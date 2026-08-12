@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: sales_ai_postgres
+    environment:
+      POSTGRES_DB: sales_ai
+      POSTGRES_USER: salesai
+      POSTGRES_PASSWORD: salesai_dev_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: sales_ai_redis
+    ports:
+      - "6380:6379"
+    volumes:
+      - redisdata:/data
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  redisdata:
