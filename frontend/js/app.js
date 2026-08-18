@@ -322,16 +322,31 @@ $(document).ready(function () {
                 // Build Person Dossier Badges
                 let dossierHTML = '';
                 if (msg.people && msg.people.length > 0) {
-                    dossierHTML += '<div class="mt-3 pt-2 border-t border-slate-100"><div class="text-xs fw-semibold text-slate-500 mb-1.5"><i class="bi bi-person-lines-fill me-1 text-indigo-500"></i>Matched Executive Dossiers (Click to view):</div><div class="d-flex flex-wrap gap-2">';
+                    dossierHTML += '<div class="mt-3 pt-2 border-t border-slate-100"><div class="text-xs fw-semibold text-slate-500 mb-2"><i class="bi bi-person-lines-fill me-1 text-indigo-500"></i>Matched Executive Profiles:</div><div class="space-y-2">';
                     msg.people.slice(0, 4).forEach((p, pIdx) => {
                         const scoreColor = (p.lead_score || 75) >= 85 ? 'text-emerald-600 bg-emerald-50 border-emerald-200' : 'text-indigo-600 bg-indigo-50 border-indigo-200';
                         dossierHTML += `
-                            <div class="lead-dossier-pill shadow-2xs chat-person-pill" data-person-idx="${pIdx}">
-                                <div>
-                                    <span class="fw-bold text-slate-800 text-xs">${p.full_name}</span>
-                                    <span class="text-[11px] text-slate-500 ms-1">• ${p.title}</span>
-                                    <span class="badge ${scoreColor} border text-[10px] ms-1.5">Score: ${p.lead_score || 75}</span>
+                            <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 chat-person-pill cursor-pointer hover:bg-white transition-all" data-person-idx="${pIdx}">
+                                <div class="d-flex align-items-center justify-content-between mb-1.5">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="fw-bold text-slate-800 text-xs">${p.full_name}</span>
+                                        <span class="badge ${scoreColor} border text-[10px]">Score: ${p.lead_score || 75}</span>
+                                        <span class="badge bg-rose-50 text-rose-600 border border-rose-200 text-[10px]">${p.lead_status || 'Hot'}</span>
+                                    </div>
+                                    <i class="bi bi-arrow-right-circle text-indigo-400 text-sm"></i>
                                 </div>
+                                <div class="text-[11px] text-slate-600 mb-1"><i class="bi bi-briefcase me-1 text-indigo-400"></i>${p.title || 'Executive'} • ${p.organization || 'BNY'}</div>
+                                <div class="d-flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-slate-500">
+                                    ${p.email ? `<span><i class="bi bi-envelope me-1 text-indigo-400"></i>${p.email}</span>` : ''}
+                                    ${p.phone ? `<span><i class="bi bi-telephone me-1 text-teal-500"></i>${p.phone}</span>` : ''}
+                                    ${p.location ? `<span><i class="bi bi-geo-alt me-1 text-rose-400"></i>${p.location}</span>` : ''}
+                                </div>
+                                ${p.sub_lob_name || p.decision_authority ? `
+                                <div class="d-flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-slate-500 mt-1">
+                                    ${p.sub_lob_name ? `<span><i class="bi bi-layers me-1 text-amber-500"></i>${p.sub_lob_name}</span>` : ''}
+                                    ${p.decision_authority ? `<span><i class="bi bi-shield-check me-1 text-emerald-500"></i>${p.decision_authority}</span>` : ''}
+                                </div>` : ''}
+                                ${p.summary_bio ? `<div class="text-[11px] text-slate-600 mt-1.5 italic border-t border-slate-100 pt-1.5">${p.summary_bio.substring(0, 150)}${p.summary_bio.length > 150 ? '...' : ''}</div>` : ''}
                             </div>
                         `;
                     });
@@ -420,6 +435,10 @@ $(document).ready(function () {
         const query = (rawQuery || $('#chat-input-field').val() || '').trim();
         if (!query) return;
 
+        // Pause video when user sends message
+        const vid = document.getElementById('chat-avatar-video');
+        if (vid) vid.pause();
+
         $('#chat-input-field').val('');
 
         const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -487,6 +506,8 @@ $(document).ready(function () {
             });
 
             renderUniversalChat();
+            // Speak the reply via TTS and play video
+            speakAnnaReply(botReply);
         }).catch(err => {
             clearInterval(loaderInterval);
             $('#universal-chat-loader').remove();
@@ -505,6 +526,8 @@ $(document).ready(function () {
                 followups: ["Who is Emily Portney?", "Show buying signals for BNY"]
             });
             renderUniversalChat();
+            // Speak the fallback reply via TTS and play video
+            speakAnnaReply(`I received your query regarding "${query}".`);
         });
     }
 
@@ -531,6 +554,114 @@ $(document).ready(function () {
     $('.starter-chip').on('click', function () {
         const prompt = $(this).data('prompt');
         submitUniversalChatQuery(prompt);
+    });
+
+    // ==========================================
+    // Anna TTS — Speak any reply
+    // ==========================================
+    function speakAnnaReply(text) {
+        const vid = document.getElementById('chat-avatar-video');
+        // Clean markdown/HTML for speech
+        const cleanText = text.replace(/<[^>]*>/g, '').replace(/\*\*/g, '').replace(/\*/g, '').replace(/•/g, '').replace(/`/g, '').replace(/\n/g, '. ').replace(/\s+/g, ' ').trim();
+        if (!cleanText) return;
+
+        // Play video while speaking
+        if (vid) vid.play();
+
+        const utterance = new SpeechSynthesisUtterance(cleanText);
+        utterance.rate = 0.95;
+        utterance.pitch = 1.1;
+        utterance.lang = 'en-US';
+
+        const voices = speechSynthesis.getVoices();
+        const femaleVoice = voices.find(v => v.name.includes('Female') || v.name.includes('Samantha') || v.name.includes('Zira') || v.name.includes('Google UK English Female'));
+        if (femaleVoice) utterance.voice = femaleVoice;
+
+        utterance.onend = function () {
+            // Stop video when done speaking
+            if (vid) vid.pause();
+        };
+
+        speechSynthesis.cancel(); // cancel any ongoing speech
+        speechSynthesis.speak(utterance);
+    }
+
+    // ==========================================
+    // Anna TTS Introduction Script
+    // ==========================================
+    const annaScript = [
+        "Hi! I'm Anna, your AI-powered sales intelligence agent.",
+        "I can search your entire enterprise database in seconds — executives, accounts, buying signals, everything.",
+        "Just ask me about any company, role, or person. For example, try asking who the CEO is or find all VPs.",
+        "I pull real-time data from your CRM, vector embeddings, and social intelligence feeds.",
+        "Let's get started — type your first query below and I'll find exactly what you need."
+    ];
+
+    $('#btn-start-anna').on('click', function () {
+        $(this).prop('disabled', true).html('<i class="bi bi-mic-fill me-2"></i>Speaking...');
+        const vid = document.getElementById('chat-avatar-video');
+        const $msgList = $('#universal-messages-list');
+        let idx = 0;
+
+        function speakNext() {
+            if (idx >= annaScript.length) {
+                // Done speaking
+                if (vid) vid.pause();
+                $msgList.append(`
+                    <div class="universal-msg-row">
+                        <div class="universal-bot-avatar"><i class="bi bi-robot"></i></div>
+                        <div class="universal-bot-bubble text-success fw-semibold" style="font-size:0.85rem;">
+                            <i class="bi bi-check-circle me-1"></i>Introduction complete. You can start chatting now!
+                        </div>
+                    </div>
+                `);
+                scrollUniversalChatToBottom();
+                $('#btn-start-anna').text('Done').removeClass('btn-primary').addClass('btn-success').prop('disabled', true);
+                return;
+            }
+
+            const sentence = annaScript[idx];
+            // Show sentence as a bot message in chat
+            $msgList.append(`
+                <div class="universal-msg-row">
+                    <div class="universal-bot-avatar"><i class="bi bi-robot"></i></div>
+                    <div class="universal-bot-bubble" style="font-size:0.88rem;">${sentence}</div>
+                </div>
+            `);
+            scrollUniversalChatToBottom();
+
+            // Play video while speaking
+            if (vid) vid.play();
+
+            // Use browser TTS
+            const utterance = new SpeechSynthesisUtterance(sentence);
+            utterance.rate = 0.95;
+            utterance.pitch = 1.1;
+            utterance.lang = 'en-US';
+
+            // Try to pick a female voice
+            const voices = speechSynthesis.getVoices();
+            const femaleVoice = voices.find(v => v.name.includes('Female') || v.name.includes('Samantha') || v.name.includes('Zira') || v.name.includes('Google UK English Female'));
+            if (femaleVoice) utterance.voice = femaleVoice;
+
+            utterance.onend = function () {
+                // Pause video between sentences (idle)
+                if (vid) vid.pause();
+                idx++;
+                setTimeout(speakNext, 600);
+            };
+
+            speechSynthesis.speak(utterance);
+        }
+
+        // Ensure voices are loaded
+        if (speechSynthesis.getVoices().length === 0) {
+            speechSynthesis.onvoiceschanged = function () {
+                speakNext();
+            };
+        } else {
+            speakNext();
+        }
     });
 
     // Quick Trigger test simulation bar on Dashboard

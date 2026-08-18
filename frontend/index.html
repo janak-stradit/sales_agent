@@ -167,7 +167,9 @@
 
             <!-- Universal AI Chatbot Assistant View Panel (ChatGPT Style) -->
             <div id="view-chat" class="view-panel">
-                <div class="universal-chat-wrapper glass-card d-flex flex-column h-[calc(100vh-100px)] overflow-hidden rounded-2xl border border-slate-200 bg-white">
+                <div class="d-flex gap-4 h-[calc(100vh-200px)]">
+                    <!-- Left: Chat Area -->
+                    <div class="universal-chat-wrapper glass-card d-flex flex-column flex-grow-1 overflow-hidden rounded-2xl border border-slate-200 bg-white" style="flex: 1; min-width: 0;">
                     <!-- Chat Header Bar -->
                     <div class="chat-universal-header d-flex justify-content-between align-items-center px-6 py-3.5 border-b border-slate-100 bg-slate-50/80">
                         <div class="d-flex align-items-center gap-3">
@@ -204,14 +206,6 @@
                     <!-- Scrollable Chat Messages Container -->
                     <div class="universal-messages-box flex-grow-1 p-6 overflow-y-auto" id="chat-messages-container" style="background: #fafafa;">
                         <!-- Welcome Hero Message -->
-                        <div class="welcome-chat-hero text-center py-8 mx-auto max-w-lg" id="chat-welcome-hero">
-                            <div class="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 d-inline-flex align-items-center justify-content-center fs-3 mb-3 shadow-sm">
-                                <i class="bi bi-stars"></i>
-                            </div>
-                            <h4 class="fw-bold text-slate-800 text-base mb-1">How can I assist your sales team today?</h4>
-                            <p class="text-xs text-slate-500 mb-4">I synthesize real-time data from your target enterprise accounts, executive hierarchies, and sales signals into actionable intelligence.</p>
-                        </div>
-
                         <!-- Dynamic Messages Inject here -->
                         <div id="universal-messages-list" class="space-y-4"></div>
                     </div>
@@ -225,11 +219,22 @@
                                     <i class="bi bi-send-fill text-white text-sm"></i>
                                 </button>
                             </div>
-                            <div class="d-flex justify-content-between align-items-center mt-2 px-1 text-[11px] text-slate-400">
+                            <div class="d-flex align-items-center mt-2 px-1 text-[11px] text-slate-400 gap-3">
+                                <button id="btn-start-anna" class="btn btn-primary btn-sm px-3 py-1 fw-semibold rounded-pill d-flex align-items-center gap-1" style="font-size: 0.75rem; white-space: nowrap;">
+                                    <i class="bi bi-play-fill"></i> Start Anna
+                                </button>
                                 <span>Powered by Sales AI Intelligence Engine & ChromaDB Vector Embeddings</span>
-                                <span>Press <kbd class="px-1.5 py-0.5 bg-slate-100 border border-slate-200 rounded text-[10px] text-slate-600 font-mono">Enter ↵</kbd> to send</span>
+                                <span class="ms-auto">Press <kbd class="px-1.5 py-0.5 bg-slate-100 border border-slate-200 rounded text-[10px] text-slate-600 font-mono">Enter ↵</kbd> to send</span>
                             </div>
                         </div>
+                    </div>
+                    </div>
+
+                    <!-- Right: AI Avatar Video (visible only in idle state) -->
+                    <div id="chat-video-panel" class="glass-card d-flex align-items-center justify-content-center rounded-2xl border border-slate-200 overflow-hidden" style="width: 320px; flex-shrink: 0; background: #0f0f1a; transition: all 0.4s ease;">
+                        <video id="chat-avatar-video" loop muted playsinline style="width: 100%; height: 100%; object-fit: cover;">
+                            <source src="asstes/Animated_woman_gesturing_and_spe…_202608181555.mp4" type="video/mp4">
+                        </video>
                     </div>
                 </div>
             </div>
