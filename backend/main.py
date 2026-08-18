@@ -11,6 +11,7 @@ from backend.routers import (
     dashboard_router,
     accounts_router,
     leads_router,
+    contacts_router,
     lobs_router,
     hierarchy_router,
     social_router,
@@ -51,6 +52,9 @@ app.include_router(accounts_router, prefix=f"{settings.API_V1_PREFIX}/accounts",
 
 # Tab 3: Executive Lead Scoring & Profiles (Matching Screenshot 1)
 app.include_router(leads_router, prefix=f"{settings.API_V1_PREFIX}/leads", tags=["Executive Lead Scoring"])
+
+# Contacts & Dedicated 360 Full-Page Profiles
+app.include_router(contacts_router, prefix=f"{settings.API_V1_PREFIX}/contacts", tags=["Contacts & 360 Profiles"])
 
 # Supporting: Lines of Business
 app.include_router(lobs_router, prefix=f"{settings.API_V1_PREFIX}/lobs", tags=["Lines of Business"])
