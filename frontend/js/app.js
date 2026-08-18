@@ -703,8 +703,8 @@ $(document).ready(function () {
         }
     });
 
-    function performDashboardSearch() {
-        const query = $('#dashboard-global-search').val().trim().toLowerCase();
+    async function performDashboardSearch() {
+        const query = $('#dashboard-global-search').val().trim();
         const category = $('#search-filter-category').val();
         const $resultsBox = $('#dashboard-search-results');
         const $list = $('#search-results-list');
@@ -715,19 +715,20 @@ $(document).ready(function () {
             return;
         }
 
+        const queryLower = query.toLowerCase();
         let results = [];
 
-        // 1. Search Leads
+        // 1. Search Mock Leads
         if (category === 'all' || category === 'leads') {
             mockData.leads.forEach(l => {
                 const leadRole = l.role || "";
-                if (l.name.toLowerCase().includes(query) || 
-                    l.company.toLowerCase().includes(query) || 
-                    l.email.toLowerCase().includes(query) ||
-                    leadRole.toLowerCase().includes(query) ||
-                    l.status.toLowerCase().includes(query)) {
+                if (l.name.toLowerCase().includes(queryLower) || 
+                    l.company.toLowerCase().includes(queryLower) || 
+                    l.email.toLowerCase().includes(queryLower) ||
+                    leadRole.toLowerCase().includes(queryLower) ||
+                    l.status.toLowerCase().includes(queryLower)) {
                     results.push({
-                        type: 'Lead',
+                        type: 'Lead (Mock)',
                         title: `${l.name} (${leadRole})`,
                         detail: `${l.company} • ${l.email} • $${l.dealValue.toLocaleString()}`,
                         badge: l.status,
@@ -743,7 +744,7 @@ $(document).ready(function () {
             });
         }
 
-        // 2. Search System Activities
+        // 2. Search Mock System Activities
         if (category === 'all' || category === 'activities') {
             const activities = [
                 { title: 'Lead Qualified (Hot)', detail: 'Sarah Jenkins (Apex Global Solutions) - $48,000 value', icon: 'bi-activity' },
@@ -752,7 +753,7 @@ $(document).ready(function () {
                 { title: 'New Lead Registered', detail: 'Marcus Thorne logged via documentation query flow', icon: 'bi-person-plus' }
             ];
             activities.forEach(act => {
-                if (act.title.toLowerCase().includes(query) || act.detail.toLowerCase().includes(query)) {
+                if (act.title.toLowerCase().includes(queryLower) || act.detail.toLowerCase().includes(queryLower)) {
                     results.push({
                         type: 'Activity',
                         title: act.title,
@@ -769,15 +770,15 @@ $(document).ready(function () {
             });
         }
 
-        // 3. Search NLP Intents / Conversations
+        // 3. Search Mock NLP Intents / Conversations
         if (category === 'all' || category === 'intents') {
             mockData.conversations.forEach(c => {
                 const convRole = c.role || "";
-                if (c.leadName.toLowerCase().includes(query) || 
-                    c.company.toLowerCase().includes(query) ||
-                    convRole.toLowerCase().includes(query) ||
-                    c.intent.toLowerCase().includes(query) ||
-                    c.sentiment.toLowerCase().includes(query)) {
+                if (c.leadName.toLowerCase().includes(queryLower) || 
+                    c.company.toLowerCase().includes(queryLower) ||
+                    convRole.toLowerCase().includes(queryLower) ||
+                    c.intent.toLowerCase().includes(queryLower) ||
+                    c.sentiment.toLowerCase().includes(queryLower)) {
                     results.push({
                         type: 'Intent / Chat',
                         title: `${c.leadName} (${convRole})`,
@@ -795,12 +796,84 @@ $(document).ready(function () {
             });
         }
 
+        // Show loading status indicator in list
+        $resultsBox.removeClass('hidden');
+        $list.html('<div class="text-slate-500 text-center py-3 text-xs"><i class="bi bi-arrow-repeat animate-spin me-2"></i>Querying live enterprise database...</div>');
+
+        // 4. Fetch Real API Results (Organizations and People)
+        try {
+            const orgsPromise = (category === 'all' || category === 'leads') ? 
+                API.get('/chatbot/search/organizations', { q: query }).catch(() => []) : 
+                Promise.resolve([]);
+
+            const peoplePromise = (category === 'all' || category === 'leads') ? 
+                API.post('/chatbot/search/people', { person_name: query, limit: 10 }).catch(() => ({ items: [] })) : 
+                Promise.resolve({ items: [] });
+
+            const peopleOrgPromise = (category === 'all' || category === 'leads') ? 
+                API.post('/chatbot/search/people', { organization: query, limit: 10 }).catch(() => ({ items: [] })) : 
+                Promise.resolve({ items: [] });
+
+            const [orgs, peopleByName, peopleByOrg] = await Promise.all([
+                orgsPromise,
+                peoplePromise.then(res => res?.items || []),
+                peopleOrgPromise.then(res => res?.items || [])
+            ]);
+
+            // Append Organizations
+            orgs.forEach(org => {
+                results.push({
+                    type: 'Organization',
+                    title: `${org.name} (${org.ticker || 'N/A'}:${org.exchange || 'N/A'})`,
+                    detail: `${org.industry || 'Financial Services'} • ${org.employee_count || 0} employees • Rev: ${org.annual_revenue || 'N/A'}`,
+                    badge: 'DB Account',
+                    badgeClass: 'bg-indigo-600 text-white',
+                    icon: 'bi-building',
+                    actionText: 'View Account',
+                    action: function() {
+                        App.navigate('accounts');
+                        setTimeout(() => {
+                            $('#account-search-field').val(org.name).trigger('input');
+                        }, 150);
+                    }
+                });
+            });
+
+            // Merge and Deduplicate People
+            const peopleMap = new Map();
+            peopleByName.forEach(p => peopleMap.set(p.id, p));
+            peopleByOrg.forEach(p => peopleMap.set(p.id, p));
+
+            peopleMap.forEach(p => {
+                results.push({
+                    type: 'Executive',
+                    title: `${p.full_name} (${p.title || 'Executive'})`,
+                    detail: `${p.organization} • ${p.location || 'New York, USA'} • Lead Score: ${p.lead_score || 0}`,
+                    badge: p.lead_status || 'Hot',
+                    badgeClass: 'bg-teal-600 text-white',
+                    icon: 'bi-person-badge',
+                    actionText: 'Interactive Dossier',
+                    action: function() {
+                        App.navigate('hierarchy');
+                        setTimeout(() => {
+                            if (p.account_id) {
+                                $('#hierarchy-account-select').val(p.account_id).trigger('change');
+                            }
+                        }, 150);
+                    }
+                });
+            });
+
+        } catch (apiErr) {
+            console.error("Failed to fetch API search results:", apiErr);
+        }
+
         // Update title and render results
         $('#search-results-title').text(`Search Results (${results.length})`);
         $list.empty();
 
         if (results.length === 0) {
-            $list.append('<div class="text-slate-500 text-center py-2 text-xs">No matching enterprise entities found.</div>');
+            $list.append('<div class="text-slate-500 text-center py-3 text-xs">No matching enterprise entities found.</div>');
         } else {
             results.forEach((res, idx) => {
                 const itemHTML = `
@@ -826,7 +899,7 @@ $(document).ready(function () {
             });
 
             // Bind click actions
-            $('.search-act-btn').on('click', function () {
+            $('.search-act-btn').off('click').on('click', function () {
                 const idx = $(this).data('idx');
                 if (results[idx] && typeof results[idx].action === 'function') {
                     results[idx].action();
