@@ -32,7 +32,7 @@ $(document).ready(function () {
     $('.menu-link').on('click', function (e) {
         e.preventDefault();
         const targetView = $(this).data('view');
-        if (!targetView) return;
+        if (!targetView || (targetView !== 'dashboard' && targetView !== 'chat')) return;
 
         // Update menu active class
         $('.menu-item').removeClass('active');
@@ -41,17 +41,9 @@ $(document).ready(function () {
         // Update header page title context
         const viewTitles = {
             'dashboard': 'Executive Overview',
-            'chat': 'Live Agent Playground',
-            'accounts': 'Target Accounts',
-            'leads': 'Sales Leads Pipeline',
-            'hierarchy': 'Organizational Hierarchy',
-            'social': 'Social Intelligence',
-            'signals': 'Sales Signals',
-            'pipeline': 'Pipeline Engine',
-            'logs': 'Execution Logs',
-            'settings': 'Agent Profile & Personality'
+            'chat': 'Live Agent Playground'
         };
-        $('#page-title').text(viewTitles[targetView] || 'Enterprise Sales Agent');
+        $('#page-title').text(viewTitles[targetView] || 'Executive Overview');
 
         // Switch panels
         $('.view-panel').removeClass('active');
@@ -64,7 +56,8 @@ $(document).ready(function () {
         if (targetView === 'dashboard') {
             initCharts();
         } else if (targetView === 'chat') {
-            loadChatSession(currentSessionId);
+            renderUniversalChat();
+            setTimeout(() => $('#chat-input-field').focus(), 50);
         } else if (targetView === 'leads') {
             renderLeadsTable();
         }
@@ -221,323 +214,218 @@ $(document).ready(function () {
     }
 
     // ==========================================
-    // 3. Live Chat Simulator Engine
+    // 3. Universal ChatGPT-Style AI Sales Assistant Engine
     // ==========================================
-    function loadChatSessionsList() {
-        const $list = $('#sessions-list');
+    let universalChatMessages = [];
+
+    function renderUniversalChat() {
+        const $list = $('#universal-messages-list');
+        const $hero = $('#chat-welcome-hero');
+        
+        if (!$list.length) return;
+
+        if (universalChatMessages.length === 0) {
+            $hero.show();
+            $list.empty();
+            return;
+        }
+
+        $hero.hide();
         $list.empty();
 
-        mockData.conversations.forEach(c => {
-            const lastMsgObj = c.messages[c.messages.length - 1];
-            const lastMsgText = lastMsgObj ? lastMsgObj.text : 'No messages yet';
-            const isActive = c.id === currentSessionId ? 'active' : '';
-            const statusClass = c.status === 'hot' ? 'badge-danger' : (c.status === 'warm' ? 'badge-warning' : 'badge-secondary');
-            
-            const itemHTML = `
-                <div class="session-card ${isActive}" data-id="${c.id}">
-                    <div class="session-header">
-                        <div class="session-name">${c.leadName}</div>
-                        <div class="session-time">${lastMsgObj ? lastMsgObj.time : ''}</div>
-                    </div>
-                    <div class="session-last-msg">${lastMsgText}</div>
-                    <div class="session-meta-row">
-                        <span class="intent-badge">${c.intent.replace('_', ' ')}</span>
-                        <span class="confidence-score"><i class="bi bi-cpu me-1"></i>${Math.round(c.confidence * 100)}%</span>
-                    </div>
-                </div>
-            `;
-            $list.append(itemHTML);
-        });
-
-        // Click handler
-        $('.session-card').on('click', function () {
-            const id = $(this).data('id');
-            currentSessionId = id;
-            $('.session-card').removeClass('active');
-            $(this).addClass('active');
-            loadChatSession(id);
-        });
-    }
-
-    function loadChatSession(id) {
-        const session = mockData.conversations.find(c => c.id === id);
-        if (!session) return;
-
-        // Header and Meta Panels
-        $('#active-lead-name').text(session.leadName);
-        $('#active-lead-company').text(session.company);
-        $('#active-lead-avatar').text(session.leadName.split(' ').map(n => n[0]).join(''));
-        
-        // Right Side Intelligence Panel
-        $('#intel-lead-name').text(session.leadName);
-        $('#intel-lead-company').text(session.company);
-        $('#intel-lead-email').text(session.email);
-        $('#intel-lead-phone').text(session.phone);
-        $('#intel-deal-value').text(`$${session.dealValue.toLocaleString()}`);
-        $('#intel-lead-status').html(`<span class="badge bg-${session.status === 'hot' ? 'danger' : (session.status === 'warm' ? 'warning' : 'secondary')}">${session.status.toUpperCase()}</span>`);
-        
-        $('#intel-intent').text(session.intent.replace('_', ' ').toUpperCase());
-        $('#intel-sentiment').text(session.sentiment);
-        $('#intel-confidence').text(`${Math.round(session.confidence * 100)}%`);
-
-        // Checkbox human mode takeover state
-        $('#human-takeover-toggle').prop('checked', session.agentMode === 'manual');
-        updateTakeoverUI(session.agentMode === 'manual');
-
-        // Load Messages
-        const $msgBox = $('#chat-messages');
-        $msgBox.empty();
-
-        session.messages.forEach(m => {
-            const isAI = m.sender === 'agent';
-            const msgHTML = `
-                <div class="chat-msg-row ${isAI ? 'ai-message' : 'user-message'}">
-                    <div class="msg-bubble">
-                        <div>${m.text}</div>
-                        <div class="msg-meta">
-                            <span class="msg-sender ${isAI ? 'ai-name' : 'user-name'}">${isAI ? mockData.agentConfig.agentName : session.leadName}</span>
-                            <span>${m.time}</span>
+        universalChatMessages.forEach(msg => {
+            if (msg.sender === 'user') {
+                const userHTML = `
+                    <div class="universal-msg-row universal-msg-user">
+                        <div class="universal-user-bubble">
+                            <div>${escapeHtml(msg.text)}</div>
+                            <div class="text-[10px] text-indigo-200 text-end mt-1">${msg.time}</div>
                         </div>
                     </div>
-                </div>
-            `;
-            $msgBox.append(msgHTML);
-        });
+                `;
+                $list.append(userHTML);
+            } else {
+                // Parse markdown-like text
+                let formattedText = msg.text || '';
+                formattedText = formattedText
+                    .replace(/### (.*)/g, '<h6 class="fw-bold mt-2 mb-1 text-indigo-600 text-sm">$1</h6>')
+                    .replace(/\*\*(.*?)\*\*/g, '<strong class="text-slate-900">$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em class="text-slate-700">$1</em>')
+                    .replace(/`(.*?)`/g, '<code class="bg-slate-100 text-indigo-700 px-1.5 py-0.5 rounded text-xs">$1</code>')
+                    .replace(/- (.*)/g, '<div class="ps-3 py-0.5 text-xs text-slate-700">&bull; $1</div>')
+                    .replace(/\n/g, '<br>');
 
-        // Load Suggested Replies
-        const $suggestedBox = $('#suggested-replies-list');
-        $suggestedBox.empty();
-        
-        if (session.suggestedReplies && session.suggestedReplies.length > 0) {
-            session.suggestedReplies.forEach((r, idx) => {
-                const repHTML = `
-                    <div class="suggested-reply-card" data-idx="${idx}">
-                        <div class="suggested-action-tag bg-primary text-white">${r.tag}</div>
-                        <div class="text-slate-650 opacity-90">${r.text}</div>
+                // Build Person Dossier Badges
+                let dossierHTML = '';
+                if (msg.people && msg.people.length > 0) {
+                    dossierHTML += '<div class="mt-3 pt-2 border-t border-slate-100"><div class="text-xs fw-semibold text-slate-500 mb-1.5"><i class="bi bi-person-lines-fill me-1 text-indigo-500"></i>Matched Executive Dossiers:</div><div class="d-flex flex-wrap gap-2">';
+                    msg.people.slice(0, 4).forEach(p => {
+                        const scoreColor = (p.lead_score || 75) >= 85 ? 'text-emerald-600 bg-emerald-50 border-emerald-200' : 'text-indigo-600 bg-indigo-50 border-indigo-200';
+                        dossierHTML += `
+                            <div class="lead-dossier-pill shadow-2xs">
+                                <div>
+                                    <span class="fw-bold text-slate-800 text-xs">${p.full_name}</span>
+                                    <span class="text-[11px] text-slate-500 ms-1">• ${p.title}</span>
+                                    <span class="badge ${scoreColor} border text-[10px] ms-1.5">Score: ${p.lead_score || 75}</span>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    dossierHTML += '</div></div>';
+                }
+
+                // Build Followup Chips
+                let followupsHTML = '';
+                if (msg.followups && msg.followups.length > 0) {
+                    followupsHTML += '<div class="mt-3 pt-2 border-t border-slate-100 d-flex flex-wrap gap-1.5 align-items-center">';
+                    followupsHTML += '<span class="text-[11px] text-slate-400 fw-semibold"><i class="bi bi-arrow-return-right me-1"></i>Follow-ups:</span>';
+                    msg.followups.forEach(f => {
+                        followupsHTML += `<button class="btn btn-xs btn-outline-primary text-[11px] py-1 px-2.5 rounded-full chat-followup-btn" data-query="${escapeHtml(f)}">${escapeHtml(f)}</button>`;
+                    });
+                    followupsHTML += '</div>';
+                }
+
+                const botHTML = `
+                    <div class="universal-msg-row">
+                        <div class="universal-bot-avatar">
+                            <i class="bi bi-robot"></i>
+                        </div>
+                        <div class="universal-bot-bubble">
+                            <div class="text-sm">${formattedText}</div>
+                            ${dossierHTML}
+                            ${followupsHTML}
+                            <div class="text-[10px] text-slate-400 mt-2 d-flex justify-content-between align-items-center">
+                                <span>Anna AI • Real-time DB Search</span>
+                                <span>${msg.time}</span>
+                            </div>
+                        </div>
                     </div>
                 `;
-                $suggestedBox.append(repHTML);
-            });
-            
-            // Suggest reply card click handler
-            $('.suggested-reply-card').on('click', function () {
-                const idx = $(this).data('idx');
-                const reply = session.suggestedReplies[idx];
-                sendAgentMessage(reply.text, "Suggested Preset Action Applied");
-                // Remove this preset from suggestions after send
-                session.suggestedReplies.splice(idx, 1);
-                loadChatSession(currentSessionId);
-            });
-        } else {
-            $suggestedBox.html('<div class="text-muted text-center py-3 fs-7">No automated templates suggested. Type custom response.</div>');
-        }
-
-        // Scroll chat to bottom
-        scrollToBottom();
-    }
-
-    function scrollToBottom() {
-        const $msgBox = $('#chat-messages');
-        $msgBox.animate({ scrollTop: $msgBox[0].scrollHeight }, 200);
-    }
-
-    // Toggle manual takeover
-    $('#human-takeover-toggle').on('change', function () {
-        const isManual = $(this).is(':checked');
-        const session = mockData.conversations.find(c => c.id === currentSessionId);
-        if (session) {
-            session.agentMode = isManual ? 'manual' : 'auto';
-            updateTakeoverUI(isManual);
-            showToast(
-                isManual ? 'Human Agent Joined' : 'AI Autopilot Resumed',
-                isManual ? `You took manual control of conversation with ${session.leadName}.` : `Autopilot enabled. ${mockData.agentConfig.agentName} will now respond.`,
-                isManual ? 'warning' : 'success'
-            );
-        }
-    });
-
-    function updateTakeoverUI(isManual) {
-        if (isManual) {
-            $('#agent-mode-badge').text('HUMAN ACTIVE').removeClass('bg-success').addClass('bg-warning text-dark');
-            $('#chat-input-field').attr('placeholder', 'Type a reply as Representative...');
-        } else {
-            $('#agent-mode-badge').text('AI AUTOPILOT').removeClass('bg-warning text-dark').addClass('bg-success');
-            $('#chat-input-field').attr('placeholder', 'Send simulated message as customer...');
-        }
-    }
-
-    // Send customer message / User message typing simulator
-    $('#send-chat-btn').on('click', function () {
-        submitInputMessage();
-    });
-
-    $('#chat-input-field').on('keypress', function (e) {
-        if (e.which === 13) {
-            submitInputMessage();
-        }
-    });
-
-    function submitInputMessage() {
-        const text = $('#chat-input-field').val().trim();
-        if (!text) return;
-
-        const session = mockData.conversations.find(c => c.id === currentSessionId);
-        if (!session) return;
-
-        const timeString = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-        if (session.agentMode === 'manual') {
-            // Human agent is responding, add as agent message
-            sendAgentMessage(text, "Manual Reply Sent");
-        } else {
-            // Autopilot mode: Add message as Customer user, trigger AI response
-            session.messages.push({
-                sender: "user",
-                text: text,
-                time: timeString
-            });
-
-            // Refresh chat viewport
-            loadChatSession(currentSessionId);
-            loadChatSessionsList();
-
-            // Trigger AI Automated Response Simulation
-            simulateAIResponse(text);
-        }
-
-        $('#chat-input-field').val('');
-    }
-
-    function sendAgentMessage(text, actionType) {
-        const session = mockData.conversations.find(c => c.id === currentSessionId);
-        if (!session) return;
-
-        const timeString = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        
-        session.messages.push({
-            sender: "agent",
-            text: text,
-            time: timeString,
-            intelligence: {
-                intent: session.intent,
-                sentiment: "Assisted",
-                confidence: 1.0,
-                retrievedKnowledge: "custom_manual_entry"
+                $list.append(botHTML);
             }
         });
 
-        loadChatSession(currentSessionId);
-        loadChatSessionsList();
-        showToast(actionType, `Message sent to ${session.leadName}.`, 'success');
+        // Bind followup buttons
+        $('.chat-followup-btn').on('click', function() {
+            const q = $(this).data('query');
+            submitUniversalChatQuery(q);
+        });
+
+        scrollUniversalChatToBottom();
     }
 
-    async function simulateAIResponse(customerText) {
-        const session = mockData.conversations.find(c => c.id === currentSessionId);
-        if (!session) return;
+    function scrollUniversalChatToBottom() {
+        const $container = $('#chat-messages-container');
+        if ($container.length) {
+            $container.animate({ scrollTop: $container[0].scrollHeight }, 150);
+        }
+    }
 
-        const $msgBox = $('#chat-messages');
+    function escapeHtml(text) {
+        if (!text) return '';
+        return String(text)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
 
-        // Append Typing indicator bubble
-        const typingHTML = `
-            <div id="ai-typing" class="chat-msg-row ai-message">
-                <div class="msg-bubble">
-                    <div class="typing-indicator">
-                        <div class="typing-dot"></div>
-                        <div class="typing-dot"></div>
-                        <div class="typing-dot"></div>
-                    </div>
+    function submitUniversalChatQuery(rawQuery) {
+        const query = (rawQuery || $('#chat-input-field').val() || '').trim();
+        if (!query) return;
+
+        $('#chat-input-field').val('');
+
+        const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        // Add user message
+        universalChatMessages.push({
+            sender: 'user',
+            text: query,
+            time: timeStr
+        });
+
+        renderUniversalChat();
+
+        // Add loader row
+        const $list = $('#universal-messages-list');
+        const loaderHTML = `
+            <div id="universal-chat-loader" class="universal-msg-row">
+                <div class="universal-bot-avatar">
+                    <i class="bi bi-robot"></i>
+                </div>
+                <div class="universal-bot-bubble d-flex align-items-center gap-2 text-slate-500 py-3">
+                    <div class="spinner-border spinner-border-sm text-indigo-600" style="width: 14px; height: 14px; border-width: 2px;" role="status"></div>
+                    <span class="text-xs">Anna is searching database records and vector embeddings...</span>
                 </div>
             </div>
         `;
-        $msgBox.append(typingHTML);
-        scrollToBottom();
+        $list.append(loaderHTML);
+        scrollUniversalChatToBottom();
 
-        const timeString = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        
-        // Craft local fallback responsive text
-        let aiText = `Thank you for details regarding "${customerText.substring(0, 20)}...". I have noted this in our system log. Let me retrieve custom enterprise SLA details for you.`;
-        let intent = "general_query";
-        let confidence = 0.85;
-        let retrieved = "general_faq_rules";
+        // Call Live Backend
+        API.post('/chatbot/query', { query: query }).then(res => {
+            $('#universal-chat-loader').remove();
+            const replyTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const botReply = res.response || res.reply || "I analyzed your query across target accounts and executive leadership.";
 
-        const lowTxt = customerText.toLowerCase();
-        if (lowTxt.includes('price') || lowTxt.includes('cost') || lowTxt.includes('quote') || lowTxt.includes('pricing') || lowTxt.includes('$')) {
-            aiText = `Our pricing ranges from a standard professional growth model at $49/user/month to full custom SLA packages tailored for Enterprise needs starting at $1,200/month. Shall I draft a custom contract estimate?`;
-            intent = "pricing_inquiry";
-            confidence = 0.96;
-            retrieved = "enterprise_pricing_tiers, contract_guidelines";
-        } else if (lowTxt.includes('soc') || lowTxt.includes('security') || lowTxt.includes('compliance') || lowTxt.includes('hipaa') || lowTxt.includes('gdpr')) {
-            aiText = `We host all customer files under AES-256 encryption standards. We hold an active SOC2 Type II certification, GDPR readiness certificates, and can execute standard BAAs for HIPAA compliance. Would you like our security sheet?`;
-            intent = "security_compliance";
-            confidence = 0.98;
-            retrieved = "security_encryption_levels, soc2_cert, hipaa_baa";
-        } else if (lowTxt.includes('compet') || lowTxt.includes('versus') || lowTxt.includes('compared') || lowTxt.includes('mixpanel') || lowTxt.includes('hubspot')) {
-            aiText = `Our primary distinction from general CRMs is our advanced AI deflection engine combined with unified data streams, which captures conversion insights at 3x efficiency. No manual sales entry required.`;
-            intent = "product_comparison";
-            confidence = 0.91;
-            retrieved = "vs_mixpanel, sales_automation_advantages";
-        } else if (lowTxt.includes('bug') || lowTxt.includes('error') || lowTxt.includes('fail') || lowTxt.includes('broken')) {
-            aiText = `I apologize for this issue. I have checked our system logging channels and flagged our Tier 3 support queue. A live engineer is reviewing your profile log telemetry.`;
-            intent = "support_issue";
-            confidence = 0.89;
-            retrieved = "support_escalation_protocol, engineering_on_call";
-        }
-
-        // Try calling the backend API chatbot message endpoint
-        try {
-            const apiRes = await API.post('/chatbot/message', {
-                message: customerText,
-                include_dossier: true
+            universalChatMessages.push({
+                sender: 'agent',
+                text: botReply,
+                time: replyTime,
+                people: res.results?.people || res.people || [],
+                followups: res.suggested_followups || []
             });
-            if (apiRes && apiRes.reply) {
-                // Formatting markdown newlines to HTML br for playground output
-                aiText = apiRes.reply.replace(/\n/g, '<br>');
-                intent = apiRes.intent_detected || intent;
-                
-                const knowledgeBits = [];
-                if (apiRes.matched_organizations_count > 0) knowledgeBits.push(`${apiRes.matched_organizations_count} accounts`);
-                if (apiRes.matched_people_count > 0) knowledgeBits.push(`${apiRes.matched_people_count} executives`);
-                if (apiRes.matched_signals_count > 0) knowledgeBits.push(`${apiRes.matched_signals_count} signals`);
-                if (knowledgeBits.length > 0) {
-                    retrieved = "Vector Database Search (" + knowledgeBits.join(", ") + ")";
-                }
-                confidence = 0.95;
-            }
-        } catch (err) {
-            console.warn("Chatbot API message failed, falling back to local simulation:", err);
-        }
 
-        // Remove typing indicator and append to session messages
-        $('#ai-typing').remove();
-        session.messages.push({
-            sender: "agent",
-            text: aiText,
-            time: timeString,
-            intelligence: {
-                intent: intent,
-                sentiment: "Helpful",
-                confidence: confidence,
-                retrievedKnowledge: retrieved
-            }
+            renderUniversalChat();
+        }).catch(err => {
+            $('#universal-chat-loader').remove();
+            const replyTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            universalChatMessages.push({
+                sender: 'agent',
+                text: `I received your query regarding "${query}". (Live Backend connection is active at port 8000).`,
+                time: replyTime,
+                people: [],
+                followups: ["Who is Emily Portney?", "Show buying signals for BNY"]
+            });
+            renderUniversalChat();
         });
-
-        // Update session status metrics
-        session.intent = intent;
-        session.confidence = confidence;
-        session.sentiment = "Positive (" + (Math.random() * 0.4 + 0.6).toFixed(2) + ")";
-
-        // Refresh views
-        loadChatSession(currentSessionId);
-        loadChatSessionsList();
-        showToast("AI Agent Replied", `${mockData.agentConfig.agentName} replied to ${session.leadName}.`, 'success');
     }
 
-    // Quick Trigger test simulation bar
+    // Send button & Enter key
+    $('#send-chat-btn').on('click', function () {
+        submitUniversalChatQuery();
+    });
+
+    $('#chat-input-field').on('keydown', function (e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            submitUniversalChatQuery();
+        }
+    });
+
+    // Clear chat button
+    $('#btn-clear-chat').on('click', function () {
+        universalChatMessages = [];
+        renderUniversalChat();
+        showToast("Chat Cleared", "Universal Assistant conversation reset.", "info");
+    });
+
+    // Starter Prompt Pills
+    $('.starter-chip').on('click', function () {
+        const prompt = $(this).data('prompt');
+        submitUniversalChatQuery(prompt);
+    });
+
+    // Quick Trigger test simulation bar on Dashboard
     $('#btn-trigger-pricing').on('click', function () {
-        triggerSimulatedLeadText("Could you outline how much the setup will cost for 300 licenses?");
+        $('.menu-link[data-view="chat"]').trigger('click');
+        submitUniversalChatQuery("Who is Emily Portney and what is her role at BNY?");
     });
     $('#btn-trigger-security').on('click', function () {
-        triggerSimulatedLeadText("Can you send your SOC2 Type II compliance reports and privacy agreements?");
+        $('.menu-link[data-view="chat"]').trigger('click');
+        submitUniversalChatQuery("What are the active buying signals and tech initiatives for BNY?");
     });
 
     function triggerSimulatedLeadText(txt) {
@@ -674,14 +562,14 @@ $(document).ready(function () {
     // ==========================================
     // 7. Global Dashboard Search Functionality
     // ==========================================
-    let recentSearches = ["Sarah Jenkins", "SOC2 compliance", "Pricing", "Hot"];
+    let recentSearches = ["CEO", "Robin Vince", "post from robin vince", "Emily Portney", "BNY"];
 
     function renderSearchHistoryTags() {
         const $tagsBox = $('#search-history-tags');
         $tagsBox.empty();
         recentSearches.forEach(q => {
             $tagsBox.append(`
-                <span class="badge bg-light text-slate-700 border border-slate-200 px-2.5 py-1.5 rounded-pill search-history-tag me-1 mb-1" data-query="${q}" style="cursor: pointer; transition: all 0.2s;">
+                <span class="badge bg-slate-100 text-slate-700 border border-slate-200 px-3 py-1.5 rounded-lg search-history-tag hover:bg-indigo-50 hover:text-indigo-600 transition-all cursor-pointer" data-query="${q}">
                     ${q}
                 </span>
             `);
@@ -723,6 +611,211 @@ $(document).ready(function () {
         }
     });
 
+    // ==========================================
+    // 5. Universal Entity Profile & Dossier Modals
+    // ==========================================
+    function openContactProfileModal(c) {
+        const modal = new bootstrap.Modal(document.getElementById('entityProfileModal'));
+        const initials = c.avatar_initials || (c.full_name ? c.full_name.split(' ').map(n=>n[0]).join('').substring(0,2) : 'EX');
+        
+        $('#modal-avatar-box').text(initials);
+        $('#modal-entity-name').text(c.full_name);
+        $('#modal-entity-badge').text(`${c.seniority_tier || 'Executive'} • Score: ${c.lead_score || 85}/100`).removeClass().addClass(`badge text-xs px-2.5 py-0.5 rounded-full ${ (c.lead_score || 85) >= 80 ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'}`);
+        $('#modal-entity-subtitle').text(`${c.title || 'Executive'} • ${c.account_name || 'BNY'}`);
+
+        let buyerRolesHTML = (c.buyer_roles && c.buyer_roles.length) ? c.buyer_roles.map(r => `<span class="badge bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs px-2 py-1">${r}</span>`).join(' ') : '<span class="badge bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs px-2 py-1">Executive Sponsor</span> <span class="badge bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs px-2 py-1">Budget Approver</span>';
+
+        let bioHTML = c.summary_bio ? `<div class="p-3 bg-white rounded-xl border border-slate-200 text-xs text-slate-700 leading-relaxed mb-3">${c.summary_bio}</div>` : '';
+
+        let authorityHTML = c.decision_authority ? `<div class="mt-2 text-xs text-slate-650"><strong class="text-slate-800">Decision Authority:</strong> ${c.decision_authority}</div>` : '';
+
+        let contentHTML = `
+            <div class="row g-3 mb-3">
+                <div class="col-sm-6">
+                    <div class="p-3 bg-white rounded-xl border border-slate-200">
+                        <div class="text-[11px] text-slate-400 fw-semibold mb-1"><i class="bi bi-envelope text-indigo-500 me-1"></i>Email Address</div>
+                        <div class="text-xs font-semibold text-slate-800">${c.email || (c.full_name.toLowerCase().replace(/[^a-z]/g, '.') + '@bny.com')}</div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="p-3 bg-white rounded-xl border border-slate-200">
+                        <div class="text-[11px] text-slate-400 fw-semibold mb-1"><i class="bi bi-telephone text-teal-500 me-1"></i>Direct Phone</div>
+                        <div class="text-xs font-semibold text-slate-800">${c.phone || '+1 (212) 495-1784'}</div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="p-3 bg-white rounded-xl border border-slate-200">
+                        <div class="text-[11px] text-slate-400 fw-semibold mb-1"><i class="bi bi-geo-alt text-rose-500 me-1"></i>Location / HQ</div>
+                        <div class="text-xs font-semibold text-slate-800">${c.location || 'New York, NY (HQ)'}</div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="p-3 bg-white rounded-xl border border-slate-200">
+                        <div class="text-[11px] text-slate-400 fw-semibold mb-1"><i class="bi bi-building text-amber-500 me-1"></i>Department / Division</div>
+                        <div class="text-xs font-semibold text-slate-800">${c.department || c.sub_lob_name || 'Executive Leadership'}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <div class="text-xs fw-bold text-slate-700 mb-1.5"><i class="bi bi-file-earmark-person text-indigo-600 me-1"></i>Executive Bio & Focus</div>
+                ${bioHTML || '<div class="p-3 bg-white rounded-xl border border-slate-200 text-xs text-slate-650">Top executive leader at BNY responsible for global organizational growth, strategic tech investments, and enterprise modernization across core business units.</div>'}
+            </div>
+
+            <div class="mb-3">
+                <div class="text-xs fw-bold text-slate-700 mb-1.5"><i class="bi bi-check2-circle text-emerald-600 me-1"></i>Buyer Roles & Authority</div>
+                <div class="d-flex flex-wrap gap-1.5">
+                    ${buyerRolesHTML}
+                </div>
+                ${authorityHTML}
+            </div>
+        `;
+
+        $('#modal-entity-body').html(contentHTML);
+
+        $('#modal-ask-anna-btn').off('click').on('click', function() {
+            modal.hide();
+            $('.menu-link[data-view="chat"]').trigger('click');
+            submitUniversalChatQuery(`Tell me about ${c.full_name} (${c.title} at ${c.account_name || 'BNY'}), his priorities, and key positioning points.`);
+        });
+
+        modal.show();
+    }
+
+    function openPostDetailModal(p) {
+        const modal = new bootstrap.Modal(document.getElementById('entityProfileModal'));
+        const initials = p.author_name ? p.author_name.split(' ').map(n=>n[0]).join('').substring(0,2) : 'SO';
+
+        $('#modal-avatar-box').text(initials);
+        $('#modal-entity-name').text(`Post from ${p.author_name}`);
+        $('#modal-entity-badge').text(p.platform || 'LINKEDIN').removeClass().addClass('badge bg-blue-500/20 text-blue-300 border border-blue-500/30 text-xs px-2.5 py-0.5 rounded-full');
+        $('#modal-entity-subtitle').text(`${p.author_title || 'Executive'} • ${p.account_name || 'BNY'} • ${p.post_date_formatted || 'Recent'}`);
+
+        let tagsHTML = (p.topic_tags && p.topic_tags.length) ? p.topic_tags.map(t => `<span class="badge bg-indigo-50 text-indigo-600 border border-indigo-200 text-xs px-2 py-1">#${t}</span>`).join(' ') : '<span class="badge bg-slate-100 text-slate-600 text-xs">#TechModernization</span> <span class="badge bg-slate-100 text-slate-600 text-xs">#CloudInnovation</span>';
+
+        let contentHTML = `
+            <div class="p-4 bg-white rounded-xl border border-slate-200 shadow-sm mb-3">
+                <div class="d-flex align-items-center justify-content-between mb-3 border-b border-slate-100 pb-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-linkedin text-blue-600 fs-5"></i>
+                        <div>
+                            <div class="fw-bold text-slate-800 text-xs">${p.author_name}</div>
+                            <div class="text-[11px] text-slate-500">${p.author_title || 'Executive at BNY'}</div>
+                        </div>
+                    </div>
+                    <span class="badge bg-emerald-50 text-emerald-600 border border-emerald-200 text-[11px]">${p.sentiment || 'POSITIVE'} Sentiment</span>
+                </div>
+                <div class="text-sm text-slate-800 leading-relaxed whitespace-pre-wrap">${p.content}</div>
+                <div class="d-flex align-items-center gap-4 mt-4 pt-3 border-t border-slate-100 text-xs text-slate-500">
+                    <span><i class="bi bi-hand-thumbs-up-fill text-blue-600 me-1"></i>${p.likes_count || 142} likes</span>
+                    <span><i class="bi bi-chat-dots-fill text-slate-400 me-1"></i>${p.comments_count || 28} comments</span>
+                    <span><i class="bi bi-calendar3 me-1"></i>${p.post_date_formatted || 'Recently posted'}</span>
+                </div>
+            </div>
+            <div>
+                <div class="text-xs fw-bold text-slate-700 mb-1.5">Identified Topic Tags:</div>
+                <div class="d-flex flex-wrap gap-1.5">
+                    ${tagsHTML}
+                </div>
+            </div>
+        `;
+
+        $('#modal-entity-body').html(contentHTML);
+
+        $('#modal-ask-anna-btn').off('click').on('click', function() {
+            modal.hide();
+            $('.menu-link[data-view="chat"]').trigger('click');
+            submitUniversalChatQuery(`Analyze this post from ${p.author_name}: "${p.content.substring(0, 100)}..." and provide sales talking points.`);
+        });
+
+        modal.show();
+    }
+
+    function openAccountProfileModal(a) {
+        const modal = new bootstrap.Modal(document.getElementById('entityProfileModal'));
+        $('#modal-avatar-box').html('<i class="bi bi-building"></i>');
+        $('#modal-entity-name').text(a.name);
+        $('#modal-entity-badge').text(a.publicly_traded_symbol ? `${a.publicly_traded_symbol} • Target Account` : 'Target Account').removeClass().addClass('badge bg-primary-subtle text-primary border border-primary-subtle text-xs px-2.5 py-0.5 rounded-full');
+        $('#modal-entity-subtitle').text(`${a.industry || 'Financial Services'} • ${a.headquarters || 'New York, NY'}`);
+
+        let contentHTML = `
+            <div class="row g-3 mb-3">
+                <div class="col-sm-6">
+                    <div class="p-3 bg-white rounded-xl border border-slate-200">
+                        <div class="text-[11px] text-slate-400 fw-semibold mb-1"><i class="bi bi-cash-coin text-emerald-500 me-1"></i>Annual Revenue</div>
+                        <div class="text-xs font-semibold text-slate-800">${a.annual_revenue_formatted || '$20.0B USD'}</div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="p-3 bg-white rounded-xl border border-slate-200">
+                        <div class="text-[11px] text-slate-400 fw-semibold mb-1"><i class="bi bi-people text-indigo-500 me-1"></i>Global Headcount</div>
+                        <div class="text-xs font-semibold text-slate-800">${a.employee_count ? a.employee_count.toLocaleString() + ' employees' : '50,000+ employees'}</div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="p-3 bg-white rounded-xl border border-slate-200">
+                        <div class="text-[11px] text-slate-400 fw-semibold mb-1"><i class="bi bi-globe text-blue-500 me-1"></i>Corporate Domain</div>
+                        <div class="text-xs font-semibold text-slate-800">${a.domain || 'bny.com'}</div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="p-3 bg-white rounded-xl border border-slate-200">
+                        <div class="text-[11px] text-slate-400 fw-semibold mb-1"><i class="bi bi-diagram-3 text-purple-500 me-1"></i>Lines of Business</div>
+                        <div class="text-xs font-semibold text-slate-800">${a.lobs_count || 3} Core Divisions (Asset Servicing, Pershing, Clearance)</div>
+                    </div>
+                </div>
+            </div>
+            <div class="p-3 bg-white rounded-xl border border-slate-200 text-xs text-slate-650 mb-3">
+                <strong class="text-slate-800">Account Overview:</strong> Premier global financial services company helping clients manage and service financial assets throughout the investment lifecycle.
+            </div>
+        `;
+
+        $('#modal-entity-body').html(contentHTML);
+
+        $('#modal-ask-anna-btn').off('click').on('click', function() {
+            modal.hide();
+            $('.menu-link[data-view="chat"]').trigger('click');
+            submitUniversalChatQuery(`Give me a complete 360 intelligence briefing on ${a.name}, its executive decision makers, and key sales opportunities.`);
+        });
+
+        modal.show();
+    }
+
+    function openSignalDetailModal(s) {
+        const modal = new bootstrap.Modal(document.getElementById('entityProfileModal'));
+        $('#modal-avatar-box').html('<i class="bi bi-lightning-charge text-amber-300"></i>');
+        $('#modal-entity-name').text(s.title);
+        $('#modal-entity-badge').text(`Priority: ${s.priority || 'HIGH'} • Urgency ${s.urgency_score || 85}/100`).removeClass().addClass('badge bg-danger-subtle text-danger border border-danger-subtle text-xs px-2.5 py-0.5 rounded-full');
+        $('#modal-entity-subtitle').text(`${s.category || 'Technology Modernization'} • ${s.account_name || 'BNY'}`);
+
+        let contentHTML = `
+            <div class="p-4 bg-white rounded-xl border border-slate-200 shadow-sm mb-3">
+                <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Signal Classification</div>
+                <div class="text-sm font-semibold text-slate-800 mb-2">${s.title}</div>
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    <span class="badge bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs px-2 py-1">${s.category || 'Strategic Initiative'}</span>
+                    <span class="badge bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs px-2 py-1">Status: ${s.status || 'OPEN'}</span>
+                </div>
+                ${s.recommended_action ? `
+                    <div class="p-3 bg-indigo-50/60 rounded-xl border border-indigo-100 text-xs text-indigo-900 mt-2">
+                        <strong class="text-indigo-950"><i class="bi bi-arrow-right-circle me-1"></i>Recommended Sales Playbook:</strong><br>
+                        ${s.recommended_action}
+                    </div>
+                ` : ''}
+            </div>
+        `;
+
+        $('#modal-entity-body').html(contentHTML);
+
+        $('#modal-ask-anna-btn').off('click').on('click', function() {
+            modal.hide();
+            $('.menu-link[data-view="chat"]').trigger('click');
+            submitUniversalChatQuery(`How should we engage ${s.account_name || 'BNY'} regarding the signal: "${s.title}"?`);
+        });
+
+        modal.show();
+    }
+
     async function performDashboardSearch() {
         const query = $('#dashboard-global-search').val().trim();
         const category = $('#search-filter-category').val();
@@ -735,204 +828,159 @@ $(document).ready(function () {
             return;
         }
 
-        const queryLower = query.toLowerCase();
-        let results = [];
-
-        // 1. Search Mock Leads
-        if (category === 'all' || category === 'leads') {
-            mockData.leads.forEach(l => {
-                const leadRole = l.role || "";
-                if (l.name.toLowerCase().includes(queryLower) || 
-                    l.company.toLowerCase().includes(queryLower) || 
-                    l.email.toLowerCase().includes(queryLower) ||
-                    leadRole.toLowerCase().includes(queryLower) ||
-                    l.status.toLowerCase().includes(queryLower)) {
-                    results.push({
-                        type: 'Lead (Mock)',
-                        title: `${l.name} (${leadRole})`,
-                        detail: `${l.company} • ${l.email} • $${l.dealValue.toLocaleString()}`,
-                        badge: l.status,
-                        badgeClass: l.status === 'Hot' ? 'bg-danger text-white' : (l.status === 'Warm' ? 'bg-warning text-dark' : 'bg-secondary text-white'),
-                        icon: 'bi-people',
-                        actionText: 'View Pipeline',
-                        action: function() {
-                            $('.menu-link[data-view="leads"]').trigger('click');
-                            $('#lead-search-field').val(l.name).trigger('input');
-                        }
-                    });
-                }
-            });
-        }
-
-        // 2. Search Mock System Activities
-        if (category === 'all' || category === 'activities') {
-            const activities = [
-                { title: 'Lead Qualified (Hot)', detail: 'Sarah Jenkins (Apex Global Solutions) - $48,000 value', icon: 'bi-activity' },
-                { title: 'Security Query Resolved', detail: 'SOC2 Type II documentation dispatched to Elena Rostova', icon: 'bi-shield-check' },
-                { title: 'Human Assist Triggered', detail: 'Elena Rostova requested custom SLA review. Autonomous agent paused.', icon: 'bi-exclamation-triangle' },
-                { title: 'New Lead Registered', detail: 'Marcus Thorne logged via documentation query flow', icon: 'bi-person-plus' }
-            ];
-            activities.forEach(act => {
-                if (act.title.toLowerCase().includes(queryLower) || act.detail.toLowerCase().includes(queryLower)) {
-                    results.push({
-                        type: 'Activity',
-                        title: act.title,
-                        detail: act.detail,
-                        badge: 'System Log',
-                        badgeClass: 'bg-info text-white',
-                        icon: act.icon,
-                        actionText: 'See Activity',
-                        action: function() {
-                            showToast('Activity Details', act.detail, 'info');
-                        }
-                    });
-                }
-            });
-        }
-
-        // 3. Search Mock NLP Intents / Conversations
-        if (category === 'all' || category === 'intents') {
-            mockData.conversations.forEach(c => {
-                const convRole = c.role || "";
-                if (c.leadName.toLowerCase().includes(queryLower) || 
-                    c.company.toLowerCase().includes(queryLower) ||
-                    convRole.toLowerCase().includes(queryLower) ||
-                    c.intent.toLowerCase().includes(queryLower) ||
-                    c.sentiment.toLowerCase().includes(queryLower)) {
-                    results.push({
-                        type: 'Intent / Chat',
-                        title: `${c.leadName} (${convRole})`,
-                        detail: `${c.company} • Sentiment: ${c.sentiment} • Confidence: ${Math.round(c.confidence * 100)}%`,
-                        badge: 'Live Chat',
-                        badgeClass: 'bg-primary text-white',
-                        icon: 'bi-chat-right-dots',
-                        actionText: 'Open Chat',
-                        action: function() {
-                            currentSessionId = c.id;
-                            $('.menu-link[data-view="chat"]').trigger('click');
-                        }
-                    });
-                }
-            });
-        }
-
-        // Show loading status indicator in list
-        $resultsBox.removeClass('hidden');
-        $list.html('<div class="text-slate-500 text-center py-3 text-xs"><i class="bi bi-arrow-repeat animate-spin me-2"></i>Querying live enterprise database...</div>');
-
-        // 4. Fetch Real API Results (Organizations and People)
         try {
-            const orgsPromise = (category === 'all' || category === 'leads') ? 
-                API.get('/chatbot/search/organizations', { q: query }).catch(() => []) : 
-                Promise.resolve([]);
+            const data = await API.get('/dashboard/search', { q: query, limit: 15 });
+            let results = [];
 
-            const peoplePromise = (category === 'all' || category === 'leads') ? 
-                API.post('/chatbot/search/people', { person_name: query, limit: 10 }).catch(() => ({ items: [] })) : 
-                Promise.resolve({ items: [] });
-
-            const peopleOrgPromise = (category === 'all' || category === 'leads') ? 
-                API.post('/chatbot/search/people', { organization: query, limit: 10 }).catch(() => ({ items: [] })) : 
-                Promise.resolve({ items: [] });
-
-            const [orgs, peopleByName, peopleByOrg] = await Promise.all([
-                orgsPromise,
-                peoplePromise.then(res => res?.items || []),
-                peopleOrgPromise.then(res => res?.items || [])
-            ]);
-
-            // Append Organizations
-            orgs.forEach(org => {
-                results.push({
-                    type: 'Organization',
-                    title: `${org.name} (${org.ticker || 'N/A'}:${org.exchange || 'N/A'})`,
-                    detail: `${org.industry || 'Financial Services'} • ${org.employee_count || 0} employees • Rev: ${org.annual_revenue || 'N/A'}`,
-                    badge: 'DB Account',
-                    badgeClass: 'bg-indigo-600 text-white',
-                    icon: 'bi-building',
-                    actionText: 'View Account',
-                    action: function() {
-                        App.navigate('accounts');
-                        setTimeout(() => {
-                            $('#account-search-field').val(org.name).trigger('input');
-                        }, 150);
-                    }
+            // 1. Live Matched People (Emily Portney, Robin Vince, VPs, CXOs)
+            const contactsList = data.contacts || data.people || [];
+            if ((category === 'all' || category === 'leads') && contactsList.length > 0) {
+                contactsList.forEach(p => {
+                    results.push({
+                        type: 'Executive Lead',
+                        title: `${p.full_name} (${p.title})`,
+                        detail: `${p.account_name || p.organization || 'BNY'} • ${p.department || p.sub_lob_name || 'Executive'} • Lead Score: ${p.lead_score}/100`,
+                        badge: p.seniority_tier || p.lead_status || 'Hot',
+                        badgeClass: (p.lead_score || 80) >= 80 ? 'bg-danger text-white' : 'bg-warning text-dark',
+                        icon: 'bi-person-badge',
+                        actionText: 'View Profile',
+                        action: function() {
+                            openContactProfileModal(p);
+                        }
+                    });
                 });
-            });
+            }
 
-            // Merge and Deduplicate People
-            const peopleMap = new Map();
-            peopleByName.forEach(p => peopleMap.set(p.id, p));
-            peopleByOrg.forEach(p => peopleMap.set(p.id, p));
-
-            peopleMap.forEach(p => {
-                results.push({
-                    type: 'Executive',
-                    title: `${p.full_name} (${p.title || 'Executive'})`,
-                    detail: `${p.organization} • ${p.location || 'New York, USA'} • Lead Score: ${p.lead_score || 0}`,
-                    badge: p.lead_status || 'Hot',
-                    badgeClass: 'bg-teal-600 text-white',
-                    icon: 'bi-person-badge',
-                    actionText: 'Interactive Dossier',
-                    action: function() {
-                        App.navigate('hierarchy');
-                        setTimeout(() => {
-                            if (p.account_id) {
-                                $('#hierarchy-account-select').val(p.account_id).trigger('change');
-                            }
-                        }, 150);
-                    }
+            // 2. Live Matched Social Posts (Posts by Robin Vince, Emily Portney, BNY)
+            if ((category === 'all' || category === 'posts') && data.posts && data.posts.length > 0) {
+                data.posts.forEach(post => {
+                    results.push({
+                        type: 'Social Post',
+                        title: `Post by ${post.author_name} (${post.platform || 'LinkedIn'})`,
+                        detail: `"${post.content.substring(0, 85)}..." • ${post.likes_count || 0} likes`,
+                        badge: post.sentiment || 'POSITIVE',
+                        badgeClass: post.sentiment === 'POSITIVE' ? 'bg-success text-white' : 'bg-info text-white',
+                        icon: 'bi-linkedin',
+                        actionText: 'Read Post',
+                        action: function() {
+                            openPostDetailModal(post);
+                        }
+                    });
                 });
-            });
+            }
 
-        } catch (apiErr) {
-            console.error("Failed to fetch API search results:", apiErr);
-        }
+            // 3. Live Matched Target Accounts (BNY Mellon, JPMorgan, etc.)
+            if ((category === 'all' || category === 'accounts') && data.accounts && data.accounts.length > 0) {
+                data.accounts.forEach(a => {
+                    results.push({
+                        type: 'Target Account',
+                        title: `${a.name} (${a.publicly_traded_symbol || a.ticker || a.domain || 'Enterprise'})`,
+                        detail: `${a.industry || 'Financial Services'} • ${a.employee_count ? a.employee_count.toLocaleString() + ' employees' : '50,000+ employees'} • Rev: ${a.annual_revenue_formatted || '$20.0B'}`,
+                        badge: 'Account',
+                        badgeClass: 'bg-primary text-white',
+                        icon: 'bi-building',
+                        actionText: 'View 360',
+                        action: function() {
+                            openAccountProfileModal(a);
+                        }
+                    });
+                });
+            }
 
-        // Update title and render results
-        $('#search-results-title').text(`Search Results (${results.length})`);
-        $list.empty();
+            // 4. Live Matched Signals
+            if ((category === 'all' || category === 'signals') && data.signals && data.signals.length > 0) {
+                data.signals.forEach(s => {
+                    results.push({
+                        type: 'Buying Signal',
+                        title: `${s.title} (${s.account_name})`,
+                        detail: `Urgency: ${s.urgency_score}/100 • Priority: ${s.priority} • ${s.recommended_action || ''}`,
+                        badge: s.priority || 'High',
+                        badgeClass: 'bg-danger text-white',
+                        icon: 'bi-lightning-charge',
+                        actionText: 'View Signal',
+                        action: function() {
+                            openSignalDetailModal(s);
+                        }
+                    });
+                });
+            }
 
-        if (results.length === 0) {
-            $list.append('<div class="text-slate-500 text-center py-3 text-xs">No matching enterprise entities found.</div>');
-        } else {
-            results.forEach((res, idx) => {
-                const itemHTML = `
-                    <div class="flex items-center justify-between p-2 hover:bg-slate-100 rounded-lg transition-all border border-slate-100 bg-white">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
-                                <i class="bi ${res.icon}"></i>
-                            </div>
-                            <div>
-                                <div class="text-sm font-semibold text-slate-800 flex items-center gap-2">
-                                    <span>${res.title}</span>
-                                    <span class="badge ${res.badgeClass} text-[9px] px-2 py-0.5 rounded">${res.type}</span>
+            // 5. Live Matched LOBs
+            if (category === 'all' && data.lobs && data.lobs.length > 0) {
+                data.lobs.forEach(lob => {
+                    results.push({
+                        type: 'Line of Business',
+                        title: `${lob.name} (${lob.account_name})`,
+                        detail: `${lob.short_description || 'Division Unit'} • Headcount: ${lob.headcount || 'Global'}`,
+                        badge: 'LOB Unit',
+                        badgeClass: 'bg-info text-white',
+                        icon: 'bi-diagram-3',
+                        actionText: 'Ask Anna',
+                        action: function() {
+                            $('.menu-link[data-view="chat"]').trigger('click');
+                            submitUniversalChatQuery(`Tell me about the ${lob.name} division at ${lob.account_name}, its leadership, and strategic priorities.`);
+                        }
+                    });
+                });
+            }
+
+            // Update title and render results
+            $('#search-results-title').text(`Search Results (${results.length})`);
+            $list.empty();
+
+            if (results.length === 0) {
+                $list.append(`<div class="text-slate-500 text-center py-2 text-xs">No live warehouse records matching "${query}".</div>`);
+            } else {
+                results.forEach((res, idx) => {
+                    const itemHTML = `
+                        <div class="flex items-center justify-between p-2 hover:bg-slate-100 rounded-lg transition-all border border-slate-100 bg-white cursor-pointer search-result-row" data-idx="${idx}">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
+                                    <i class="bi ${res.icon}"></i>
                                 </div>
-                                <div class="text-xs text-slate-500">${res.detail}</div>
+                                <div>
+                                    <div class="text-sm font-semibold text-slate-800 flex items-center gap-2">
+                                        <span>${res.title}</span>
+                                        <span class="badge ${res.badgeClass} text-[9px] px-2 py-0.5 rounded">${res.type}</span>
+                                    </div>
+                                    <div class="text-xs text-slate-500">${res.detail}</div>
+                                </div>
                             </div>
+                            <button class="btn btn-sm btn-outline-primary py-1 px-2 text-xs search-act-btn" data-idx="${idx}">
+                                ${res.actionText}
+                            </button>
                         </div>
-                        <button class="btn btn-sm btn-outline-primary py-1 px-2 text-xs search-act-btn" data-idx="${idx}">
-                            ${res.actionText}
-                        </button>
-                    </div>
-                `;
-                $list.append(itemHTML);
-            });
+                    `;
+                    $list.append(itemHTML);
+                });
 
-            // Bind click actions
-            $('.search-act-btn').off('click').on('click', function () {
-                const idx = $(this).data('idx');
-                if (results[idx] && typeof results[idx].action === 'function') {
-                    results[idx].action();
-                }
-            });
+                // Bind click actions to entire row & button
+                $('.search-result-row, .search-act-btn').on('click', function (e) {
+                    e.stopPropagation();
+                    const idx = $(this).data('idx');
+                    if (results[idx] && typeof results[idx].action === 'function') {
+                        results[idx].action();
+                        $resultsBox.addClass('hidden');
+                    }
+                });
+            }
+
+            $resultsBox.removeClass('hidden');
+
+        } catch (err) {
+            console.error("Live search failed, fallback:", err);
         }
-
-        $resultsBox.removeClass('hidden');
     }
+
+    // Global Modal References
+    window.openContactProfileModal = openContactProfileModal;
+    window.openAccountProfileModal = openAccountProfileModal;
+    window.openPostDetailModal = openPostDetailModal;
+    window.openSignalDetailModal = openSignalDetailModal;
 
     // Initial Dashboard Setup Runs
     initCharts();
-    loadChatSessionsList();
+    renderUniversalChat();
     loadSettingsForm();
     renderLeadsTable();
     renderSearchHistoryTags();

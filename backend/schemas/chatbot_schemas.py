@@ -83,17 +83,22 @@ class ChatbotSignalResult(BaseModel):
 
 # ── Chatbot Request Payload ────────────────────────
 class ChatbotQueryRequest(BaseModel):
-    message: str = Field(..., min_length=1, description="Natural language question or search prompt from sales rep")
+    message: Optional[str] = Field(None, description="Natural language question or search prompt from sales rep")
+    query: Optional[str] = Field(None, description="Alias for message parameter")
     account_id: Optional[UUID] = Field(None, description="Optional account ID to constrain search to a specific organization")
     account_name: Optional[str] = Field(None, description="Optional account name filter (e.g. 'BNY', 'Goldman Sachs')")
     include_dossier: bool = Field(True, description="Include deep persona & executive dossier cards")
     limit: int = Field(10, ge=1, le=50, description="Max matched entities to return")
+
+    def get_query_text(self) -> str:
+        return (self.message or self.query or "").strip()
 
 
 # ── Chatbot Conversational Response ────────────────
 class ChatbotQueryResponse(BaseModel):
     query: str
     reply: str
+    response: Optional[str] = None  # Frontend compatibility alias
     intent_detected: str  # e.g. "person_lookup", "role_search", "org_lookup", "signal_search", "general_intelligence"
     matched_people_count: int = 0
     matched_organizations_count: int = 0
@@ -102,6 +107,7 @@ class ChatbotQueryResponse(BaseModel):
     organizations: List[ChatbotOrganizationResult] = Field(default_factory=list)
     lobs: List[ChatbotLOBResult] = Field(default_factory=list)
     signals: List[ChatbotSignalResult] = Field(default_factory=list)
+    results: Optional[Dict[str, Any]] = None  # Frontend compatibility container
     suggested_followups: List[str] = Field(default_factory=list)
 
 
