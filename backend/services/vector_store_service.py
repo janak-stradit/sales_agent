@@ -11,8 +11,6 @@ Stores and queries vector embeddings across:
 import os
 import logging
 from typing import List, Dict, Any, Optional
-import chromadb
-from chromadb.config import Settings as ChromaSettings
 from sqlalchemy.orm import Session
 
 from backend.config import get_settings
@@ -25,13 +23,29 @@ from backend.models.sales_trigger_signal import SalesTriggerSignal
 logger = logging.getLogger("vector_store.chroma")
 settings = get_settings()
 
+try:
+    import chromadb
+    from chromadb.config import Settings as ChromaSettings
+    CHROMADB_AVAILABLE = True
+except ImportError:
+    chromadb = None
+    CHROMADB_AVAILABLE = False
+    logger.warning("ChromaDB package is not installed. Vector search will fallback gracefully.")
+
 _chroma_client = None
 _collection = None
 
 
-def get_chroma_client() -> chromadb.PersistentClient:
+def is_chromadb_available() -> bool:
+    """Returns True if chromadb is installed and available."""
+    return CHROMADB_AVAILABLE
+
+
+def get_chroma_client():
     """Returns a singleton ChromaDB PersistentClient."""
     global _chroma_client
+    if not CHROMADB_AVAILABLE:
+        return None
     if _chroma_client is None:
         persist_dir = settings.CHROMA_PERSIST_DIR
         os.makedirs(persist_dir, exist_ok=True)
@@ -43,12 +57,15 @@ def get_chroma_client() -> chromadb.PersistentClient:
 def get_vector_collection():
     """Returns the primary ChromaDB collection for Sales AI embeddings."""
     global _collection
+    if not CHROMADB_AVAILABLE:
+        return None
     if _collection is None:
         client = get_chroma_client()
-        _collection = client.get_or_create_collection(
-            name=settings.CHROMA_COLLECTION_NAME,
-            metadata={"description": "Sales AI Executive & Enterprise Account Embeddings"}
-        )
+        if client:
+            _collection = client.get_or_create_collection(
+                name=settings.CHROMA_COLLECTION_NAME,
+                metadata={"description": "Sales AI Executive & Enterprise Account Embeddings"}
+            )
     return _collection
 
 
@@ -57,8 +74,21 @@ def index_all_warehouse_data(db: Session) -> Dict[str, int]:
     Extracts all contacts, accounts, LOBs, and sales trigger signals from PostgreSQL,
     generates vector embeddings, and stores them in ChromaDB.
     """
+    if not CHROMADB_AVAILABLE:
+        logger.warning("Skipping vector indexing: ChromaDB not installed.")
+        return {
+            "total_indexed": 0,
+            "contacts_count": 0,
+            "accounts_count": 0,
+            "lobs_count": 0,
+            "signals_count": 0,
+            "status": "chromadb_not_installed"
+        }
+
     collection = get_vector_collection()
-    
+    if not collection:
+        return {"total_indexed": 0, "status": "collection_unavailable"}
+
     ids: List[str] = []
     documents: List[str] = []
     metadatas: List[Dict[str, Any]] = []
@@ -211,7 +241,12 @@ def semantic_search(
     Executes vector cosine similarity search in ChromaDB.
     Returns ranked matches with metadata, content excerpts, and distance scores.
     """
+    if not CHROMADB_AVAILABLE:
+        return []
+
     collection = get_vector_collection()
+    if not collection:
+        return []
     
     where_clause = None
     conditions = []
@@ -257,9 +292,14 @@ def semantic_search(
 
 def get_vector_store_stats() -> Dict[str, Any]:
     """Returns vector store health and total indexed embeddings count."""
+    if not CHROMADB_AVAILABLE:
+        return {
+            "status": "unavailable",
+            "message": "ChromaDB package is not installed."
+        }
     try:
         collection = get_vector_collection()
-        count = collection.count()
+        count = collection.count() if collection else 0
         return {
             "status": "online",
             "provider": "ChromaDB Persistent (ONNX / Sentence-Transformers)",

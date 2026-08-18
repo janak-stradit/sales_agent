@@ -26,7 +26,6 @@ services:
       - postgres
     volumes:
       - pgadmin_data:/var/lib/pgadmin
-      - ./servers.json:/pgadmin4/servers.json:ro
     restart: unless-stopped
 
   redis:
