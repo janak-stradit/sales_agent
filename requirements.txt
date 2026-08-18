@@ -9,6 +9,9 @@ psycopg2-binary==2.9.*
 celery[redis]==5.4.*
 redis==5.2.*
 
+# Vector Database (Semantic Search & Embeddings)
+chromadb>=0.5.0
+
 # Config & Validation
 pydantic-settings==2.7.*
 python-dotenv==1.0.*

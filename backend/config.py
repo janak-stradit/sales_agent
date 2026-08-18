@@ -1,5 +1,6 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from functools import lru_cache
+import os
 
 
 class Settings(BaseSettings):
@@ -23,6 +24,12 @@ class Settings(BaseSettings):
     CELERY_BROKER_URL: str | None = None
     CELERY_RESULT_BACKEND: str | None = None
     CACHE_TTL_SECONDS: int = 604800  # 7 days
+
+    # ── Vector Database (ChromaDB) ─────────────
+    CHROMA_PERSIST_DIR: str = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "chroma_db")
+    CHROMA_COLLECTION_NAME: str = "sales_ai_embeddings"
+    OPENAI_API_KEY: str | None = None
+    EMBEDDING_PROVIDER: str = "local"  # "local" (Chroma ONNX embeddings) or "openai"
 
     # ── Monid.ai (MCP Data Layer) ──────────────
     MONID_API_KEY: str

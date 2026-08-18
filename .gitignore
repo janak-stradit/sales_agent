@@ -1,45 +1,56 @@
-# Python
+# ── Python Bytecode & Cache ──
 __pycache__/
 *.py[cod]
 *.pyo
 *.pyd
 *.pyc
-
-# Virtual Environment
-venv/
-.venv/
-env/
-
-# Environment Variables — NEVER commit real .env
-.env
-
-# IDE
-.vscode/
-.idea/
-
-# Database
-*.db
-*.sqlite3
-
-# Logs
-*.log
-logs/
-
-# Build / Packaging
-dist/
-build/
-*.egg-info/
-
-# Testing
 .pytest_cache/
 .coverage
 htmlcov/
 
-# Alembic generated
-backend/migrations/versions/__pycache__/
-migrations/versions/__pycache__/
+# ── Virtual Environments ──
+venv/
+.venv/
+env/
 
-# OS & Notes
+# ── Environment Variables (NEVER commit secrets) ──
+.env
+.env.local
+.env.*.local
+
+# ── Vector Database & Local Embeddings (ChromaDB) ──
+data/
+data/chroma_db/
+*.bin
+*.parquet
+.cache/
+
+# ── Scratch & Temporary Test Scripts ──
+scratch/
+tmp/
+temp/
+*.tmp
+
+# ── Generated PDF Reports & Data Exports ──
+*.pdf
+bny_sublobs_hierarchy_personas.json
+exports/
+sales_ai_schemas_dashboard.html
+
+# ── Logs ──
+*.log
+logs/
+
+# ── Database Files & Volumes ──
+*.db
+*.sqlite3
+pgdata/
+pgadmin_data/
+redisdata/
+
+# ── IDE & Operating System Files ──
+.vscode/
+.idea/
 .obsidian/
 .DS_Store
 Thumbs.db

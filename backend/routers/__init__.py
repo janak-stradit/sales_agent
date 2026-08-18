@@ -10,6 +10,7 @@ from .signals import router as signals_router
 from .pipeline import router as pipeline_router
 from .logs import router as logs_router
 from .tasks import router as tasks_router
+from .chatbot import router as chatbot_router
 
 __all__ = [
     "dashboard_router",
@@ -22,4 +23,5 @@ __all__ = [
     "pipeline_router",
     "logs_router",
     "tasks_router",
+    "chatbot_router",
 ]

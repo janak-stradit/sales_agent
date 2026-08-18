@@ -1,6 +1,6 @@
 """
 FastAPI application entry point.
-Registers all routers for all 7 Discovery Navigation tabs and Engine Controls (Generic Multi-Organization Architecture).
+Registers all routers for all 7 Discovery Navigation tabs, Engine Controls, and Sales AI Chatbot.
 """
 
 from fastapi import FastAPI
@@ -18,6 +18,7 @@ from backend.routers import (
     pipeline_router,
     logs_router,
     tasks_router,
+    chatbot_router,
 )
 
 settings = get_settings()
@@ -25,8 +26,8 @@ settings = get_settings()
 # ── Create FastAPI App ─────────────────────────
 app = FastAPI(
     title="Data Discovery / Sales Intelligence Platform",
-    description="Multi-Organization Sales Lead Intelligence Engine & B2B Automation Backend",
-    version="2.5.0",
+    description="Multi-Organization Sales Lead Intelligence Engine & B2B Automation Backend with AI Chatbot",
+    version="2.6.0",
     docs_url="/docs",
     redoc_url="/redoc",
 )
@@ -69,6 +70,9 @@ app.include_router(pipeline_router, prefix=f"{settings.API_V1_PREFIX}/pipeline",
 # Tab 7: Engine Controls — Tool Execution Logs & Telemetry
 app.include_router(logs_router, prefix=f"{settings.API_V1_PREFIX}/logs", tags=["Telemetry & Audit Logs"])
 
+# Sales AI Conversational Chatbot & People/Designation Search
+app.include_router(chatbot_router, prefix=f"{settings.API_V1_PREFIX}/chatbot", tags=["Sales AI Chatbot"])
+
 # Async Tasks
 app.include_router(tasks_router, prefix=f"{settings.API_V1_PREFIX}/tasks", tags=["Background Tasks"])
 
@@ -97,7 +101,7 @@ def read_root():
     return {
         "status": "online",
         "app_name": "Data Discovery / Sales Intelligence Platform",
-        "version": "v2.5.0",
+        "version": "v2.6.0",
         "environment": settings.ENVIRONMENT,
         "engine": "Multi-Organization Sales Lead Intelligence Engine"
     }
@@ -108,6 +112,6 @@ def health_check():
     return {
         "status": "online",
         "app_name": "Data Discovery / Sales Intelligence Platform",
-        "version": "v2.5.0",
+        "version": "v2.6.0",
         "environment": settings.ENVIRONMENT,
     }
