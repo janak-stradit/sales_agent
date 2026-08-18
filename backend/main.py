@@ -18,6 +18,7 @@ from backend.routers import (
     pipeline_router,
     logs_router,
     tasks_router,
+    chatbot_router,
 )
 
 settings = get_settings()
@@ -72,13 +73,16 @@ app.include_router(logs_router, prefix=f"{settings.API_V1_PREFIX}/logs", tags=["
 # Async Tasks
 app.include_router(tasks_router, prefix=f"{settings.API_V1_PREFIX}/tasks", tags=["Background Tasks"])
 
+# Chatbot AI Assistant
+app.include_router(chatbot_router, prefix=f"{settings.API_V1_PREFIX}/chatbot", tags=["AI Chatbot"])
+
 
 import os
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 
 # ── Health Check & UI Routes ───────────────────
-FRONTEND_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend", "public")
+FRONTEND_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend")
 
 if os.path.exists(FRONTEND_DIR):
     css_dir = os.path.join(FRONTEND_DIR, "css")
