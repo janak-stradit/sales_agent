@@ -73,16 +73,16 @@ a {
 }
 
 /* Card Utility */
-.glass-card {
+.glass-card, .card {
     background: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: 16px;
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
-                box-shadow 0.3 cubic-bezier(0.4, 0, 0.2, 1), 
+                box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
                 border-color 0.3s ease;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0, 0, 0, 0.01);
 }
-.glass-card:hover {
+.glass-card:hover, .card:hover {
     border-color: rgba(99, 102, 241, 0.25);
     box-shadow: 0 12px 40px rgba(99, 102, 241, 0.06);
 }

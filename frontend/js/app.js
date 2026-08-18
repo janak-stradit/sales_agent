@@ -1,5 +1,26 @@
+// Global App helper for pages
+window.App = {
+    toast(message, type = 'success') {
+        const title = type === 'error' ? 'Error' : 'Notification';
+        if (typeof window.showToastGlobal === 'function') {
+            window.showToastGlobal(title, message, type);
+        } else {
+            console.log(`[Toast] ${title}: ${message}`);
+        }
+    },
+    navigate(page) {
+        const $link = $(`.menu-link[data-view="${page}"]`);
+        if ($link.length) {
+            $link.trigger('click');
+        }
+    }
+};
+
 // Enterprise Sales Agent Dashboard Core Logic (jQuery Driven)
 $(document).ready(function () {
+    // Expose showToast globally
+    window.showToastGlobal = showToast;
+
     // Current state variables
     let currentSessionId = "chat-001";
     let activeView = "dashboard";
@@ -21,14 +42,21 @@ $(document).ready(function () {
         const viewTitles = {
             'dashboard': 'Executive Overview',
             'chat': 'Live Agent Playground',
+            'accounts': 'Target Accounts',
             'leads': 'Sales Leads Pipeline',
+            'hierarchy': 'Organizational Hierarchy',
+            'social': 'Social Intelligence',
+            'signals': 'Sales Signals',
+            'pipeline': 'Pipeline Engine',
+            'logs': 'Execution Logs',
             'settings': 'Agent Profile & Personality'
         };
         $('#page-title').text(viewTitles[targetView] || 'Enterprise Sales Agent');
 
         // Switch panels
         $('.view-panel').removeClass('active');
-        $(`#view-${targetView}`).addClass('active');
+        const $targetPanel = $(`#view-${targetView}`);
+        $targetPanel.addClass('active');
 
         activeView = targetView;
 
@@ -40,7 +68,30 @@ $(document).ready(function () {
         } else if (targetView === 'leads') {
             renderLeadsTable();
         }
+
+        // Dynamically load page module if it exists
+        const pageModules = {
+            'accounts': typeof AccountsPage !== 'undefined' ? AccountsPage : null,
+            'hierarchy': typeof HierarchyPage !== 'undefined' ? HierarchyPage : null,
+            'social': typeof SocialPage !== 'undefined' ? SocialPage : null,
+            'signals': typeof SignalsPage !== 'undefined' ? SignalsPage : null,
+            'pipeline': typeof PipelinePage !== 'undefined' ? PipelinePage : null,
+            'logs': typeof LogsPage !== 'undefined' ? LogsPage : null
+        };
+
+        if (pageModules[targetView]) {
+            const mod = pageModules[targetView];
+            $targetPanel.html(mod.render());
+            if (mod.init) mod.init();
+            if (mod.load) mod.load();
+        }
     });
+
+    // Init page & form handlers for dynamically loaded modules
+    if (typeof AccountsPage !== 'undefined' && AccountsPage.init) AccountsPage.init();
+    if (typeof ChatbotPage !== 'undefined' && ChatbotPage.init) ChatbotPage.init();
+    if (typeof HierarchyPage !== 'undefined' && HierarchyPage.init) HierarchyPage.init();
+    if (typeof PipelinePage !== 'undefined' && PipelinePage.init) PipelinePage.init();
 
     // Sidebar Toggle Collapse
     $('#toggle-sidebar').on('click', function () {
