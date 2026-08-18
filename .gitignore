@@ -36,8 +36,10 @@ build/
 htmlcov/
 
 # Alembic generated
+backend/migrations/versions/__pycache__/
 migrations/versions/__pycache__/
 
-# OS
+# OS & Notes
+.obsidian/
 .DS_Store
 Thumbs.db
