@@ -1,0 +1,98 @@
+version: '3.8'
+
+services:
+  # ── 1. Redis Cache & Celery Message Broker ──────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: sales_ai_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sales_ai_network
+
+  # ── 2. Celery Worker (Async Data Tasks & Pipeline Runs) ─────────────────────
+  celery_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sales_ai_celery_worker
+    restart: unless-stopped
+    command: celery -A backend.tasks.celery_app worker --loglevel=info -Q default,data_collection --concurrency=4
+    environment:
+      - DATABASE_URL=${DATABASE_URL:-postgresql://postgres:postgres@host.docker.internal:5432/Sales-ai}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL:-redis://redis:6379/0}
+      - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND:-redis://redis:6379/0}
+      - MONID_API_KEY=${MONID_API_KEY}
+      - SECRET_KEY=${SECRET_KEY:-default_secret_key_sales_ai_2026}
+      - ALGORITHM=${ALGORITHM:-HS256}
+      - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - sales_ai_network
+
+  # ── 3. Celery Beat (Periodic Scheduled Data Refresh) ────────────────────────
+  celery_beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sales_ai_celery_beat
+    restart: unless-stopped
+    command: celery -A backend.tasks.celery_app beat --loglevel=info
+    environment:
+      - DATABASE_URL=${DATABASE_URL:-postgresql://postgres:postgres@host.docker.internal:5432/Sales-ai}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL:-redis://redis:6379/0}
+      - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND:-redis://redis:6379/0}
+      - MONID_API_KEY=${MONID_API_KEY}
+      - SECRET_KEY=${SECRET_KEY:-default_secret_key_sales_ai_2026}
+      - ALGORITHM=${ALGORITHM:-HS256}
+      - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - sales_ai_network
+
+  # ── 4. FastAPI Backend API ──────────────────────────────────────────────────
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sales_ai_backend
+    restart: unless-stopped
+    command: python run.py --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=${DATABASE_URL:-postgresql://postgres:postgres@host.docker.internal:5432/Sales-ai}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL:-redis://redis:6379/0}
+      - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND:-redis://redis:6379/0}
+      - MONID_API_KEY=${MONID_API_KEY}
+      - SECRET_KEY=${SECRET_KEY:-default_secret_key_sales_ai_2026}
+      - ALGORITHM=${ALGORITHM:-HS256}
+      - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - sales_ai_network
+
+volumes:
+  redis_data:
+    driver: local
+
+networks:
+  sales_ai_network:
+    driver: bridge

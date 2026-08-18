@@ -73,8 +73,8 @@ app.include_router(logs_router, prefix=f"{settings.API_V1_PREFIX}/logs", tags=["
 # Async Tasks
 app.include_router(tasks_router, prefix=f"{settings.API_V1_PREFIX}/tasks", tags=["Background Tasks"])
 
-# Chatbot AI Assistant
-app.include_router(chatbot_router, prefix=f"{settings.API_V1_PREFIX}/chatbot", tags=["AI Chatbot"])
+# AI Sales Chatbot & Semantic Search (ChromaDB)
+app.include_router(chatbot_router, prefix=f"{settings.API_V1_PREFIX}/chatbot", tags=["AI Sales Chatbot"])
 
 
 import os

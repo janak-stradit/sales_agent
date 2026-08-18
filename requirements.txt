@@ -16,9 +16,10 @@ python-dotenv==1.0.*
 # HTTP Client (Monid MCP calls)
 httpx==0.28.*
 
-# AI APIs (Persona Synthesis)
+# AI APIs & Vector Store
 openai==1.62.*
 anthropic==0.44.*
+chromadb>=0.4.22
 
 # Templates & Forms
 jinja2==3.1.*

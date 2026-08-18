@@ -24,6 +24,13 @@ class Settings(BaseSettings):
     CELERY_RESULT_BACKEND: str | None = None
     CACHE_TTL_SECONDS: int = 604800  # 7 days
 
+    # ── Vector Database (ChromaDB) ─────────────
+    CHROMA_PERSIST_DIR: str = "chroma_db"
+    CHROMA_COLLECTION_NAME: str = "sales_ai_embeddings"
+    OPENAI_API_KEY: str | None = None
+    ANTHROPIC_API_KEY: str | None = None
+    EMBEDDING_PROVIDER: str = "local"  # "local" (Chroma default embeddings) or "openai"
+
     # ── Monid.ai (MCP Data Layer) ──────────────
     MONID_API_KEY: str
     MONID_BASE_URL: str = "https://api.monid.ai/v1"
