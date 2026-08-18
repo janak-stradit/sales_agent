@@ -431,7 +431,7 @@ $(document).ready(function () {
         showToast(actionType, `Message sent to ${session.leadName}.`, 'success');
     }
 
-    function simulateAIResponse(customerText) {
+    async function simulateAIResponse(customerText) {
         const session = mockData.conversations.find(c => c.id === currentSessionId);
         if (!session) return;
 
@@ -452,64 +452,84 @@ $(document).ready(function () {
         $msgBox.append(typingHTML);
         scrollToBottom();
 
-        // 1.5 second delay simulation
-        setTimeout(() => {
-            $('#ai-typing').remove();
+        const timeString = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        
+        // Craft local fallback responsive text
+        let aiText = `Thank you for details regarding "${customerText.substring(0, 20)}...". I have noted this in our system log. Let me retrieve custom enterprise SLA details for you.`;
+        let intent = "general_query";
+        let confidence = 0.85;
+        let retrieved = "general_faq_rules";
 
-            const timeString = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            
-            // Craft intelligence mapping & responsive text
-            let aiText = `Thank you for details regarding "${customerText.substring(0, 20)}...". I have noted this in our system log. Let me retrieve custom enterprise SLA details for you.`;
-            let intent = "general_query";
-            let confidence = 0.85;
-            let retrieved = "general_faq_rules";
+        const lowTxt = customerText.toLowerCase();
+        if (lowTxt.includes('price') || lowTxt.includes('cost') || lowTxt.includes('quote') || lowTxt.includes('pricing') || lowTxt.includes('$')) {
+            aiText = `Our pricing ranges from a standard professional growth model at $49/user/month to full custom SLA packages tailored for Enterprise needs starting at $1,200/month. Shall I draft a custom contract estimate?`;
+            intent = "pricing_inquiry";
+            confidence = 0.96;
+            retrieved = "enterprise_pricing_tiers, contract_guidelines";
+        } else if (lowTxt.includes('soc') || lowTxt.includes('security') || lowTxt.includes('compliance') || lowTxt.includes('hipaa') || lowTxt.includes('gdpr')) {
+            aiText = `We host all customer files under AES-256 encryption standards. We hold an active SOC2 Type II certification, GDPR readiness certificates, and can execute standard BAAs for HIPAA compliance. Would you like our security sheet?`;
+            intent = "security_compliance";
+            confidence = 0.98;
+            retrieved = "security_encryption_levels, soc2_cert, hipaa_baa";
+        } else if (lowTxt.includes('compet') || lowTxt.includes('versus') || lowTxt.includes('compared') || lowTxt.includes('mixpanel') || lowTxt.includes('hubspot')) {
+            aiText = `Our primary distinction from general CRMs is our advanced AI deflection engine combined with unified data streams, which captures conversion insights at 3x efficiency. No manual sales entry required.`;
+            intent = "product_comparison";
+            confidence = 0.91;
+            retrieved = "vs_mixpanel, sales_automation_advantages";
+        } else if (lowTxt.includes('bug') || lowTxt.includes('error') || lowTxt.includes('fail') || lowTxt.includes('broken')) {
+            aiText = `I apologize for this issue. I have checked our system logging channels and flagged our Tier 3 support queue. A live engineer is reviewing your profile log telemetry.`;
+            intent = "support_issue";
+            confidence = 0.89;
+            retrieved = "support_escalation_protocol, engineering_on_call";
+        }
 
-            const lowTxt = customerText.toLowerCase();
-            if (lowTxt.includes('price') || lowTxt.includes('cost') || lowTxt.includes('quote') || lowTxt.includes('pricing') || lowTxt.includes('$')) {
-                aiText = `Our pricing ranges from a standard professional growth model at $49/user/month to full custom SLA packages tailored for Enterprise needs starting at $1,200/month. Shall I draft a custom contract estimate?`;
-                intent = "pricing_inquiry";
-                confidence = 0.96;
-                retrieved = "enterprise_pricing_tiers, contract_guidelines";
-            } else if (lowTxt.includes('soc') || lowTxt.includes('security') || lowTxt.includes('compliance') || lowTxt.includes('hipaa') || lowTxt.includes('gdpr')) {
-                aiText = `We host all customer files under AES-256 encryption standards. We hold an active SOC2 Type II certification, GDPR readiness certificates, and can execute standard BAAs for HIPAA compliance. Would you like our security sheet?`;
-                intent = "security_compliance";
-                confidence = 0.98;
-                retrieved = "security_encryption_levels, soc2_cert, hipaa_baa";
-            } else if (lowTxt.includes('compet') || lowTxt.includes('versus') || lowTxt.includes('compared') || lowTxt.includes('mixpanel') || lowTxt.includes('hubspot')) {
-                aiText = `Our primary distinction from general CRMs is our advanced AI deflection engine combined with unified data streams, which captures conversion insights at 3x efficiency. No manual sales entry required.`;
-                intent = "product_comparison";
-                confidence = 0.91;
-                retrieved = "vs_mixpanel, sales_automation_advantages";
-            } else if (lowTxt.includes('bug') || lowTxt.includes('error') || lowTxt.includes('fail') || lowTxt.includes('broken')) {
-                aiText = `I apologize for this issue. I have checked our system logging channels and flagged our Tier 3 support queue. A live engineer is reviewing your profile log telemetry.`;
-                intent = "support_issue";
-                confidence = 0.89;
-                retrieved = "support_escalation_protocol, engineering_on_call";
-            }
-
-            // Append to session messages
-            session.messages.push({
-                sender: "agent",
-                text: aiText,
-                time: timeString,
-                intelligence: {
-                    intent: intent,
-                    sentiment: "Helpful",
-                    confidence: confidence,
-                    retrievedKnowledge: retrieved
-                }
+        // Try calling the backend API chatbot message endpoint
+        try {
+            const apiRes = await API.post('/chatbot/message', {
+                message: customerText,
+                include_dossier: true
             });
+            if (apiRes && apiRes.reply) {
+                // Formatting markdown newlines to HTML br for playground output
+                aiText = apiRes.reply.replace(/\n/g, '<br>');
+                intent = apiRes.intent_detected || intent;
+                
+                const knowledgeBits = [];
+                if (apiRes.matched_organizations_count > 0) knowledgeBits.push(`${apiRes.matched_organizations_count} accounts`);
+                if (apiRes.matched_people_count > 0) knowledgeBits.push(`${apiRes.matched_people_count} executives`);
+                if (apiRes.matched_signals_count > 0) knowledgeBits.push(`${apiRes.matched_signals_count} signals`);
+                if (knowledgeBits.length > 0) {
+                    retrieved = "Vector Database Search (" + knowledgeBits.join(", ") + ")";
+                }
+                confidence = 0.95;
+            }
+        } catch (err) {
+            console.warn("Chatbot API message failed, falling back to local simulation:", err);
+        }
 
-            // Update session status metrics
-            session.intent = intent;
-            session.confidence = confidence;
-            session.sentiment = "Positive (" + (Math.random() * 0.4 + 0.6).toFixed(2) + ")";
+        // Remove typing indicator and append to session messages
+        $('#ai-typing').remove();
+        session.messages.push({
+            sender: "agent",
+            text: aiText,
+            time: timeString,
+            intelligence: {
+                intent: intent,
+                sentiment: "Helpful",
+                confidence: confidence,
+                retrievedKnowledge: retrieved
+            }
+        });
 
-            // Refresh views
-            loadChatSession(currentSessionId);
-            loadChatSessionsList();
-            showToast("AI Agent Replied", `${mockData.agentConfig.agentName} replied to ${session.leadName}.`, 'success');
-        }, 1500);
+        // Update session status metrics
+        session.intent = intent;
+        session.confidence = confidence;
+        session.sentiment = "Positive (" + (Math.random() * 0.4 + 0.6).toFixed(2) + ")";
+
+        // Refresh views
+        loadChatSession(currentSessionId);
+        loadChatSessionsList();
+        showToast("AI Agent Replied", `${mockData.agentConfig.agentName} replied to ${session.leadName}.`, 'success');
     }
 
     // Quick Trigger test simulation bar
