@@ -166,7 +166,7 @@ def _extract_intent_and_entities(query: str) -> Dict[str, Any]:
 
 # ── Core Conversational Query Processing Engine (Hybrid Search) ──
 def process_chatbot_query(db: Session, request: ChatbotQueryRequest) -> ChatbotQueryResponse:
-    query = request.message.strip()
+    query = request.get_query_text()
     extracted = _extract_intent_and_entities(query)
     pattern = f"%{query}%"
 
@@ -408,6 +408,7 @@ def process_chatbot_query(db: Session, request: ChatbotQueryRequest) -> ChatbotQ
     return ChatbotQueryResponse(
         query=query,
         reply=full_reply,
+        response=full_reply,
         intent_detected=extracted["intent"],
         matched_people_count=len(people_results),
         matched_organizations_count=len(org_results),
@@ -416,6 +417,12 @@ def process_chatbot_query(db: Session, request: ChatbotQueryRequest) -> ChatbotQ
         organizations=org_results,
         lobs=lob_results,
         signals=signal_results,
+        results={
+            "people": people_results,
+            "organizations": org_results,
+            "lobs": lob_results,
+            "signals": signal_results
+        },
         suggested_followups=suggested_followups
     )
 

@@ -25,6 +25,7 @@ from backend.schemas.dashboard_schemas import (
     DashboardAccountSearchResult,
     DashboardLOBSearchResult,
     DashboardSignalSearchResult,
+    DashboardPostSearchResult,
     DashboardSearchResponse,
 )
 
@@ -464,9 +465,49 @@ def search_dashboard(db: Session, query: str, limit: int = 25) -> DashboardSearc
             recommended_action=sig.recommended_action
         ))
 
-    total = len(contacts_res) + len(accounts_res) + len(lobs_res) + len(signals_res)
+    # 5. Search Social Intelligence Posts (e.g., "post from robin vince", "cloud modernization post")
+    clean_author_q = clean_q.lower()
+    for prefix in ["post from", "posts from", "post by", "posts by", "post", "posts"]:
+        clean_author_q = clean_author_q.replace(prefix, "")
+    clean_author_q = clean_author_q.strip()
+    author_pat = f"%{clean_author_q}%" if clean_author_q else pattern
 
-    logger.info(f"Dashboard search '{query}' yield: {total} matches ({len(contacts_res)} contacts, {len(accounts_res)} accounts, {len(lobs_res)} lobs, {len(signals_res)} signals)")
+    post_filters = [
+        SocialIntelligence.author_name.ilike(author_pat),
+        SocialIntelligence.content.ilike(pattern),
+        SocialIntelligence.headline.ilike(pattern),
+        SocialIntelligence.platform.ilike(pattern),
+    ]
+    if len(words) > 1:
+        for w in words:
+            if w.lower() not in ["post", "posts", "from", "by", "the", "at", "in"]:
+                post_filters.append(SocialIntelligence.author_name.ilike(f"%{w}%"))
+                post_filters.append(SocialIntelligence.content.ilike(f"%{w}%"))
+
+    matched_posts = db.query(SocialIntelligence).filter(or_(*post_filters)).limit(limit).all()
+
+    posts_res = []
+    for p in matched_posts:
+        posts_res.append(DashboardPostSearchResult(
+            id=p.id,
+            author_name=p.author_name,
+            author_title=p.author_title,
+            account_name=p.account.name if p.account else "Target Account",
+            account_id=p.account_id,
+            contact_id=p.contact_id,
+            platform=p.platform or "LINKEDIN",
+            content=p.content,
+            headline=p.headline,
+            post_date_formatted=p.post_date_formatted or (p.post_date.strftime("%b %d, %Y") if p.post_date else "Recent"),
+            likes_count=p.likes_count or 0,
+            comments_count=p.comments_count or 0,
+            sentiment=p.sentiment or "POSITIVE",
+            topic_tags=p.topic_tags or []
+        ))
+
+    total = len(contacts_res) + len(accounts_res) + len(lobs_res) + len(signals_res) + len(posts_res)
+
+    logger.info(f"Dashboard search '{query}' yield: {total} matches ({len(contacts_res)} contacts, {len(accounts_res)} accounts, {len(lobs_res)} lobs, {len(signals_res)} signals, {len(posts_res)} posts)")
 
     return DashboardSearchResponse(
         query=clean_q,
@@ -474,5 +515,6 @@ def search_dashboard(db: Session, query: str, limit: int = 25) -> DashboardSearc
         contacts=contacts_res,
         accounts=accounts_res,
         lobs=lobs_res,
-        signals=signals_res
+        signals=signals_res,
+        posts=posts_res
     )

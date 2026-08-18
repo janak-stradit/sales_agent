@@ -136,6 +136,23 @@ class DashboardSignalSearchResult(BaseModel):
     recommended_action: Optional[str] = None
 
 
+class DashboardPostSearchResult(BaseModel):
+    id: UUID
+    author_name: str
+    author_title: Optional[str] = None
+    account_name: Optional[str] = None
+    account_id: UUID
+    contact_id: Optional[UUID] = None
+    platform: str = "LINKEDIN"
+    content: str
+    headline: Optional[str] = None
+    post_date_formatted: Optional[str] = None
+    likes_count: int = 0
+    comments_count: int = 0
+    sentiment: str = "POSITIVE"
+    topic_tags: List[str] = []
+
+
 class DashboardSearchResponse(BaseModel):
     query: str
     total_matches: int
@@ -143,3 +160,4 @@ class DashboardSearchResponse(BaseModel):
     accounts: List[DashboardAccountSearchResult] = []
     lobs: List[DashboardLOBSearchResult] = []
     signals: List[DashboardSignalSearchResult] = []
+    posts: List[DashboardPostSearchResult] = []

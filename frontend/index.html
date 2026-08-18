@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aria | Enterprise AI Sales Agent Dashboard</title>
+    <title>Anna | Enterprise AI Sales Agent Dashboard</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -41,7 +41,7 @@
         <aside class="app-sidebar">
             <div class="sidebar-header">
                 <div class="logo-icon"><i class="bi bi-robot"></i></div>
-                <div class="logo-text">ARIA SALES AGENT</div>
+                <div class="logo-text">ANNA SALES AGENT</div>
             </div>
 
             <ul class="sidebar-menu">
@@ -57,18 +57,6 @@
                         <span>Live Playground</span>
                     </a>
                 </li>
-                <li class="menu-item">
-                    <a href="#" class="menu-link" data-view="leads">
-                        <i class="bi bi-people"></i>
-                        <span>Leads Pipeline</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="#" class="menu-link" data-view="settings">
-                        <i class="bi bi-sliders"></i>
-                        <span>Agent Settings</span>
-                    </a>
-                </li>
             </ul>
 
             <div class="sidebar-footer">
@@ -78,7 +66,7 @@
                         <div class="status-indicator status-online"></div>
                     </div>
                     <div class="agent-info">
-                        <div class="agent-name" id="sidebar-agent-display-name">Aria</div>
+                        <div class="agent-name" id="sidebar-agent-display-name">Anna</div>
                         <div class="agent-role" id="sidebar-agent-display-role">Enterprise Sales Specialist</div>
                     </div>
                 </div>
@@ -113,289 +101,127 @@
                 </div>
             </header>
 
-            <!-- Dashboard View Panel -->
+            <!-- Dashboard View Panel (Centered Search Hub) -->
             <div id="view-dashboard" class="view-panel active">
-                <!-- Global Enterprise Search Hub -->
-                <div class="glass-card p-4 mb-4">
-                    <div class="row align-items-center g-3">
-                        <div class="col-lg-8 col-md-7">
-                            <div class="search-input-wrap">
-                                <i class="bi bi-search text-slate-400"></i>
-                                <input type="text" placeholder="Global Enterprise Search... (e.g. 'Sarah', 'Hot', 'SOC2', 'Pricing')" id="dashboard-global-search" class="w-full pl-10 pr-12 py-3 bg-slate-100 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-indigo-600 focus:bg-white transition-all">
-                                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs bg-slate-200 text-slate-500 px-2 py-1 rounded">⌘K</span>
-                            </div>
+                <div class="d-flex flex-column align-items-center justify-content-center min-h-[calc(100vh-140px)] py-12 px-4">
+                    <!-- Centered Branding Header -->
+                    <div class="text-center mb-6 max-w-xl">
+                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-700 to-violet-600 text-white d-inline-flex align-items-center justify-content-center fs-2 mb-3 shadow-lg shadow-indigo-500/25">
+                            <i class="bi bi-search"></i>
                         </div>
-                        <div class="col-lg-4 col-md-5">
-                            <div class="flex gap-2">
-                                <select id="search-filter-category" class="form-select custom-form-select py-[11px] mb-0 w-full">
-                                    <option value="all">All Categories</option>
-                                    <option value="leads">Leads Pipeline</option>
-                                    <option value="activities">System Activities</option>
-                                    <option value="intents">NLP Intents</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Search History tag cards -->
-                    <div class="mt-3 d-flex align-items-center gap-2 flex-wrap text-xs text-slate-500">
-                        <span class="fw-semibold"><i class="bi bi-clock-history me-1"></i> Recent:</span>
-                        <div id="search-history-tags" class="d-flex gap-2 flex-wrap">
-                            <!-- Dynamic Tag Cards will be injected here -->
-                        </div>
-                    </div>
-                    
-                    <!-- Dynamic Search Results Dropdown -->
-                    <div id="dashboard-search-results" class="mt-3 p-3 bg-slate-50 border border-slate-200 rounded-xl hidden">
-                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2" id="search-results-title">Search Results (0)</div>
-                        <div id="search-results-list" class="space-y-2 max-h-60 overflow-y-auto">
-                            <!-- Dynamic Results inject here -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Simulation Quick Tools -->
-                <div class="simulation-bar">
-                    <div>
-                        <h5 class="text-slate-800 mb-1"><i class="bi bi-magic text-tealNeon me-2"></i>Interactive Lead Simulator</h5>
-                        <p class="text-xs text-slate-500 m-0">Send a simulated message to trigger real-time AI context retrieval, sentiment analysis, and response generation.</p>
-                    </div>
-                    <div class="flex gap-2">
-                        <button class="btn btn-sm btn-outline-primary" id="btn-trigger-pricing">
-                            <i class="bi bi-currency-dollar me-1"></i> Trigger Pricing Query
-                        </button>
-                        <button class="btn btn-sm btn-outline-info" id="btn-trigger-security">
-                            <i class="bi bi-shield-check me-1"></i> Trigger SOC2 Security Query
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Stats Cards Row -->
-                <div class="row g-4 mb-4">
-                    <div class="col-xl-3 col-md-6">
-                        <div class="glass-card metric-card" style="--card-accent: #6366f1;">
-                            <div class="metric-header">
-                                <span class="metric-title">Today's Chats</span>
-                                <div class="metric-icon-wrap"><i class="bi bi-chat-text"></i></div>
-                            </div>
-                            <div class="metric-value text-slate-800">142</div>
-                            <div class="metric-trend trend-up text-emerald-600">
-                                <i class="bi bi-arrow-up-right-solid"></i> <span class="fw-semibold">+12%</span> vs yesterday
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xl-3 col-md-6">
-                        <div class="glass-card metric-card" style="--card-accent: #10b981;">
-                            <div class="metric-header">
-                                <span class="metric-title">Lead Conversion</span>
-                                <div class="metric-icon-wrap"><i class="bi bi-target"></i></div>
-                            </div>
-                            <div class="metric-value text-slate-800">24.8%</div>
-                            <div class="metric-trend trend-up text-emerald-600">
-                                <i class="bi bi-arrow-up-right-solid"></i> <span class="fw-semibold">+3.2%</span> this week
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xl-3 col-md-6">
-                        <div class="glass-card metric-card" style="--card-accent: #a855f7;">
-                            <div class="metric-header">
-                                <span class="metric-title">Pipeline Value</span>
-                                <div class="metric-icon-wrap"><i class="bi bi-funnel"></i></div>
-                            </div>
-                            <div class="metric-value text-slate-800">$345,500</div>
-                            <div class="metric-trend trend-up text-emerald-600">
-                                <i class="bi bi-arrow-up-right-solid"></i> <span class="fw-semibold">+18.5%</span> this month
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xl-3 col-md-6">
-                        <div class="glass-card metric-card" style="--card-accent: #14b8a6;">
-                            <div class="metric-header">
-                                <span class="metric-title">AI Deflection</span>
-                                <div class="metric-icon-wrap"><i class="bi bi-cpu"></i></div>
-                            </div>
-                            <div class="metric-value text-slate-800">88.5%</div>
-                            <div class="metric-trend trend-down text-rose-600">
-                                <i class="bi bi-arrow-down-right-solid"></i> <span class="fw-semibold">-0.4%</span> from average
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Charts & Activities Section -->
-                <div class="row g-4 mb-4">
-                    <!-- Customer Intent Analysis -->
-                    <div class="col-lg-4">
-                        <div class="glass-card p-6 h-[380px]">
-                            <h5 class="text-slate-800 mb-4"><i class="bi bi-pie-chart text-violetNeon me-2"></i>Customer Intent Analysis</h5>
-                            <div class="relative h-[280px]">
-                                <canvas id="chart-intents"></canvas>
-                            </div>
-                        </div>
+                        <h2 class="fw-bold text-slate-800 fs-3 mb-2 tracking-tight">Enterprise Sales Intelligence</h2>
+                        <p class="text-slate-500 text-sm mb-0">Search target accounts (BNY), executive decision makers (CEO, Robin Vince, Emily), social posts, and buying signals.</p>
                     </div>
 
-                    <!-- Sales Value Created -->
-                    <div class="col-lg-4">
-                        <div class="glass-card p-6 h-[380px]">
-                            <h5 class="text-slate-800 mb-4"><i class="bi bi-cash-coin text-tealNeon me-2"></i>Sales Value Created</h5>
-                            <div class="relative h-[280px]">
-                                <canvas id="chart-revenue"></canvas>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Live System Activities -->
-                    <div class="col-lg-4">
-                        <div class="glass-card p-6 h-[380px] flex flex-col">
-                            <h5 class="text-slate-800 mb-3"><i class="bi bi-activity text-purpleNeon me-2"></i>Live System Activities</h5>
-                            <div class="flex-grow overflow-y-auto space-y-3 pr-2">
-                                <div class="flex items-start justify-between border-b border-slate-100 pb-2">
-                                    <div>
-                                        <div class="text-sm font-semibold text-slate-800">Lead Qualified (Hot)</div>
-                                        <div class="text-xs text-slate-500">Sarah Jenkins (Apex Global Solutions) - $48,000 value</div>
-                                    </div>
-                                    <div class="text-xs text-slate-400">Just Now</div>
+                    <!-- Centered Search Card -->
+                    <div class="w-full max-w-3xl glass-card p-6 shadow-xl rounded-2xl border border-slate-200/80 bg-white">
+                        <div class="row align-items-center g-3">
+                            <div class="col-lg-8 col-md-7">
+                                <div class="search-input-wrap position-relative">
+                                    <i class="bi bi-search text-slate-400 position-absolute left-3.5 top-1/2 -translate-y-1/2 fs-6"></i>
+                                    <input type="text" placeholder="Search people (Robin Vince, CEO, Emily), accounts (BNY), posts, signals..." id="dashboard-global-search" class="w-full pl-11 pr-12 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-indigo-600 focus:bg-white text-sm shadow-inner transition-all">
+                                    <span class="position-absolute right-3 top-1/2 -translate-y-1/2 text-xs bg-slate-200 text-slate-500 px-2 py-1 rounded font-mono">⌘K</span>
                                 </div>
-                                <div class="flex items-start justify-between border-b border-slate-100 pb-2">
-                                    <div>
-                                        <div class="text-sm font-semibold text-slate-800">Security Query Resolved</div>
-                                        <div class="text-xs text-slate-500">SOC2 Type II documentation dispatched to Elena Rostova</div>
-                                    </div>
-                                    <div class="text-xs text-slate-400">12 min ago</div>
+                            </div>
+                            <div class="col-lg-4 col-md-5">
+                                <div class="flex gap-2">
+                                    <select id="search-filter-category" class="form-select custom-form-select py-[13px] mb-0 w-full text-sm rounded-xl">
+                                        <option value="all">All Intelligence</option>
+                                        <option value="leads">People & Executives</option>
+                                        <option value="posts">Social Posts & Speeches</option>
+                                        <option value="accounts">Target Accounts</option>
+                                        <option value="signals">Buying Signals</option>
+                                    </select>
                                 </div>
-                                <div class="flex items-start justify-between border-b border-slate-100 pb-2">
-                                    <div>
-                                        <div class="text-sm font-semibold text-amber-600">Human Assist Triggered</div>
-                                        <div class="text-xs text-slate-500">Elena Rostova requested custom SLA review. Autonomous agent paused.</div>
-                                    </div>
-                                    <div class="text-xs text-slate-400">15 min ago</div>
-                                </div>
-                                <div class="flex items-start justify-between border-b border-slate-100 pb-2">
-                                    <div>
-                                        <div class="text-sm font-semibold text-slate-800">New Lead Registered</div>
-                                        <div class="text-xs text-slate-500">Marcus Thorne logged via documentation query flow</div>
-                                    </div>
-                                    <div class="text-xs text-slate-400">1 hour ago</div>
-                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Search History tag cards -->
+                        <div class="mt-4 pt-3 border-t border-slate-100 d-flex align-items-center gap-2 flex-wrap text-xs text-slate-500">
+                            <span class="fw-semibold text-slate-600"><i class="bi bi-clock-history me-1 text-indigo-500"></i> Quick Searches:</span>
+                            <div id="search-history-tags" class="d-flex gap-2 flex-wrap">
+                                <span class="badge bg-slate-100 text-slate-700 border border-slate-200 px-2.5 py-1.5 rounded-lg cursor-pointer hover:bg-indigo-50 hover:text-indigo-600 search-quick-pill" data-query="CEO">👑 CEO</span>
+                                <span class="badge bg-slate-100 text-slate-700 border border-slate-200 px-2.5 py-1.5 rounded-lg cursor-pointer hover:bg-indigo-50 hover:text-indigo-600 search-quick-pill" data-query="Robin Vince">🏢 Robin Vince</span>
+                                <span class="badge bg-slate-100 text-slate-700 border border-slate-200 px-2.5 py-1.5 rounded-lg cursor-pointer hover:bg-indigo-50 hover:text-indigo-600 search-quick-pill" data-query="post from robin vince">📄 Post from Robin Vince</span>
+                                <span class="badge bg-slate-100 text-slate-700 border border-slate-200 px-2.5 py-1.5 rounded-lg cursor-pointer hover:bg-indigo-50 hover:text-indigo-600 search-quick-pill" data-query="Emily Portney">👤 Emily Portney</span>
+                                <span class="badge bg-slate-100 text-slate-700 border border-slate-200 px-2.5 py-1.5 rounded-lg cursor-pointer hover:bg-indigo-50 hover:text-indigo-600 search-quick-pill" data-query="BNY">🌐 BNY</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Dynamic Search Results Dropdown -->
+                        <div id="dashboard-search-results" class="mt-4 p-4 bg-slate-50 border border-slate-200 rounded-xl hidden">
+                            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2" id="search-results-title">Search Results (0)</div>
+                            <div id="search-results-list" class="space-y-2 max-h-80 overflow-y-auto">
+                                <!-- Dynamic Results inject here -->
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Chat Agent Playground View Panel -->
+            <!-- Universal AI Chatbot Assistant View Panel (ChatGPT Style) -->
             <div id="view-chat" class="view-panel">
-                <div class="chat-agent-layout glass-card overflow-hidden">
-                    <!-- Session Selector Column (Left) -->
-                    <div class="session-list-column">
-                        <div class="session-search">
-                            <div class="search-input-wrap">
-                                <i class="bi bi-search"></i>
-                                <input type="text" placeholder="Search conversations..." id="search-sessions-field">
+                <div class="universal-chat-wrapper glass-card d-flex flex-column h-[calc(100vh-100px)] overflow-hidden rounded-2xl border border-slate-200 bg-white">
+                    <!-- Chat Header Bar -->
+                    <div class="chat-universal-header d-flex justify-content-between align-items-center px-6 py-3.5 border-b border-slate-100 bg-slate-50/80">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 d-flex align-items-center justify-content-center text-white shadow-sm">
+                                <i class="bi bi-robot fs-5"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0 fw-bold text-slate-800 text-sm d-flex align-items-center gap-2">
+                                    Anna Intelligence Assistant
+                                    <span class="badge bg-emerald-50 text-emerald-600 border border-emerald-200 text-[10px] font-normal px-2 py-0.5 rounded-full d-inline-flex align-items-center gap-1">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Live DB Connected
+                                    </span>
+                                </h5>
+                                <p class="text-xs text-slate-400 mb-0">Ask questions about target accounts, executive personas, buying triggers, or tech initiatives.</p>
                             </div>
                         </div>
-                        <div class="sessions-scroll" id="sessions-list">
-                            <!-- Dynamic Inject via jQuery -->
-                        </div>
-                    </div>
-
-                    <!-- Chat Box Area (Middle) -->
-                    <div class="chat-main-column">
-                        <div class="chat-active-header">
-                            <div class="lead-meta-header">
-                                <div class="lead-avatar-wrap" id="active-lead-avatar">SJ</div>
-                                <div>
-                                    <h4 class="lead-name-text" id="active-lead-name">Sarah Jenkins</h4>
-                                    <div class="lead-company-text" id="active-lead-company">Apex Global Solutions</div>
-                                </div>
-                            </div>
-
-                            <div class="chat-actions">
-                                <span class="badge bg-success flex items-center px-3" id="agent-mode-badge">AI AUTOPILOT</span>
-                                <div class="form-check form-switch flex items-center ms-3 mb-0">
-                                    <input class="form-check-input" type="checkbox" role="switch" id="human-takeover-toggle">
-                                    <label class="form-check-label text-slate-500 text-xs ms-2" for="human-takeover-toggle">Human Assist</label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Messages Scroll -->
-                        <div class="chat-messages-container" id="chat-messages">
-                            <!-- Dynamic Inject via jQuery -->
-                        </div>
-
-                        <!-- Chat Bottom Input -->
-                        <div class="chat-input-area">
-                            <div class="input-box-wrapper">
-                                <input type="text" placeholder="Send simulated message as customer..." class="chat-text-input" id="chat-input-field">
-                                <button class="input-action-btn" title="Add File Attachment">
-                                    <i class="bi bi-paperclip"></i>
-                                </button>
-                                <button class="input-action-btn send-btn ms-2" id="send-chat-btn">
-                                    <i class="bi bi-send"></i>
-                                </button>
-                            </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <button id="btn-clear-chat" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs" title="Clear Conversation">
+                                <i class="bi bi-trash3"></i> Clear Chat
+                            </button>
                         </div>
                     </div>
 
-                    <!-- Agent Intelligence Telemetry (Right) -->
-                    <div class="agent-intelligence-column">
-                        <div class="panel-header">
-                            <i class="bi bi-cpu text-tealNeon"></i>
-                            <span>AI Telemetry</span>
+                    <!-- Quick Starter Prompt Pills -->
+                    <div class="starter-pills-bar px-6 py-2 border-b border-slate-100 bg-white d-flex align-items-center gap-2 overflow-x-auto text-xs">
+                        <span class="text-slate-400 fw-semibold text-[11px] flex-shrink-0"><i class="bi bi-lightbulb me-1 text-amber-500"></i> Suggestions:</span>
+                        <button class="starter-chip" data-prompt="Who is Emily Portney and what is her role at BNY?">🏢 Emily Portney (BNY)</button>
+                        <button class="starter-chip" data-prompt="Find all VPs and Managing Directors in Asset Servicing at BNY">👥 VPs in Asset Servicing</button>
+                        <button class="starter-chip" data-prompt="What are the highest urgency buying signals and tech initiatives for BNY?">⚡ Buying Signals</button>
+                        <button class="starter-chip" data-prompt="Who is the CEO and President of BNY?">👑 CEO & Leadership</button>
+                        <button class="starter-chip" data-prompt="Give me a 360 overview of BNY Mellon including revenue, employees, and tech stack">🌐 BNY 360 Overview</button>
+                    </div>
+
+                    <!-- Scrollable Chat Messages Container -->
+                    <div class="universal-messages-box flex-grow-1 p-6 overflow-y-auto" id="chat-messages-container" style="background: #fafafa;">
+                        <!-- Welcome Hero Message -->
+                        <div class="welcome-chat-hero text-center py-8 mx-auto max-w-lg" id="chat-welcome-hero">
+                            <div class="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 d-inline-flex align-items-center justify-content-center fs-3 mb-3 shadow-sm">
+                                <i class="bi bi-stars"></i>
+                            </div>
+                            <h4 class="fw-bold text-slate-800 text-base mb-1">How can I assist your sales team today?</h4>
+                            <p class="text-xs text-slate-500 mb-4">I synthesize real-time data from your target enterprise accounts, executive hierarchies, and sales signals into actionable intelligence.</p>
                         </div>
 
-                        <!-- Lead Summary Panel -->
-                        <div class="panel-section">
-                            <div class="panel-section-title">Lead Insights</div>
-                            <div class="intel-stat-row">
-                                <span class="intel-stat-label">Lead Name:</span>
-                                <span class="intel-stat-value text-slate-850" id="intel-lead-name">-</span>
-                            </div>
-                            <div class="intel-stat-row">
-                                <span class="intel-stat-label">Company:</span>
-                                <span class="intel-stat-value text-slate-850" id="intel-lead-company">-</span>
-                            </div>
-                            <div class="intel-stat-row">
-                                <span class="intel-stat-label">Email:</span>
-                                <span class="intel-stat-value text-slate-850 truncate max-w-[160px]" id="intel-lead-email">-</span>
-                            </div>
-                            <div class="intel-stat-row">
-                                <span class="intel-stat-label">Phone:</span>
-                                <span class="intel-stat-value text-slate-850" id="intel-lead-phone">-</span>
-                            </div>
-                            <div class="intel-stat-row">
-                                <span class="intel-stat-label">Deal Value:</span>
-                                <span class="intel-stat-value text-teal-600 font-semibold" id="intel-deal-value">-</span>
-                            </div>
-                            <div class="intel-stat-row">
-                                <span class="intel-stat-label">Category:</span>
-                                <span id="intel-lead-status">-</span>
-                            </div>
-                        </div>
+                        <!-- Dynamic Messages Inject here -->
+                        <div id="universal-messages-list" class="space-y-4"></div>
+                    </div>
 
-                        <!-- Real-time Agent thought processes -->
-                        <div class="panel-section">
-                            <div class="panel-section-title">NLP Classification</div>
-                            <div class="intel-stat-row">
-                                <span class="intel-stat-label">Detected Intent:</span>
-                                <span class="intel-stat-value text-indigo-600" id="intel-intent">-</span>
+                    <!-- Bottom Floating ChatGPT-Style Prompt Bar -->
+                    <div class="chat-universal-input-bar p-4 border-t border-slate-100 bg-white">
+                        <div class="max-w-4xl mx-auto">
+                            <div class="d-flex align-items-center gap-2 bg-slate-50 border border-slate-200 rounded-2xl px-4 py-2.5 focus-within:border-indigo-600 focus-within:bg-white focus-within:ring-2 focus-within:ring-indigo-100 transition-all shadow-sm">
+                                <input type="text" id="chat-input-field" placeholder="Ask Anna anything about accounts, executives, buying triggers, or tech stacks... (Press Enter to send)" class="form-control border-0 bg-transparent p-0 text-sm shadow-none flex-grow-1" style="outline: none;">
+                                <button id="send-chat-btn" class="btn btn-primary d-flex align-items-center justify-content-center rounded-xl p-2 px-3.5 bg-indigo-600 border-0 hover:bg-indigo-700 shadow-sm" title="Send Message (Enter)">
+                                    <i class="bi bi-send-fill text-white text-sm"></i>
+                                </button>
                             </div>
-                            <div class="intel-stat-row">
-                                <span class="intel-stat-label">Customer Sentiment:</span>
-                                <span class="intel-stat-value text-slate-850" id="intel-sentiment">-</span>
-                            </div>
-                            <div class="intel-stat-row">
-                                <span class="intel-stat-label">Model Confidence:</span>
-                                <span class="intel-stat-value text-emerald-600" id="intel-confidence">-</span>
-                            </div>
-                        </div>
-
-                        <!-- Human Actions / Templates -->
-                        <div class="panel-section flex-grow">
-                            <div class="panel-section-title">Suggested Quick Answers</div>
-                            <div class="space-y-2" id="suggested-replies-list">
-                                <!-- Dynamic Inject via jQuery -->
+                            <div class="d-flex justify-content-between align-items-center mt-2 px-1 text-[11px] text-slate-400">
+                                <span>Powered by Sales AI Intelligence Engine & ChromaDB Vector Embeddings</span>
+                                <span>Press <kbd class="px-1.5 py-0.5 bg-slate-100 border border-slate-200 rounded text-[10px] text-slate-600 font-mono">Enter ↵</kbd> to send</span>
                             </div>
                         </div>
                     </div>
@@ -408,7 +234,7 @@
                     <div class="flex justify-between items-center mb-6">
                         <div>
                             <h4 class="text-slate-800 mb-1"><i class="bi bi-card-list text-purpleNeon me-2"></i>Leads Qualification Board</h4>
-                            <p class="text-xs text-slate-500 m-0">All corporate inquiries logged and categorized by Aria in the current sales cycle.</p>
+                            <p class="text-xs text-slate-500 m-0">All corporate inquiries logged and categorized by Anna in the current sales cycle.</p>
                         </div>
 
                         <div class="w-72">
@@ -486,7 +312,7 @@
                                 <div class="mb-4 h-full flex flex-col">
                                     <label class="custom-form-label">Core System Instructions & Prompt Guide</label>
                                     <textarea id="setting-system-prompt" class="form-control custom-form-input flex-grow h-72 resize-none" style="min-height: 280px;"></textarea>
-                                    <p class="text-xs text-slate-400 mt-2">Adjust core system directives guiding Aria's responses, compliance protocols, and competitor positioning parameters.</p>
+                                    <p class="text-xs text-slate-400 mt-2">Adjust core system directives guiding Anna's responses, compliance protocols, and competitor positioning parameters.</p>
                                 </div>
                             </div>
                         </div>
@@ -497,9 +323,62 @@
                             </button>
                         </div>
                     </form>
+            <!-- Accounts View Panel -->
+            <div id="view-accounts" class="view-panel"></div>
+
+            <!-- Hierarchy View Panel -->
+            <div id="view-hierarchy" class="view-panel"></div>
+
+            <!-- Social View Panel -->
+            <div id="view-social" class="view-panel"></div>
+
+            <!-- Signals View Panel -->
+            <div id="view-signals" class="view-panel"></div>
+
+            <!-- Pipeline View Panel -->
+            <div id="view-pipeline" class="view-panel"></div>
+
+            <!-- Logs View Panel -->
+            <div id="view-logs" class="view-panel"></div>
+        </main>
+    </div>
+
+    <!-- Universal Entity Profile & 360 Dossier Modal -->
+    <div class="modal fade" id="entityProfileModal" tabindex="-1" aria-labelledby="entityProfileModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow-2xl rounded-2xl overflow-hidden">
+                <div class="modal-header bg-gradient-to-r from-slate-900 via-indigo-950 to-indigo-900 text-white p-5 border-0">
+                    <div class="d-flex align-items-center gap-3 w-100">
+                        <div id="modal-avatar-box" class="w-14 h-14 rounded-2xl bg-white/10 border border-white/20 d-flex align-items-center justify-content-center text-white fw-bold fs-4 flex-shrink-0 shadow-inner">
+                            RV
+                        </div>
+                        <div class="flex-grow-1 min-w-0">
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <h5 class="modal-title fw-bold text-white fs-5 mb-0 text-truncate" id="modal-entity-name">Robin Vince</h5>
+                                <span id="modal-entity-badge" class="badge bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs px-2 py-0.5 rounded-full">CXO • Hot Lead</span>
+                            </div>
+                            <p class="text-xs text-indigo-200 mb-0 text-truncate" id="modal-entity-subtitle">President & Chief Executive Officer (CEO) • BNY</p>
+                        </div>
+                        <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                </div>
+                <div class="modal-body p-5 bg-slate-50 overflow-y-auto" style="max-height: 68vh;" id="modal-entity-body">
+                    <!-- Dynamic Profile Tabs / Cards Inject Here -->
+                </div>
+                <div class="modal-footer bg-white px-5 py-3 border-t border-slate-100 d-flex justify-content-between">
+                    <div class="text-xs text-slate-400">
+                        <i class="bi bi-shield-check text-emerald-500 me-1"></i>Live Intelligence Warehouse Profile
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-sm btn-outline-secondary px-3 rounded-lg" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-sm btn-primary px-4 rounded-lg bg-indigo-600 border-0 hover:bg-indigo-700 shadow-sm d-flex align-items-center gap-1.5" id="modal-ask-anna-btn">
+                            <i class="bi bi-stars"></i>
+                            <span>Ask Anna About This</span>
+                        </button>
+                    </div>
                 </div>
             </div>
-        </main>
+        </div>
     </div>
 
     <!-- Toast Notification Container -->
@@ -511,6 +390,14 @@
     <!-- ChartJS -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Custom Application Files -->
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/pages/accounts.js"></script>
+    <script src="js/pages/hierarchy.js"></script>
+    <script src="js/pages/social.js"></script>
+    <script src="js/pages/signals.js"></script>
+    <script src="js/pages/pipeline.js"></script>
+    <script src="js/pages/logs.js"></script>
     <script src="js/mockData.js"></script>
     <script src="js/app.js"></script>
 </body>
