@@ -1,0 +1,44 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: sales_ai_postgres
+    environment:
+      POSTGRES_DB: sales_ai
+      POSTGRES_USER: salesai
+      POSTGRES_PASSWORD: salesai_dev_pass
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: sales_ai_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@salesai.com
+      PGADMIN_DEFAULT_PASSWORD: admin_pass
+      PGADMIN_CONFIG_AUTHENTICATION_SOURCES: "['internal']"
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
+    ports:
+      - "5051:80"
+    depends_on:
+      - postgres
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ./servers.json:/pgadmin4/servers.json:ro
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: sales_ai_redis
+    ports:
+      - "6380:6379"
+    volumes:
+      - redisdata:/data
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  pgadmin_data:
+  redisdata:

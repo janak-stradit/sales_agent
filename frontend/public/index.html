@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sales AI Intelligence & Lead Discovery Chatbot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0b0f19;
+      --bg-secondary: #111827;
+      --bg-card: #1e293b;
+      --bg-card-hover: #26354a;
+      --accent-blue: #3b82f6;
+      --accent-indigo: #6366f1;
+      --accent-cyan: #06b6d4;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* ── Top Navbar ── */
+    header {
+      background: rgba(17, 24, 39, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0.85rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-indigo));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      box-shadow: 0 0 16px rgba(99, 102, 241, 0.4);
+    }
+
+    .brand-title {
+      font-weight: 700;
+      font-size: 1.15rem;
+      letter-spacing: -0.02em;
+      background: linear-gradient(to right, #ffffff, #93c5fd);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-subtitle {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 0.35rem 0.75rem;
+      border-radius: 9999px;
+      background: rgba(16, 185, 129, 0.12);
+      color: var(--accent-emerald);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      background-color: var(--accent-emerald);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--accent-emerald);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.85); }
+    }
+
+    .btn-link {
+      background: var(--bg-card);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      padding: 0.4rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .btn-link:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--accent-blue);
+    }
+
+    /* ── Main Layout ── */
+    .app-container {
+      display: flex;
+      flex: 1;
+      max-width: 1600px;
+      margin: 0 auto;
+      width: 100%;
+      padding: 1.5rem;
+      gap: 1.5rem;
+      height: calc(100vh - 75px);
+    }
+
+    /* ── Left Chat Panel ── */
+    .chat-panel {
+      flex: 1.2;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .chat-header {
+      padding: 1rem 1.25rem;
+      background: rgba(30, 41, 59, 0.6);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .chat-header h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      scroll-behavior: smooth;
+    }
+
+    .chat-messages::-webkit-scrollbar {
+      width: 6px;
+    }
+    .chat-messages::-webkit-scrollbar-thumb {
+      background: var(--border-color);
+      border-radius: 4px;
+    }
+
+    .message-row {
+      display: flex;
+      gap: 0.85rem;
+      max-width: 90%;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .message-row.user {
+      align-self: flex-end;
+      flex-direction: row-reverse;
+    }
+
+    .message-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .message-row.bot .message-avatar {
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-indigo));
+      color: #fff;
+    }
+
+    .message-row.user .message-avatar {
+      background: linear-gradient(135deg, #10b981, #06b6d4);
+      color: #fff;
+    }
+
+    .message-content {
+      padding: 0.9rem 1.15rem;
+      border-radius: 14px;
+      font-size: 0.92rem;
+      line-height: 1.55;
+    }
+
+    .message-row.bot .message-content {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: #e2e8f0;
+    }
+
+    .message-row.user .message-content {
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-indigo));
+      color: #ffffff;
+      border-bottom-right-radius: 4px;
+    }
+
+    .message-content p {
+      margin-bottom: 0.5rem;
+    }
+    .message-content p:last-child {
+      margin-bottom: 0;
+    }
+
+    .message-content strong {
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    .message-content code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      background: rgba(0, 0, 0, 0.35);
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      color: #38bdf8;
+    }
+
+    /* ── Quick Suggestions Bar ── */
+    .suggestions-container {
+      padding: 0.75rem 1.25rem;
+      background: rgba(17, 24, 39, 0.95);
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .suggestions-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+    }
+
+    .suggestions-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      max-height: 90px;
+      overflow-y: auto;
+    }
+
+    .suggestion-chip {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: #cbd5e1;
+      padding: 0.4rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .suggestion-chip:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--accent-blue);
+      color: #ffffff;
+      transform: translateY(-1px);
+    }
+
+    /* ── Input Box ── */
+    .chat-input-wrapper {
+      padding: 1rem 1.25rem;
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .chat-input {
+      flex: 1;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 0.85rem 1.15rem;
+      color: var(--text-main);
+      font-size: 0.92rem;
+      font-family: inherit;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .chat-input:focus {
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+    }
+
+    .btn-send {
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-indigo));
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      padding: 0.85rem 1.4rem;
+      font-size: 0.92rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-send:hover {
+      opacity: 0.95;
+      transform: scale(1.02);
+      box-shadow: 0 0 16px rgba(99, 102, 241, 0.4);
+    }
+
+    .btn-send:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* ── Right Results & Dossier Panel ── */
+    .dossier-panel {
+      flex: 1;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .tabs-header {
+      display: flex;
+      background: rgba(30, 41, 59, 0.6);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0.5rem 0.75rem 0;
+      gap: 0.5rem;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 0.65rem 1.15rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      border-bottom: 2px solid transparent;
+    }
+
+    .tab-btn.active {
+      color: #ffffff;
+      background: var(--bg-secondary);
+      border-bottom: 2px solid var(--accent-blue);
+    }
+
+    .tab-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.25rem;
+      display: none;
+    }
+
+    .tab-content.active {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .tab-content::-webkit-scrollbar {
+      width: 6px;
+    }
+    .tab-content::-webkit-scrollbar-thumb {
+      background: var(--border-color);
+      border-radius: 4px;
+    }
+
+    /* ── Executive Result Card ── */
+    .person-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.15rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      transition: all 0.2s ease;
+    }
+
+    .person-card:hover {
+      border-color: var(--accent-blue);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .person-card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+
+    .person-identity {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    .person-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .person-name {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .person-title {
+      font-size: 0.82rem;
+      color: #93c5fd;
+      font-weight: 500;
+    }
+
+    .score-badge {
+      padding: 0.35rem 0.65rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .score-hot {
+      background: rgba(244, 63, 94, 0.15);
+      color: #fb7185;
+      border: 1px solid rgba(244, 63, 94, 0.3);
+    }
+
+    .score-warm {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .person-details-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      background: rgba(15, 23, 42, 0.5);
+      padding: 0.75rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+    }
+
+    .detail-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .detail-label {
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .detail-value {
+      color: #f1f5f9;
+      font-weight: 500;
+      word-break: break-all;
+    }
+
+    .talking-points-box {
+      background: rgba(30, 41, 59, 0.8);
+      border-left: 3px solid var(--accent-cyan);
+      padding: 0.6rem 0.85rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      color: #cbd5e1;
+    }
+
+    .talking-points-title {
+      font-weight: 600;
+      color: var(--accent-cyan);
+      font-size: 0.75rem;
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+    }
+
+    /* ── Organization Card ── */
+    .org-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.15rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .tech-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
+
+    .tech-chip {
+      background: rgba(59, 130, 246, 0.15);
+      color: #93c5fd;
+      border: 1px solid rgba(59, 130, 246, 0.25);
+      padding: 0.2rem 0.55rem;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ── Signal Card ── */
+    .signal-card {
+      background: var(--bg-card);
+      border-left: 4px solid var(--accent-rose);
+      border-radius: 10px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .signal-title {
+      font-weight: 700;
+      font-size: 0.92rem;
+      color: #ffffff;
+    }
+
+    /* ── Structured Search Form ── */
+    .search-form {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      background: var(--bg-card);
+      padding: 1rem;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .form-group label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .form-group input, .form-group select {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.55rem 0.75rem;
+      color: #fff;
+      font-size: 0.85rem;
+      outline: none;
+    }
+
+    .form-group input:focus, .form-group select:focus {
+      border-color: var(--accent-blue);
+    }
+
+    .btn-filter-submit {
+      background: linear-gradient(135deg, var(--accent-emerald), #06b6d4);
+      color: #fff;
+      font-weight: 600;
+      padding: 0.65rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-filter-submit:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
+    }
+
+    /* Empty state */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 3rem 1.5rem;
+      color: var(--text-muted);
+    }
+
+    .empty-state-icon {
+      font-size: 2.5rem;
+      margin-bottom: 0.75rem;
+      opacity: 0.6;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navbar -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon">⚡</div>
+      <div>
+        <div class="brand-title">Sales AI Intelligence Platform</div>
+        <div class="brand-subtitle">Executive Lead Discovery & Organization Search Chatbot</div>
+      </div>
+    </div>
+    <div class="nav-actions">
+      <div class="status-pill">
+        <div class="status-dot"></div>
+        <span>Warehouse Online</span>
+      </div>
+      <a href="/docs" target="_blank" class="btn-link">
+        <span>📖 Swagger API Docs</span>
+      </a>
+      <a href="http://localhost:5051" target="_blank" class="btn-link">
+        <span>🐘 pgAdmin Database</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- App Layout -->
+  <div class="app-container">
+
+    <!-- Left: Conversational Chat Panel -->
+    <div class="chat-panel">
+      <div class="chat-header">
+        <h2>💬 Sales Assistant Intelligence Copilot</h2>
+        <span style="font-size: 0.75rem; color: var(--text-muted);">Real-time PostgreSQL Data Layer</span>
+      </div>
+
+      <div class="chat-messages" id="chatMessages">
+        <div class="message-row bot">
+          <div class="message-avatar">AI</div>
+          <div class="message-content">
+            <p>👋 Hello! I am your <strong>Sales AI Intelligence Assistant</strong>.</p>
+            <p>You can ask me questions about <strong>people, organizations, titles, designations, roles, decision makers, technographics, or buying triggers</strong>.</p>
+            <p>Try one of the quick suggestions below or type your custom query!</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Suggestions Bar -->
+      <div class="suggestions-container">
+        <div class="suggestions-label">💡 Suggested Queries for Sales Discovery</div>
+        <div class="suggestions-chips" id="suggestionsChips">
+          <button class="suggestion-chip" onclick="sendPrompt('Who is the CEO of BNY?')">👔 Who is the CEO of BNY?</button>
+          <button class="suggestion-chip" onclick="sendPrompt('Find all VPs and Managing Directors in Asset Servicing at BNY')">🏢 VPs in Asset Servicing</button>
+          <button class="suggestion-chip" onclick="sendPrompt('Show all confirmed decision makers with lead score above 85 at BNY')">🔥 High-Score Decision Makers</button>
+          <button class="suggestion-chip" onclick="sendPrompt('What is Emily Portney\'s communication style and background?')">🎯 Emily Portney Persona Dossier</button>
+          <button class="suggestion-chip" onclick="sendPrompt('What are the active buying triggers and tech initiatives for BNY?')">⚡ Active Buying Signals for BNY</button>
+          <button class="suggestion-chip" onclick="sendPrompt('Give me a 360 overview of BNY Mellon including revenue and tech stack')">📊 BNY Organization 360</button>
+        </div>
+      </div>
+
+      <!-- Input Bar -->
+      <div class="chat-input-wrapper">
+        <input 
+          type="text" 
+          id="chatInput" 
+          class="chat-input" 
+          placeholder="Ask anything (e.g. 'Who is the Head of Asset Servicing at BNY?', 'Find VPs in BNY')..." 
+          onkeydown="if(event.key === 'Enter') handleSendMessage()"
+        />
+        <button id="sendBtn" class="btn-send" onclick="handleSendMessage()">
+          <span>Send</span>
+          <span>➔</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Right: Executive Dossier & Structured Search Panel -->
+    <div class="dossier-panel">
+      <div class="tabs-header">
+        <button class="tab-btn active" onclick="switchTab('executivesTab', this)">
+          <span>👥 People & Leads</span>
+          <span id="execCountBadge" style="background: rgba(59,130,246,0.3); padding: 0.1rem 0.45rem; border-radius: 9999px; font-size: 0.72rem;">0</span>
+        </button>
+        <button class="tab-btn" onclick="switchTab('orgTab', this)">
+          <span>🏢 Organization</span>
+        </button>
+        <button class="tab-btn" onclick="switchTab('signalsTab', this)">
+          <span>⚡ Buying Signals</span>
+        </button>
+        <button class="tab-btn" onclick="switchTab('filterTab', this)">
+          <span>🔍 Filter Search</span>
+        </button>
+      </div>
+
+      <!-- Tab 1: People & Executive Dossiers -->
+      <div class="tab-content active" id="executivesTab">
+        <div id="executivesList">
+          <div class="empty-state">
+            <div class="empty-state-icon">👤</div>
+            <p>No query executed yet.</p>
+            <p style="font-size: 0.8rem; margin-top: 0.25rem;">Enter a query in the chat on the left to view matched executive dossiers.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 2: Organization 360 -->
+      <div class="tab-content" id="orgTab">
+        <div id="orgList">
+          <div class="empty-state">
+            <div class="empty-state-icon">🏢</div>
+            <p>Organization data will appear here.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 3: Buying Signals -->
+      <div class="tab-content" id="signalsTab">
+        <div id="signalsList">
+          <div class="empty-state">
+            <div class="empty-state-icon">⚡</div>
+            <p>Buying trigger signals will appear here.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 4: Structured Multi-Filter Search -->
+      <div class="tab-content" id="filterTab">
+        <div class="search-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Person Name</label>
+              <input type="text" id="filterName" placeholder="e.g. Robin Vince, Emily" />
+            </div>
+            <div class="form-group">
+              <label>Organization</label>
+              <input type="text" id="filterOrg" placeholder="e.g. BNY, BK" value="BNY" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Designation / Title</label>
+              <input type="text" id="filterDesignation" placeholder="e.g. CEO, VP, Head of" />
+            </div>
+            <div class="form-group">
+              <label>Seniority Tier</label>
+              <select id="filterRole">
+                <option value="">All Tiers</option>
+                <option value="CXO">CXO / C-Suite</option>
+                <option value="VP">Vice President (VP)</option>
+                <option value="Director">Director / Managing Director</option>
+                <option value="Tech Lead">Tech Lead / Architect</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Min Lead Score (0 - 100)</label>
+              <input type="number" id="filterScore" placeholder="e.g. 80" min="0" max="100" />
+            </div>
+            <div class="form-group" style="justify-content: center;">
+              <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; text-transform: none; margin-top: 0.75rem;">
+                <input type="checkbox" id="filterDecisionMaker" style="width: auto;" />
+                <span>Decision Makers Only</span>
+              </label>
+            </div>
+          </div>
+          <button class="btn-filter-submit" onclick="executeStructuredSearch()">🔍 Execute Structured Search</button>
+        </div>
+        <div id="filterResultsList" style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 0.5rem;"></div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    const API_BASE = "http://127.0.0.1:8000/api/v1/chatbot";
+
+    // Switch right panel tabs
+    function switchTab(tabId, btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+    }
+
+    function sendPrompt(promptText) {
+      document.getElementById('chatInput').value = promptText;
+      handleSendMessage();
+    }
+
+    async function handleSendMessage() {
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      input.value = '';
+      appendUserMessage(text);
+
+      const sendBtn = document.getElementById('sendBtn');
+      sendBtn.disabled = true;
+
+      // Add loading message
+      const loadingId = appendLoadingMessage();
+
+      try {
+        const response = await fetch(`${API_BASE}/message`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: text, include_dossier: true })
+        });
+
+        removeMessage(loadingId);
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        appendBotMessage(data.reply);
+        renderDossierData(data);
+
+      } catch (err) {
+        removeMessage(loadingId);
+        appendBotMessage(`❌ **Error:** Failed to reach chatbot API. (${err.message})`);
+      } finally {
+        sendBtn.disabled = false;
+      }
+    }
+
+    function appendUserMessage(text) {
+      const box = document.getElementById('chatMessages');
+      const div = document.createElement('div');
+      div.className = 'message-row user';
+      div.innerHTML = `
+        <div class="message-avatar">YOU</div>
+        <div class="message-content"><p>${escapeHtml(text)}</p></div>
+      `;
+      box.appendChild(div);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function appendBotMessage(text) {
+      const box = document.getElementById('chatMessages');
+      const div = document.createElement('div');
+      div.className = 'message-row bot';
+      // Format markdown-like bold and bullet points
+      let formatted = escapeHtml(text)
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/`(.*?)`/g, '<code>$1</code>')
+        .replace(/\n/g, '<br/>');
+
+      div.innerHTML = `
+        <div class="message-avatar">AI</div>
+        <div class="message-content">${formatted}</div>
+      `;
+      box.appendChild(div);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function appendLoadingMessage() {
+      const box = document.getElementById('chatMessages');
+      const id = 'msg-' + Date.now();
+      const div = document.createElement('div');
+      div.id = id;
+      div.className = 'message-row bot';
+      div.innerHTML = `
+        <div class="message-avatar">AI</div>
+        <div class="message-content"><p>⚡ <em>Querying data warehouse & compiling executive dossier...</em></p></div>
+      `;
+      box.appendChild(div);
+      box.scrollTop = box.scrollHeight;
+      return id;
+    }
+
+    function removeMessage(id) {
+      const el = document.getElementById(id);
+      if (el) el.remove();
+    }
+
+    function renderDossierData(data) {
+      // 1. Render Executives
+      const execList = document.getElementById('executivesList');
+      const countBadge = document.getElementById('execCountBadge');
+      countBadge.innerText = data.people.length;
+
+      if (data.people && data.people.length > 0) {
+        execList.innerHTML = data.people.map(p => {
+          const initials = p.full_name.split(' ').map(n => n[0]).join('').substring(0, 2);
+          const scoreClass = (p.lead_score || 75) >= 80 ? 'score-hot' : 'score-warm';
+          const talkingPoints = p.key_talking_points && p.key_talking_points.length > 0
+            ? `<div class="talking-points-box">
+                <div class="talking-points-title">💡 Sales Intelligence Talking Points:</div>
+                <ul style="padding-left: 1.1rem; margin: 0;">
+                  ${p.key_talking_points.map(tp => `<li>${escapeHtml(tp)}</li>`).join('')}
+                </ul>
+               </div>`
+            : '';
+
+          return `
+            <div class="person-card">
+              <div class="person-card-top">
+                <div class="person-identity">
+                  <div class="person-avatar">${initials}</div>
+                  <div>
+                    <div class="person-name">${escapeHtml(p.full_name)}</div>
+                    <div class="person-title">${escapeHtml(p.title)} • ${escapeHtml(p.organization)}</div>
+                  </div>
+                </div>
+                <div class="score-badge ${scoreClass}">
+                  🔥 Score: ${p.lead_score}/100
+                </div>
+              </div>
+              <div class="person-details-grid">
+                <div class="detail-item">
+                  <span class="detail-label">Email</span>
+                  <span class="detail-value">${p.email ? `<a href="mailto:${p.email}" style="color:#38bdf8; text-decoration:none;">${escapeHtml(p.email)}</a>` : 'N/A'}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Phone</span>
+                  <span class="detail-value">${escapeHtml(p.phone || 'Direct line via switchboard')}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Seniority / Role</span>
+                  <span class="detail-value">${escapeHtml(p.seniority_tier || 'Executive')} (${escapeHtml(p.role || 'Leader')})</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Authority</span>
+                  <span class="detail-value">${p.is_decision_maker ? '✅ Confirmed Decision Maker' : 'Key Influencer'}</span>
+                </div>
+              </div>
+              ${p.communication_style ? `<div style="font-size: 0.8rem; color: #a5b4fc; background: rgba(99,102,241,0.12); padding: 0.45rem 0.75rem; border-radius: 6px;"><strong>🧠 Comm Style:</strong> ${escapeHtml(p.communication_style)}</div>` : ''}
+              ${talkingPoints}
+            </div>
+          `;
+        }).join('');
+      } else {
+        execList.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🔍</div><p>No individual executives matched this query.</p></div>`;
+      }
+
+      // 2. Render Organizations
+      const orgList = document.getElementById('orgList');
+      if (data.organizations && data.organizations.length > 0) {
+        orgList.innerHTML = data.organizations.map(o => `
+          <div class="org-card">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <h3 style="font-size: 1.15rem; color: #fff;">${escapeHtml(o.name)} <span style="font-size:0.8rem; color: #94a3b8;">(${escapeHtml(o.ticker || 'N/A')})</span></h3>
+              <span style="font-size: 0.8rem; background: rgba(16,185,129,0.15); color: #34d399; padding: 0.2rem 0.5rem; border-radius: 6px;">${escapeHtml(o.industry || 'Financial Services')}</span>
+            </div>
+            <div class="person-details-grid">
+              <div class="detail-item"><span class="detail-label">Annual Revenue</span><span class="detail-value">${escapeHtml(o.annual_revenue || '$20.0B')}</span></div>
+              <div class="detail-item"><span class="detail-label">Market Cap</span><span class="detail-value">${escapeHtml(o.market_cap || '$92.7B')}</span></div>
+              <div class="detail-item"><span class="detail-label">Headquarters</span><span class="detail-value">${escapeHtml(o.headquarters || 'New York, NY')}</span></div>
+              <div class="detail-item"><span class="detail-label">Employees</span><span class="detail-value">${o.employee_count ? o.employee_count.toLocaleString() : '50,000+'}</span></div>
+            </div>
+            <div>
+              <div class="detail-label" style="margin-bottom: 0.35rem;">Technographics & Core Stack:</div>
+              <div class="tech-chips">
+                ${o.tech_stack.map(t => `<span class="tech-chip">${escapeHtml(t)}</span>`).join('')}
+              </div>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // 3. Render Signals
+      const sigList = document.getElementById('signalsList');
+      if (data.signals && data.signals.length > 0) {
+        sigList.innerHTML = data.signals.map(s => `
+          <div class="signal-card">
+            <div style="display: flex; justify-content: space-between;">
+              <span class="signal-title">${escapeHtml(s.title)}</span>
+              <span style="font-size:0.75rem; font-weight:700; color:#fb7185;">🔥 ${s.urgency_score}/100</span>
+            </div>
+            <p style="font-size: 0.82rem; color: #cbd5e1;">${escapeHtml(s.summary || '')}</p>
+            ${s.recommended_action ? `<div style="font-size: 0.78rem; color: #34d399; background: rgba(16,185,129,0.1); padding: 0.4rem 0.6rem; border-radius: 6px;">👉 <strong>Action:</strong> ${escapeHtml(s.recommended_action)}</div>` : ''}
+          </div>
+        `).join('');
+      }
+    }
+
+    async function executeStructuredSearch() {
+      const payload = {
+        person_name: document.getElementById('filterName').value.trim() || null,
+        organization: document.getElementById('filterOrg').value.trim() || null,
+        designation: document.getElementById('filterDesignation').value.trim() || null,
+        role: document.getElementById('filterRole').value.trim() || null,
+        min_lead_score: document.getElementById('filterScore').value ? parseInt(document.getElementById('filterScore').value) : null,
+        is_decision_maker: document.getElementById('filterDecisionMaker').checked ? true : null,
+        limit: 25
+      };
+
+      const resContainer = document.getElementById('filterResultsList');
+      resContainer.innerHTML = '<p style="color: var(--text-muted); font-size: 0.85rem;">Searching database...</p>';
+
+      try {
+        const res = await fetch(`${API_BASE}/search/people`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        if (data.items && data.items.length > 0) {
+          resContainer.innerHTML = `<div style="font-size:0.8rem; color:#34d399; margin-bottom: 0.3rem;">✅ Found ${data.total_found} matched executive(s):</div>` +
+            data.items.map(p => `
+              <div class="person-card" style="padding: 0.85rem;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <strong>${escapeHtml(p.full_name)}</strong>
+                  <span style="font-size:0.75rem; color:#38bdf8;">Score: ${p.lead_score}/100</span>
+                </div>
+                <div style="font-size:0.8rem; color:#93c5fd;">${escapeHtml(p.title)} • ${escapeHtml(p.organization)}</div>
+                <div style="font-size:0.75rem; color:#94a3b8;">✉️ ${escapeHtml(p.email || 'N/A')} | 📞 ${escapeHtml(p.phone || 'N/A')}</div>
+              </div>
+            `).join('');
+        } else {
+          resContainer.innerHTML = '<p style="color: var(--text-muted); font-size: 0.85rem;">No executives matched the filter criteria.</p>';
+        }
+      } catch (err) {
+        resContainer.innerHTML = `<p style="color: #fb7185; font-size: 0.85rem;">Error: ${err.message}</p>`;
+      }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+  </script>
+</body>
+</html>
