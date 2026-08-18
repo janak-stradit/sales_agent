@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en" class="h-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Intelligence Platform</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+        }
+        .sidebar {
+            width: 260px;
+            background-color: #0f172a;
+            color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            transition: all 0.3s;
+        }
+        .sidebar-brand {
+            padding: 1.25rem;
+            border-bottom: 1px solid #1e293b;
+        }
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1.25rem;
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+        .sidebar-link:hover {
+            color: #f8fafc;
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        .sidebar-link.active {
+            color: #38bdf8;
+            background-color: rgba(56, 189, 248, 0.1);
+            border-left-color: #38bdf8;
+        }
+        @media (max-width: 991.98px) {
+            .sidebar {
+                margin-left: -260px;
+                position: fixed;
+                z-index: 1040;
+                height: 100%;
+            }
+            .sidebar.show {
+                margin-left: 0;
+            }
+        }
+        .main-wrapper {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .content-area {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+        .top-bar {
+            background-color: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+        .page-content {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+        .card {
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            margin-bottom: 1.5rem;
+        }
+        .hover-up {
+            transition: transform 0.22s ease-in-out, box-shadow 0.22s ease-in-out !important;
+        }
+        .hover-up:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.075) !important;
+        }
+        .fw-extrabold {
+            font-weight: 800 !important;
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .loader {
+            border: 3px solid #e2e8f0;
+            border-top-color: #0284c7;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 0.6s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        #toast {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            z-index: 1050;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            font-size: 0.875rem;
+        }
+        .search-container {
+            position: relative;
+            max-width: 600px;
+            margin-bottom: 1.5rem;
+        }
+        .search-box {
+            border-radius: 12px;
+            border: 1px solid #ced4da;
+            padding: 0.75rem 1rem 0.75rem 2.75rem;
+            font-size: 0.95rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            transition: all 0.2s;
+        }
+        .search-box:focus {
+            border-color: #38bdf8;
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25);
+            outline: none;
+        }
+        .search-icon-inside {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 1.1rem;
+        }
+        .search-results-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            margin-top: 0.5rem;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0;
+            z-index: 1000;
+            max-height: 450px;
+            overflow-y: auto;
+        }
+        .search-badge {
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+        }
+        .history-tag {
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .history-tag:hover {
+            background-color: #e2e8f0 !important;
+            color: #0f172a !important;
+        }
+    </style>
+</head>
+<body class="h-100">
+    <div class="main-wrapper">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar">
+            <div class="sidebar-brand">
+                <h1 class="h6 mb-0 text-white d-flex align-items-center gap-2">
+                    <i class="bi bi-cpu-fill text-info fs-5"></i>
+                    <span>Sales AI Portal</span>
+                </h1>
+                <p class="text-secondary small mb-0 mt-1">Lead Intelligence Platform</p>
+            </div>
+            <nav class="flex-grow-1 py-3 overflow-auto">
+                <a href="#" class="sidebar-link active" data-page="dashboard">
+                    <i class="bi bi-grid-1x2-fill"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="sidebar-link" data-page="chatbot">
+                    <i class="bi bi-robot"></i>
+                    <span>AI Chatbot</span>
+                </a>
+                <a href="#" class="sidebar-link" data-page="accounts">
+                    <i class="bi bi-building"></i>
+                    <span>Target Accounts</span>
+                </a>
+                <a href="#" class="sidebar-link" data-page="leads">
+                    <i class="bi bi-people-fill"></i>
+                    <span>Executive Leads</span>
+                </a>
+                <a href="#" class="sidebar-link" data-page="hierarchy">
+                    <i class="bi bi-diagram-3-fill"></i>
+                    <span>Hierarchy Spans</span>
+                </a>
+                <a href="#" class="sidebar-link" data-page="social">
+                    <i class="bi bi-linkedin"></i>
+                    <span>Social Intel</span>
+                </a>
+                <a href="#" class="sidebar-link" data-page="signals">
+                    <i class="bi bi-lightning-charge-fill"></i>
+                    <span>Buying Signals</span>
+                </a>
+                <a href="#" class="sidebar-link" data-page="pipeline">
+                    <i class="bi bi-gear-wide-connected"></i>
+                    <span>Pipeline Control</span>
+                </a>
+                <a href="#" class="sidebar-link" data-page="logs">
+                    <i class="bi bi-terminal-fill"></i>
+                    <span>Execution Logs</span>
+                </a>
+            </nav>
+            <div class="p-3 border-top border-secondary">
+                <div class="d-flex align-items-center gap-2 text-secondary small">
+                    <span class="d-inline-block rounded-circle bg-success" style="width: 8px; height: 8px;"></span>
+                    <span id="connStatus">API Connected</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Content Area -->
+        <div class="content-area">
+            <!-- Top Bar -->
+            <header class="top-bar">
+                <div class="d-flex align-items-center gap-3">
+                    <button id="sidebarToggle" class="btn btn-sm btn-outline-secondary d-lg-none">
+                        <i class="bi bi-list"></i>
+                    </button>
+                    <h2 class="h5 mb-0 font-weight-bold" id="pageTitle">Executive Dashboard</h2>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <span class="text-muted small" id="lastUpdated"></span>
+                    <button id="refreshBtn" class="btn btn-sm btn-primary px-3 d-flex align-items-center gap-2">
+                        <i class="bi bi-arrow-clockwise"></i>
+                        <span>Refresh</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <div class="page-content" id="mainContent">
+                <!-- Dynamic content loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="text-white bg-dark d-none"></div>
+
+    <!-- Bootstrap Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/pages/dashboard.js"></script>
+    <script src="js/pages/chatbot.js"></script>
+    <script src="js/pages/accounts.js"></script>
+    <script src="js/pages/leads.js"></script>
+    <script src="js/pages/hierarchy.js"></script>
+    <script src="js/pages/social.js"></script>
+    <script src="js/pages/signals.js"></script>
+    <script src="js/pages/pipeline.js"></script>
+    <script src="js/pages/logs.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
