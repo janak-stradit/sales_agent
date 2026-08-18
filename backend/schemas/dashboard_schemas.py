@@ -1,4 +1,4 @@
-"""Pydantic schemas for Executive Dashboard (Tab 1)."""
+"""Pydantic schemas for Executive Dashboard (Tab 1) & Unified Global Search."""
 
 from pydantic import BaseModel, ConfigDict
 from typing import List, Dict, Any, Optional
@@ -74,3 +74,72 @@ class DashboardOverviewResponse(BaseModel):
     segment_revenues: List[Dict[str, Any]] = []
     recent_signals: List[Dict[str, Any]]
     recent_pipeline_runs: List[Dict[str, Any]]
+
+
+# ── Unified Dashboard Search Schemas ─────────────────────────────────────────
+
+class DashboardContactSearchResult(BaseModel):
+    id: UUID
+    full_name: str
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    title: str
+    seniority_tier: str
+    department: Optional[str] = None
+    account_name: str
+    account_id: UUID
+    lead_score: int
+    lead_status: str
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    location: Optional[str] = None
+    avatar_initials: str
+    buyer_roles: List[str] = []
+    decision_authority: Optional[str] = None
+    summary_bio: Optional[str] = None
+    linkedin_url: Optional[str] = None
+
+
+class DashboardAccountSearchResult(BaseModel):
+    id: UUID
+    name: str
+    domain: Optional[str] = None
+    publicly_traded_symbol: Optional[str] = None
+    industry: Optional[str] = None
+    annual_revenue_formatted: Optional[str] = None
+    employee_count: Optional[int] = None
+    headquarters: Optional[str] = None
+    leads_count: int = 0
+    lobs_count: int = 0
+
+
+class DashboardLOBSearchResult(BaseModel):
+    id: UUID
+    name: str
+    account_name: str
+    account_id: UUID
+    entity_type: str
+    revenue_printed: Optional[str] = None
+    headcount: Optional[int] = None
+    short_description: Optional[str] = None
+
+
+class DashboardSignalSearchResult(BaseModel):
+    id: UUID
+    title: str
+    account_name: str
+    account_id: UUID
+    category: Optional[str] = None
+    priority: str
+    urgency_score: int
+    status: str
+    recommended_action: Optional[str] = None
+
+
+class DashboardSearchResponse(BaseModel):
+    query: str
+    total_matches: int
+    contacts: List[DashboardContactSearchResult] = []
+    accounts: List[DashboardAccountSearchResult] = []
+    lobs: List[DashboardLOBSearchResult] = []
+    signals: List[DashboardSignalSearchResult] = []
