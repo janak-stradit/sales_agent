@@ -1,297 +1,517 @@
 <!DOCTYPE html>
-<html lang="en" class="h-100">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sales Intelligence Platform</title>
+    <title>Aria | Enterprise AI Sales Agent Dashboard</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8f9fa;
-        }
-        .sidebar {
-            width: 260px;
-            background-color: #0f172a;
-            color: #f8fafc;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            flex-shrink: 0;
-            transition: all 0.3s;
-        }
-        .sidebar-brand {
-            padding: 1.25rem;
-            border-bottom: 1px solid #1e293b;
-        }
-        .sidebar-link {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem 1.25rem;
-            color: #94a3b8;
-            text-decoration: none;
-            font-size: 0.875rem;
-            font-weight: 500;
-            transition: all 0.2s;
-            border-left: 3px solid transparent;
-        }
-        .sidebar-link:hover {
-            color: #f8fafc;
-            background-color: rgba(255, 255, 255, 0.05);
-        }
-        .sidebar-link.active {
-            color: #38bdf8;
-            background-color: rgba(56, 189, 248, 0.1);
-            border-left-color: #38bdf8;
-        }
-        @media (max-width: 991.98px) {
-            .sidebar {
-                margin-left: -260px;
-                position: fixed;
-                z-index: 1040;
-                height: 100%;
-            }
-            .sidebar.show {
-                margin-left: 0;
+    <!-- Tailwind CSS (Play CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#f8fafc',
+                        sidebarBg: '#ffffff',
+                        cardBg: '#ffffff',
+                        borderCol: '#e2e8f0',
+                        purpleNeon: '#6366f1',
+                        tealNeon: '#0d9488',
+                        violetNeon: '#8b5cf6'
+                    }
+                }
             }
         }
-        .main-wrapper {
-            display: flex;
-            width: 100%;
-            height: 100vh;
-            overflow: hidden;
-        }
-        .content-area {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            overflow: hidden;
-        }
-        .top-bar {
-            background-color: #ffffff;
-            border-bottom: 1px solid #e2e8f0;
-            padding: 0.75rem 1.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-shrink: 0;
-        }
-        .page-content {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding: 1.5rem;
-        }
-        .card {
-            border: 1px solid #e2e8f0;
-            border-radius: 0.75rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            margin-bottom: 1.5rem;
-        }
-        .hover-up {
-            transition: transform 0.22s ease-in-out, box-shadow 0.22s ease-in-out !important;
-        }
-        .hover-up:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 24px rgba(0,0,0,0.075) !important;
-        }
-        .fw-extrabold {
-            font-weight: 800 !important;
-        }
-        .fade-in {
-            animation: fadeIn 0.3s ease-in-out;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .loader {
-            border: 3px solid #e2e8f0;
-            border-top-color: #0284c7;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 0.6s linear infinite;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        #toast {
-            position: fixed;
-            bottom: 1.5rem;
-            right: 1.5rem;
-            z-index: 1050;
-            padding: 0.75rem 1.25rem;
-            border-radius: 0.5rem;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            font-size: 0.875rem;
-        }
-        .search-container {
-            position: relative;
-            max-width: 600px;
-            margin-bottom: 1.5rem;
-        }
-        .search-box {
-            border-radius: 12px;
-            border: 1px solid #ced4da;
-            padding: 0.75rem 1rem 0.75rem 2.75rem;
-            font-size: 0.95rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-            transition: all 0.2s;
-        }
-        .search-box:focus {
-            border-color: #38bdf8;
-            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25);
-            outline: none;
-        }
-        .search-icon-inside {
-            position: absolute;
-            left: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #94a3b8;
-            font-size: 1.1rem;
-        }
-        .search-results-dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            margin-top: 0.5rem;
-            background: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            border: 1px solid #e2e8f0;
-            z-index: 1000;
-            max-height: 450px;
-            overflow-y: auto;
-        }
-        .search-badge {
-            font-size: 0.7rem;
-            font-weight: 600;
-            padding: 0.2rem 0.4rem;
-            border-radius: 4px;
-        }
-        .history-tag {
-            font-size: 0.75rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .history-tag:hover {
-            background-color: #e2e8f0 !important;
-            color: #0f172a !important;
-        }
-    </style>
+    </script>
+    <!-- Custom Style Sheet -->
+    <link rel="stylesheet" href="css/style.css">
 </head>
-<body class="h-100">
-    <div class="main-wrapper">
+<body>
+
+    <div class="app-container">
         <!-- Sidebar -->
-        <aside id="sidebar" class="sidebar">
-            <div class="sidebar-brand">
-                <h1 class="h6 mb-0 text-white d-flex align-items-center gap-2">
-                    <i class="bi bi-cpu-fill text-info fs-5"></i>
-                    <span>Sales AI Portal</span>
-                </h1>
-                <p class="text-secondary small mb-0 mt-1">Lead Intelligence Platform</p>
+        <aside class="app-sidebar">
+            <div class="sidebar-header">
+                <div class="logo-icon"><i class="bi bi-robot"></i></div>
+                <div class="logo-text">ARIA SALES AGENT</div>
             </div>
-            <nav class="flex-grow-1 py-3 overflow-auto">
-                <a href="#" class="sidebar-link active" data-page="dashboard">
-                    <i class="bi bi-grid-1x2-fill"></i>
-                    <span>Dashboard</span>
-                </a>
-                <a href="#" class="sidebar-link" data-page="chatbot">
-                    <i class="bi bi-robot"></i>
-                    <span>AI Chatbot</span>
-                </a>
-                <a href="#" class="sidebar-link" data-page="accounts">
-                    <i class="bi bi-building"></i>
-                    <span>Target Accounts</span>
-                </a>
-                <a href="#" class="sidebar-link" data-page="leads">
-                    <i class="bi bi-people-fill"></i>
-                    <span>Executive Leads</span>
-                </a>
-                <a href="#" class="sidebar-link" data-page="hierarchy">
-                    <i class="bi bi-diagram-3-fill"></i>
-                    <span>Hierarchy Spans</span>
-                </a>
-                <a href="#" class="sidebar-link" data-page="social">
-                    <i class="bi bi-linkedin"></i>
-                    <span>Social Intel</span>
-                </a>
-                <a href="#" class="sidebar-link" data-page="signals">
-                    <i class="bi bi-lightning-charge-fill"></i>
-                    <span>Buying Signals</span>
-                </a>
-                <a href="#" class="sidebar-link" data-page="pipeline">
-                    <i class="bi bi-gear-wide-connected"></i>
-                    <span>Pipeline Control</span>
-                </a>
-                <a href="#" class="sidebar-link" data-page="logs">
-                    <i class="bi bi-terminal-fill"></i>
-                    <span>Execution Logs</span>
-                </a>
-            </nav>
-            <div class="p-3 border-top border-secondary">
-                <div class="d-flex align-items-center gap-2 text-secondary small">
-                    <span class="d-inline-block rounded-circle bg-success" style="width: 8px; height: 8px;"></span>
-                    <span id="connStatus">API Connected</span>
+
+            <ul class="sidebar-menu">
+                <li class="menu-item active">
+                    <a href="#" class="menu-link" data-view="dashboard">
+                        <i class="bi bi-graph-up"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="#" class="menu-link" data-view="chat">
+                        <i class="bi bi-chat-right-dots"></i>
+                        <span>Live Playground</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="#" class="menu-link" data-view="leads">
+                        <i class="bi bi-people"></i>
+                        <span>Leads Pipeline</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="#" class="menu-link" data-view="settings">
+                        <i class="bi bi-sliders"></i>
+                        <span>Agent Settings</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <div class="agent-profile-mini">
+                    <div class="agent-avatar" id="sidebar-agent-avatar-wrap">
+                        <span id="sidebar-agent-avatar-char">A</span>
+                        <div class="status-indicator status-online"></div>
+                    </div>
+                    <div class="agent-info">
+                        <div class="agent-name" id="sidebar-agent-display-name">Aria</div>
+                        <div class="agent-role" id="sidebar-agent-display-role">Enterprise Sales Specialist</div>
+                    </div>
                 </div>
             </div>
         </aside>
 
-        <!-- Content Area -->
-        <div class="content-area">
-            <!-- Top Bar -->
-            <header class="top-bar">
-                <div class="d-flex align-items-center gap-3">
-                    <button id="sidebarToggle" class="btn btn-sm btn-outline-secondary d-lg-none">
+        <!-- Main Body -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="app-header">
+                <div class="header-left">
+                    <button class="sidebar-toggle" id="toggle-sidebar">
                         <i class="bi bi-list"></i>
                     </button>
-                    <h2 class="h5 mb-0 font-weight-bold" id="pageTitle">Executive Dashboard</h2>
+                    <h2 class="page-title-context" id="page-title">Executive Overview</h2>
                 </div>
-                <div class="d-flex align-items-center gap-3">
-                    <span class="text-muted small" id="lastUpdated"></span>
-                    <button id="refreshBtn" class="btn btn-sm btn-primary px-3 d-flex align-items-center gap-2">
-                        <i class="bi bi-arrow-clockwise"></i>
-                        <span>Refresh</span>
-                    </button>
+
+                <div class="header-right">
+                    <div class="system-health">
+                        <div class="system-health-dot"></div>
+                        <span>AI Deflection: 99.9% Uptime</span>
+                    </div>
+
+                    <div class="icon-btn" title="System Notifications">
+                        <i class="bi bi-bell"></i>
+                        <span class="badge-dot"></span>
+                    </div>
+
+                    <div class="icon-btn" title="Agent Status">
+                        <i class="bi bi-cpu"></i>
+                    </div>
                 </div>
             </header>
 
-            <!-- Page Content -->
-            <div class="page-content" id="mainContent">
-                <!-- Dynamic content loaded here -->
+            <!-- Dashboard View Panel -->
+            <div id="view-dashboard" class="view-panel active">
+                <!-- Global Enterprise Search Hub -->
+                <div class="glass-card p-4 mb-4">
+                    <div class="row align-items-center g-3">
+                        <div class="col-lg-8 col-md-7">
+                            <div class="search-input-wrap">
+                                <i class="bi bi-search text-slate-400"></i>
+                                <input type="text" placeholder="Global Enterprise Search... (e.g. 'Sarah', 'Hot', 'SOC2', 'Pricing')" id="dashboard-global-search" class="w-full pl-10 pr-12 py-3 bg-slate-100 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-indigo-600 focus:bg-white transition-all">
+                                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs bg-slate-200 text-slate-500 px-2 py-1 rounded">⌘K</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-5">
+                            <div class="flex gap-2">
+                                <select id="search-filter-category" class="form-select custom-form-select py-[11px] mb-0 w-full">
+                                    <option value="all">All Categories</option>
+                                    <option value="leads">Leads Pipeline</option>
+                                    <option value="activities">System Activities</option>
+                                    <option value="intents">NLP Intents</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Search History tag cards -->
+                    <div class="mt-3 d-flex align-items-center gap-2 flex-wrap text-xs text-slate-500">
+                        <span class="fw-semibold"><i class="bi bi-clock-history me-1"></i> Recent:</span>
+                        <div id="search-history-tags" class="d-flex gap-2 flex-wrap">
+                            <!-- Dynamic Tag Cards will be injected here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Dynamic Search Results Dropdown -->
+                    <div id="dashboard-search-results" class="mt-3 p-3 bg-slate-50 border border-slate-200 rounded-xl hidden">
+                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2" id="search-results-title">Search Results (0)</div>
+                        <div id="search-results-list" class="space-y-2 max-h-60 overflow-y-auto">
+                            <!-- Dynamic Results inject here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Simulation Quick Tools -->
+                <div class="simulation-bar">
+                    <div>
+                        <h5 class="text-slate-800 mb-1"><i class="bi bi-magic text-tealNeon me-2"></i>Interactive Lead Simulator</h5>
+                        <p class="text-xs text-slate-500 m-0">Send a simulated message to trigger real-time AI context retrieval, sentiment analysis, and response generation.</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="btn btn-sm btn-outline-primary" id="btn-trigger-pricing">
+                            <i class="bi bi-currency-dollar me-1"></i> Trigger Pricing Query
+                        </button>
+                        <button class="btn btn-sm btn-outline-info" id="btn-trigger-security">
+                            <i class="bi bi-shield-check me-1"></i> Trigger SOC2 Security Query
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stats Cards Row -->
+                <div class="row g-4 mb-4">
+                    <div class="col-xl-3 col-md-6">
+                        <div class="glass-card metric-card" style="--card-accent: #6366f1;">
+                            <div class="metric-header">
+                                <span class="metric-title">Today's Chats</span>
+                                <div class="metric-icon-wrap"><i class="bi bi-chat-text"></i></div>
+                            </div>
+                            <div class="metric-value text-slate-800">142</div>
+                            <div class="metric-trend trend-up text-emerald-600">
+                                <i class="bi bi-arrow-up-right-solid"></i> <span class="fw-semibold">+12%</span> vs yesterday
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-6">
+                        <div class="glass-card metric-card" style="--card-accent: #10b981;">
+                            <div class="metric-header">
+                                <span class="metric-title">Lead Conversion</span>
+                                <div class="metric-icon-wrap"><i class="bi bi-target"></i></div>
+                            </div>
+                            <div class="metric-value text-slate-800">24.8%</div>
+                            <div class="metric-trend trend-up text-emerald-600">
+                                <i class="bi bi-arrow-up-right-solid"></i> <span class="fw-semibold">+3.2%</span> this week
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-6">
+                        <div class="glass-card metric-card" style="--card-accent: #a855f7;">
+                            <div class="metric-header">
+                                <span class="metric-title">Pipeline Value</span>
+                                <div class="metric-icon-wrap"><i class="bi bi-funnel"></i></div>
+                            </div>
+                            <div class="metric-value text-slate-800">$345,500</div>
+                            <div class="metric-trend trend-up text-emerald-600">
+                                <i class="bi bi-arrow-up-right-solid"></i> <span class="fw-semibold">+18.5%</span> this month
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-6">
+                        <div class="glass-card metric-card" style="--card-accent: #14b8a6;">
+                            <div class="metric-header">
+                                <span class="metric-title">AI Deflection</span>
+                                <div class="metric-icon-wrap"><i class="bi bi-cpu"></i></div>
+                            </div>
+                            <div class="metric-value text-slate-800">88.5%</div>
+                            <div class="metric-trend trend-down text-rose-600">
+                                <i class="bi bi-arrow-down-right-solid"></i> <span class="fw-semibold">-0.4%</span> from average
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts & Activities Section -->
+                <div class="row g-4 mb-4">
+                    <!-- Customer Intent Analysis -->
+                    <div class="col-lg-4">
+                        <div class="glass-card p-6 h-[380px]">
+                            <h5 class="text-slate-800 mb-4"><i class="bi bi-pie-chart text-violetNeon me-2"></i>Customer Intent Analysis</h5>
+                            <div class="relative h-[280px]">
+                                <canvas id="chart-intents"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sales Value Created -->
+                    <div class="col-lg-4">
+                        <div class="glass-card p-6 h-[380px]">
+                            <h5 class="text-slate-800 mb-4"><i class="bi bi-cash-coin text-tealNeon me-2"></i>Sales Value Created</h5>
+                            <div class="relative h-[280px]">
+                                <canvas id="chart-revenue"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Live System Activities -->
+                    <div class="col-lg-4">
+                        <div class="glass-card p-6 h-[380px] flex flex-col">
+                            <h5 class="text-slate-800 mb-3"><i class="bi bi-activity text-purpleNeon me-2"></i>Live System Activities</h5>
+                            <div class="flex-grow overflow-y-auto space-y-3 pr-2">
+                                <div class="flex items-start justify-between border-b border-slate-100 pb-2">
+                                    <div>
+                                        <div class="text-sm font-semibold text-slate-800">Lead Qualified (Hot)</div>
+                                        <div class="text-xs text-slate-500">Sarah Jenkins (Apex Global Solutions) - $48,000 value</div>
+                                    </div>
+                                    <div class="text-xs text-slate-400">Just Now</div>
+                                </div>
+                                <div class="flex items-start justify-between border-b border-slate-100 pb-2">
+                                    <div>
+                                        <div class="text-sm font-semibold text-slate-800">Security Query Resolved</div>
+                                        <div class="text-xs text-slate-500">SOC2 Type II documentation dispatched to Elena Rostova</div>
+                                    </div>
+                                    <div class="text-xs text-slate-400">12 min ago</div>
+                                </div>
+                                <div class="flex items-start justify-between border-b border-slate-100 pb-2">
+                                    <div>
+                                        <div class="text-sm font-semibold text-amber-600">Human Assist Triggered</div>
+                                        <div class="text-xs text-slate-500">Elena Rostova requested custom SLA review. Autonomous agent paused.</div>
+                                    </div>
+                                    <div class="text-xs text-slate-400">15 min ago</div>
+                                </div>
+                                <div class="flex items-start justify-between border-b border-slate-100 pb-2">
+                                    <div>
+                                        <div class="text-sm font-semibold text-slate-800">New Lead Registered</div>
+                                        <div class="text-xs text-slate-500">Marcus Thorne logged via documentation query flow</div>
+                                    </div>
+                                    <div class="text-xs text-slate-400">1 hour ago</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
+
+            <!-- Chat Agent Playground View Panel -->
+            <div id="view-chat" class="view-panel">
+                <div class="chat-agent-layout glass-card overflow-hidden">
+                    <!-- Session Selector Column (Left) -->
+                    <div class="session-list-column">
+                        <div class="session-search">
+                            <div class="search-input-wrap">
+                                <i class="bi bi-search"></i>
+                                <input type="text" placeholder="Search conversations..." id="search-sessions-field">
+                            </div>
+                        </div>
+                        <div class="sessions-scroll" id="sessions-list">
+                            <!-- Dynamic Inject via jQuery -->
+                        </div>
+                    </div>
+
+                    <!-- Chat Box Area (Middle) -->
+                    <div class="chat-main-column">
+                        <div class="chat-active-header">
+                            <div class="lead-meta-header">
+                                <div class="lead-avatar-wrap" id="active-lead-avatar">SJ</div>
+                                <div>
+                                    <h4 class="lead-name-text" id="active-lead-name">Sarah Jenkins</h4>
+                                    <div class="lead-company-text" id="active-lead-company">Apex Global Solutions</div>
+                                </div>
+                            </div>
+
+                            <div class="chat-actions">
+                                <span class="badge bg-success flex items-center px-3" id="agent-mode-badge">AI AUTOPILOT</span>
+                                <div class="form-check form-switch flex items-center ms-3 mb-0">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="human-takeover-toggle">
+                                    <label class="form-check-label text-slate-500 text-xs ms-2" for="human-takeover-toggle">Human Assist</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Messages Scroll -->
+                        <div class="chat-messages-container" id="chat-messages">
+                            <!-- Dynamic Inject via jQuery -->
+                        </div>
+
+                        <!-- Chat Bottom Input -->
+                        <div class="chat-input-area">
+                            <div class="input-box-wrapper">
+                                <input type="text" placeholder="Send simulated message as customer..." class="chat-text-input" id="chat-input-field">
+                                <button class="input-action-btn" title="Add File Attachment">
+                                    <i class="bi bi-paperclip"></i>
+                                </button>
+                                <button class="input-action-btn send-btn ms-2" id="send-chat-btn">
+                                    <i class="bi bi-send"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Agent Intelligence Telemetry (Right) -->
+                    <div class="agent-intelligence-column">
+                        <div class="panel-header">
+                            <i class="bi bi-cpu text-tealNeon"></i>
+                            <span>AI Telemetry</span>
+                        </div>
+
+                        <!-- Lead Summary Panel -->
+                        <div class="panel-section">
+                            <div class="panel-section-title">Lead Insights</div>
+                            <div class="intel-stat-row">
+                                <span class="intel-stat-label">Lead Name:</span>
+                                <span class="intel-stat-value text-slate-850" id="intel-lead-name">-</span>
+                            </div>
+                            <div class="intel-stat-row">
+                                <span class="intel-stat-label">Company:</span>
+                                <span class="intel-stat-value text-slate-850" id="intel-lead-company">-</span>
+                            </div>
+                            <div class="intel-stat-row">
+                                <span class="intel-stat-label">Email:</span>
+                                <span class="intel-stat-value text-slate-850 truncate max-w-[160px]" id="intel-lead-email">-</span>
+                            </div>
+                            <div class="intel-stat-row">
+                                <span class="intel-stat-label">Phone:</span>
+                                <span class="intel-stat-value text-slate-850" id="intel-lead-phone">-</span>
+                            </div>
+                            <div class="intel-stat-row">
+                                <span class="intel-stat-label">Deal Value:</span>
+                                <span class="intel-stat-value text-teal-600 font-semibold" id="intel-deal-value">-</span>
+                            </div>
+                            <div class="intel-stat-row">
+                                <span class="intel-stat-label">Category:</span>
+                                <span id="intel-lead-status">-</span>
+                            </div>
+                        </div>
+
+                        <!-- Real-time Agent thought processes -->
+                        <div class="panel-section">
+                            <div class="panel-section-title">NLP Classification</div>
+                            <div class="intel-stat-row">
+                                <span class="intel-stat-label">Detected Intent:</span>
+                                <span class="intel-stat-value text-indigo-600" id="intel-intent">-</span>
+                            </div>
+                            <div class="intel-stat-row">
+                                <span class="intel-stat-label">Customer Sentiment:</span>
+                                <span class="intel-stat-value text-slate-850" id="intel-sentiment">-</span>
+                            </div>
+                            <div class="intel-stat-row">
+                                <span class="intel-stat-label">Model Confidence:</span>
+                                <span class="intel-stat-value text-emerald-600" id="intel-confidence">-</span>
+                            </div>
+                        </div>
+
+                        <!-- Human Actions / Templates -->
+                        <div class="panel-section flex-grow">
+                            <div class="panel-section-title">Suggested Quick Answers</div>
+                            <div class="space-y-2" id="suggested-replies-list">
+                                <!-- Dynamic Inject via jQuery -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Leads View Panel -->
+            <div id="view-leads" class="view-panel">
+                <div class="glass-card p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h4 class="text-slate-800 mb-1"><i class="bi bi-card-list text-purpleNeon me-2"></i>Leads Qualification Board</h4>
+                            <p class="text-xs text-slate-500 m-0">All corporate inquiries logged and categorized by Aria in the current sales cycle.</p>
+                        </div>
+
+                        <div class="w-72">
+                            <div class="search-input-wrap">
+                                <i class="bi bi-search"></i>
+                                <input type="text" placeholder="Search captured leads..." id="lead-search-field">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table custom-table align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Lead Identifier</th>
+                                    <th>Company</th>
+                                    <th>Email Address</th>
+                                    <th>AI Qualification</th>
+                                    <th>Pipeline Value</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leads-table-body">
+                                <!-- Dynamic Inject via jQuery -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings View Panel -->
+            <div id="view-settings" class="view-panel">
+                <div class="glass-card p-6">
+                    <h4 class="text-slate-800 mb-6"><i class="bi bi-sliders text-tealNeon me-2"></i>Configure AI Sales Specialist</h4>
+                    
+                    <form id="agent-config-form">
+                        <div class="row g-4">
+                            <!-- Left Column Inputs -->
+                            <div class="col-lg-6">
+                                <div class="mb-4">
+                                    <label class="custom-form-label">Agent Representative Name</label>
+                                    <input type="text" id="setting-agent-name" class="form-control custom-form-input" required>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="custom-form-label">Specialist Role Title</label>
+                                    <input type="text" id="setting-agent-role" class="form-control custom-form-input" required>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="custom-form-label flex justify-between">
+                                        <span>Model Temperature (Creativity)</span>
+                                        <span class="text-teal-600 font-semibold" id="setting-temp-val">0.2</span>
+                                    </label>
+                                    <input type="range" class="form-range" min="0" max="1" step="0.05" id="setting-agent-temp">
+                                    <div class="flex justify-between text-xs text-slate-400 mt-1">
+                                        <span>Strict & Safe (0.0)</span>
+                                        <span>Creative (1.0)</span>
+                                    </div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="custom-form-label">AI Engine Model</label>
+                                    <select class="form-select custom-form-select" id="setting-agent-model">
+                                        <option value="gpt-4o-enterprise">GPT-4o Enterprise (Fastest, Smartest)</option>
+                                        <option value="claude-3-5-sonnet">Claude 3.5 Sonnet (Context Deep)</option>
+                                        <option value="gemini-1-5-pro">Gemini 1.5 Pro (Massive Context)</option>
+                                        <option value="meta-llama-3-1-70b">Llama 3.1 70B (Open-Source Host)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Right Column Prompt Area -->
+                            <div class="col-lg-6">
+                                <div class="mb-4 h-full flex flex-col">
+                                    <label class="custom-form-label">Core System Instructions & Prompt Guide</label>
+                                    <textarea id="setting-system-prompt" class="form-control custom-form-input flex-grow h-72 resize-none" style="min-height: 280px;"></textarea>
+                                    <p class="text-xs text-slate-400 mt-2">Adjust core system directives guiding Aria's responses, compliance protocols, and competitor positioning parameters.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="border-t border-slate-200 pt-4 mt-4 flex justify-end">
+                            <button type="submit" class="btn btn-primary px-4 py-2" style="background-color: var(--color-primary); border-color: var(--color-primary);">
+                                <i class="bi bi-cloud-arrow-up me-2"></i>Save Configuration
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
     </div>
 
-    <!-- Toast Notification -->
-    <div id="toast" class="text-white bg-dark d-none"></div>
+    <!-- Toast Notification Container -->
+    <div class="custom-toast-container" id="toast-box-container"></div>
 
-    <!-- Bootstrap Bundle JS -->
+    <!-- Core Libraries JS -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Scripts -->
-    <script src="js/config.js"></script>
-    <script src="js/api.js"></script>
-    <script src="js/pages/dashboard.js"></script>
-    <script src="js/pages/chatbot.js"></script>
-    <script src="js/pages/accounts.js"></script>
-    <script src="js/pages/leads.js"></script>
-    <script src="js/pages/hierarchy.js"></script>
-    <script src="js/pages/social.js"></script>
-    <script src="js/pages/signals.js"></script>
-    <script src="js/pages/pipeline.js"></script>
-    <script src="js/pages/logs.js"></script>
+    <!-- ChartJS -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom Application Files -->
+    <script src="js/mockData.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>
