@@ -3,6 +3,7 @@
 from .dashboard import router as dashboard_router
 from .accounts import router as accounts_router
 from .leads import router as leads_router
+from .contacts import router as contacts_router
 from .lobs import router as lobs_router
 from .hierarchy import router as hierarchy_router
 from .social import router as social_router
@@ -16,6 +17,7 @@ __all__ = [
     "dashboard_router",
     "accounts_router",
     "leads_router",
+    "contacts_router",
     "lobs_router",
     "hierarchy_router",
     "social_router",

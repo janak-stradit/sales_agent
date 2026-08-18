@@ -48,7 +48,7 @@ class ContactResponse(BaseModel):
     last_name: Optional[str] = None
     email: Optional[str] = None
     email_confidence: Optional[str] = "verified"
-    avatar_initials: str
+    avatar_initials: Optional[str] = "EX"
     avatar_url: Optional[str] = None
     title: str
     current_title: Optional[str] = None

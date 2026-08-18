@@ -81,6 +81,23 @@ class ChatbotSignalResult(BaseModel):
     source_name: Optional[str] = None
 
 
+# ── Structured Social Post Result ──────────────────
+class ChatbotPostResult(BaseModel):
+    id: UUID
+    author_name: str
+    author_title: Optional[str] = None
+    platform: Optional[str] = "LINKEDIN"
+    content: str
+    headline: Optional[str] = None
+    post_date_formatted: Optional[str] = None
+    likes_count: Optional[int] = 0
+    comments_count: Optional[int] = 0
+    shares_count: Optional[int] = 0
+    sentiment: Optional[str] = "POSITIVE"
+    sentiment_score: Optional[float] = 0.5
+    topic_tags: Optional[List[str]] = Field(default_factory=list)
+
+
 # ── Chatbot Request Payload ────────────────────────
 class ChatbotQueryRequest(BaseModel):
     message: Optional[str] = Field(None, description="Natural language question or search prompt from sales rep")
@@ -99,11 +116,15 @@ class ChatbotQueryResponse(BaseModel):
     query: str
     reply: str
     response: Optional[str] = None  # Frontend compatibility alias
-    intent_detected: str  # e.g. "person_lookup", "role_search", "org_lookup", "signal_search", "general_intelligence"
+    executive_summary: Optional[str] = None  # 3-4 line quick executive briefing
+    intent_detected: str  # e.g. "social_intelligence", "person_lookup", "role_search", "org_lookup", "signal_search", "hierarchy_lookup"
+    processing_steps: List[str] = Field(default_factory=list)  # Visual process tags / thoughts
     matched_people_count: int = 0
     matched_organizations_count: int = 0
     matched_signals_count: int = 0
+    matched_posts_count: int = 0
     people: List[ChatbotPersonResult] = Field(default_factory=list)
+    posts: List[ChatbotPostResult] = Field(default_factory=list)
     organizations: List[ChatbotOrganizationResult] = Field(default_factory=list)
     lobs: List[ChatbotLOBResult] = Field(default_factory=list)
     signals: List[ChatbotSignalResult] = Field(default_factory=list)

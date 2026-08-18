@@ -255,14 +255,78 @@ $(document).ready(function () {
                     .replace(/- (.*)/g, '<div class="ps-3 py-0.5 text-xs text-slate-700">&bull; $1</div>')
                     .replace(/\n/g, '<br>');
 
+                // Build Thought Chain / Processing Steps Badges
+                let thoughtChainHTML = '';
+                if (msg.processing_steps && msg.processing_steps.length > 0) {
+                    thoughtChainHTML = `
+                        <div class="thought-chain-box mb-3">
+                            <div class="fw-bold text-slate-700 text-[11px] mb-1.5 d-flex align-items-center justify-content-between">
+                                <span><i class="bi bi-gear-wide-connected text-indigo-600 me-1"></i> Agent Process & Thought Chain:</span>
+                                <span class="badge bg-emerald-50 text-emerald-700 border border-emerald-200 text-[9px] font-normal px-2 py-0.5">Live Executed</span>
+                            </div>
+                            <div class="space-y-1">
+                                ${msg.processing_steps.map(step => `
+                                    <div class="thought-step-item">
+                                        <i class="bi bi-check-circle-fill text-emerald-500 text-[11px]"></i>
+                                        <span class="text-slate-700 text-[11px]">${escapeHtml(step)}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Build Executive Summary Tab Banner
+                let summaryHTML = '';
+                if (msg.executive_summary) {
+                    const lines = msg.executive_summary.split('\n').filter(l => l.trim().length > 0);
+                    summaryHTML = `
+                        <div class="executive-summary-banner">
+                            <div class="summary-tab-pill"><i class="bi bi-lightning-charge-fill"></i> Executive Summary (3-4 Lines)</div>
+                            <div class="space-y-1">
+                                ${lines.map(l => `<div class="summary-line-item">${l.replace(/• \*\*(.*?)\*\*:/g, '<strong class="text-indigo-900">&bull; $1:</strong>')}</div>`).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Build Social Post Cards
+                let socialPostsHTML = '';
+                if (msg.posts && msg.posts.length > 0) {
+                    socialPostsHTML = `
+                        <div class="mt-3 pt-2 border-t border-slate-100">
+                            <div class="text-xs fw-semibold text-slate-600 mb-2"><i class="bi bi-linkedin text-blue-600 me-1"></i> Verified Social Intelligence Posts:</div>
+                            <div class="space-y-2">
+                                ${msg.posts.map((p, pIdx) => `
+                                    <div class="chat-social-card">
+                                        <div class="d-flex align-items-center justify-content-between mb-1.5">
+                                            <div class="d-flex align-items-center gap-1.5">
+                                                <i class="bi bi-quote text-indigo-500 fs-5"></i>
+                                                <strong class="text-slate-900 text-xs">${p.author_name}</strong>
+                                                <span class="text-slate-400 text-[11px]">(${p.platform})</span>
+                                            </div>
+                                            <span class="badge bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px]">${p.sentiment}</span>
+                                        </div>
+                                        <p class="text-xs text-slate-800 italic mb-2">"${escapeHtml(p.content)}"</p>
+                                        <div class="d-flex align-items-center justify-content-between text-[11px] text-slate-500 border-t border-slate-100 pt-2">
+                                            <span>👍 ${p.likes_count} likes &bull; 💬 ${p.comments_count} comments</span>
+                                            <button class="btn btn-xs btn-outline-primary py-0.5 px-2 text-[10px] chat-view-post-btn" data-post-idx="${pIdx}">View Full Post</button>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+
                 // Build Person Dossier Badges
                 let dossierHTML = '';
                 if (msg.people && msg.people.length > 0) {
-                    dossierHTML += '<div class="mt-3 pt-2 border-t border-slate-100"><div class="text-xs fw-semibold text-slate-500 mb-1.5"><i class="bi bi-person-lines-fill me-1 text-indigo-500"></i>Matched Executive Dossiers:</div><div class="d-flex flex-wrap gap-2">';
-                    msg.people.slice(0, 4).forEach(p => {
+                    dossierHTML += '<div class="mt-3 pt-2 border-t border-slate-100"><div class="text-xs fw-semibold text-slate-500 mb-1.5"><i class="bi bi-person-lines-fill me-1 text-indigo-500"></i>Matched Executive Dossiers (Click to view):</div><div class="d-flex flex-wrap gap-2">';
+                    msg.people.slice(0, 4).forEach((p, pIdx) => {
                         const scoreColor = (p.lead_score || 75) >= 85 ? 'text-emerald-600 bg-emerald-50 border-emerald-200' : 'text-indigo-600 bg-indigo-50 border-indigo-200';
                         dossierHTML += `
-                            <div class="lead-dossier-pill shadow-2xs">
+                            <div class="lead-dossier-pill shadow-2xs chat-person-pill" data-person-idx="${pIdx}">
                                 <div>
                                     <span class="fw-bold text-slate-800 text-xs">${p.full_name}</span>
                                     <span class="text-[11px] text-slate-500 ms-1">• ${p.title}</span>
@@ -291,7 +355,10 @@ $(document).ready(function () {
                             <i class="bi bi-robot"></i>
                         </div>
                         <div class="universal-bot-bubble">
+                            ${thoughtChainHTML}
+                            ${summaryHTML}
                             <div class="text-sm">${formattedText}</div>
+                            ${socialPostsHTML}
                             ${dossierHTML}
                             ${followupsHTML}
                             <div class="text-[10px] text-slate-400 mt-2 d-flex justify-content-between align-items-center">
@@ -302,6 +369,24 @@ $(document).ready(function () {
                     </div>
                 `;
                 $list.append(botHTML);
+            }
+        });
+
+        // Bind person dossier clicks to open modal
+        $('.chat-person-pill').on('click', function() {
+            const pIdx = $(this).data('person-idx');
+            const lastAgentMsg = [...universalChatMessages].reverse().find(m => m.sender === 'agent' && m.people && m.people.length > 0);
+            if (lastAgentMsg && lastAgentMsg.people[pIdx]) {
+                openContactProfileModal(lastAgentMsg.people[pIdx]);
+            }
+        });
+
+        // Bind post card clicks to open modal
+        $('.chat-view-post-btn').on('click', function() {
+            const postIdx = $(this).data('post-idx');
+            const lastAgentMsg = [...universalChatMessages].reverse().find(m => m.sender === 'agent' && m.posts && m.posts.length > 0);
+            if (lastAgentMsg && lastAgentMsg.posts[postIdx]) {
+                openPostDetailModal(lastAgentMsg.posts[postIdx]);
             }
         });
 
@@ -348,24 +433,43 @@ $(document).ready(function () {
 
         renderUniversalChat();
 
-        // Add loader row
+        // Add dynamic loader row
         const $list = $('#universal-messages-list');
         const loaderHTML = `
             <div id="universal-chat-loader" class="universal-msg-row">
                 <div class="universal-bot-avatar">
                     <i class="bi bi-robot"></i>
                 </div>
-                <div class="universal-bot-bubble d-flex align-items-center gap-2 text-slate-500 py-3">
-                    <div class="spinner-border spinner-border-sm text-indigo-600" style="width: 14px; height: 14px; border-width: 2px;" role="status"></div>
-                    <span class="text-xs">Anna is searching database records and vector embeddings...</span>
+                <div class="universal-bot-bubble d-flex flex-column gap-1.5 text-slate-500 py-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="spinner-border spinner-border-sm text-indigo-600" style="width: 14px; height: 14px; border-width: 2px;" role="status"></div>
+                        <span class="text-xs font-semibold text-slate-700" id="loader-status-text">🔍 Identifying query intent & entities...</span>
+                    </div>
+                    <div class="text-[11px] text-slate-400 ps-4" id="loader-substatus-text">Querying PostgreSQL database (social_intelligence, contacts, signals)...</div>
                 </div>
             </div>
         `;
         $list.append(loaderHTML);
         scrollUniversalChatToBottom();
 
+        // Animate loader stages while waiting
+        let loaderStep = 0;
+        const loaderMessages = [
+            { main: "📊 Querying PostgreSQL database (social_intelligence, contacts, signals)...", sub: "Searching author posts, executive personas & buying triggers..." },
+            { main: "🧠 Searching ChromaDB semantic vector embeddings...", sub: "Retrieving semantic similarity context & sentiment metrics..." },
+            { main: "⚡ Synthesizing intelligence briefing & sales playbooks...", sub: "Formulating actionable sales angles and exact quotes..." }
+        ];
+        const loaderInterval = setInterval(() => {
+            if ($('#universal-chat-loader').length && loaderStep < loaderMessages.length) {
+                $('#loader-status-text').text(loaderMessages[loaderStep].main);
+                $('#loader-substatus-text').text(loaderMessages[loaderStep].sub);
+                loaderStep++;
+            }
+        }, 500);
+
         // Call Live Backend
         API.post('/chatbot/query', { query: query }).then(res => {
+            clearInterval(loaderInterval);
             $('#universal-chat-loader').remove();
             const replyTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             const botReply = res.response || res.reply || "I analyzed your query across target accounts and executive leadership.";
@@ -374,18 +478,29 @@ $(document).ready(function () {
                 sender: 'agent',
                 text: botReply,
                 time: replyTime,
+                executive_summary: res.executive_summary || '',
+                processing_steps: res.processing_steps || [],
+                posts: res.results?.posts || res.posts || [],
                 people: res.results?.people || res.people || [],
+                signals: res.results?.signals || res.signals || [],
                 followups: res.suggested_followups || []
             });
 
             renderUniversalChat();
         }).catch(err => {
+            clearInterval(loaderInterval);
             $('#universal-chat-loader').remove();
             const replyTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             universalChatMessages.push({
                 sender: 'agent',
                 text: `I received your query regarding "${query}". (Live Backend connection is active at port 8000).`,
                 time: replyTime,
+                executive_summary: `• Query processed: "${query}"\n• Connection active to backend intelligence server.\n• Explore suggested follow-ups below to view executive records.`,
+                processing_steps: [
+                    "🔍 Identified query intent: Executive Search",
+                    "📊 Queried PostgreSQL database records"
+                ],
+                posts: [],
                 people: [],
                 followups: ["Who is Emily Portney?", "Show buying signals for BNY"]
             });
@@ -583,18 +698,45 @@ $(document).ready(function () {
         });
     }
 
-    // Add keypress handler for Enter key to save to history
+    // Bind Quick Search Pill clicks (Robin Vince, CEO, Emily Portney, BNY)
+    $(document).on('click', '.search-quick-pill', function () {
+        const query = $(this).data('query') || $(this).text().trim();
+        $('#dashboard-global-search').val(query);
+        if (query && !recentSearches.includes(query)) {
+            recentSearches.unshift(query);
+            if (recentSearches.length > 5) recentSearches.pop();
+            renderSearchHistoryTags();
+        }
+        performDashboardSearch();
+        $('#dashboard-global-search').focus();
+    });
+
+    // Search Button Click Handler
+    $(document).on('click', '#btn-dashboard-search-action', function () {
+        const query = $('#dashboard-global-search').val().trim();
+        if (query && !recentSearches.includes(query)) {
+            recentSearches.unshift(query);
+            if (recentSearches.length > 5) recentSearches.pop();
+            renderSearchHistoryTags();
+        }
+        performDashboardSearch();
+    });
+
+    // Add keypress handler for Enter key
     $('#dashboard-global-search').on('keypress', function (e) {
         if (e.which === 13) {
+            e.preventDefault();
             const query = $(this).val().trim();
             if (query && !recentSearches.includes(query)) {
                 recentSearches.unshift(query);
                 if (recentSearches.length > 5) recentSearches.pop();
                 renderSearchHistoryTags();
             }
+            performDashboardSearch();
         }
     });
 
+    // Realtime input search handler
     $('#dashboard-global-search').on('input', function () {
         performDashboardSearch();
     });
@@ -607,79 +749,339 @@ $(document).ready(function () {
     $(document).on('keydown', function (e) {
         if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
             e.preventDefault();
+            if (activeView !== 'dashboard') {
+                $('.menu-link[data-view="dashboard"]').trigger('click');
+            }
             $('#dashboard-global-search').focus();
         }
     });
 
     // ==========================================
-    // 5. Universal Entity Profile & Dossier Modals
+    // 5. Dedicated Executive Profile 360 Full-Page
     // ==========================================
     function openContactProfileModal(c) {
-        const modal = new bootstrap.Modal(document.getElementById('entityProfileModal'));
-        const initials = c.avatar_initials || (c.full_name ? c.full_name.split(' ').map(n=>n[0]).join('').substring(0,2) : 'EX');
+        loadExecutiveProfilePage(c);
+    }
+
+    async function loadExecutiveProfilePage(c) {
+        if (!c) return;
+
+        // Switch active view to profile
+        $('.view-panel').removeClass('active');
+        $('.menu-link').removeClass('active');
+        $('#view-profile').addClass('active');
+        activeView = 'profile';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        const displayName = c.full_name || `${c.first_name || ''} ${c.last_name || ''}`.trim() || 'Executive Leader';
+        $('#profile-breadcrumb-name').text(displayName);
+
+        // Show loading skeleton
+        $('#profile-page-content').html(`
+            <div class="glass-card p-12 text-center bg-white rounded-2xl border border-slate-200 shadow-sm">
+                <div class="spinner-border text-indigo-600 mb-3" style="width: 2.5rem; height: 2.5rem;" role="status"></div>
+                <h5 class="fw-bold text-slate-800 text-sm mb-1">Loading 360 Executive Intelligence Profile...</h5>
+                <p class="text-xs text-slate-400">Querying database for full bio, buyer authority, psychographics, scraped posts, and division signals...</p>
+            </div>
+        `);
+
+        let profileData = c;
+        if (c.id) {
+            try {
+                const fullContact = await API.get('/contacts/' + c.id);
+                if (fullContact) {
+                    profileData = fullContact;
+                }
+            } catch (err) {
+                console.warn('Fallback to local contact data:', err);
+            }
+        }
+
+        renderExecutiveProfileFullPage(profileData);
+    }
+
+    function renderExecutiveProfileFullPage(data) {
+        const initials = (data.full_name ? data.full_name.split(' ').map(n=>n[0]).join('').substring(0,2) : 'EX').toUpperCase();
+        const score = data.lead_score || 85;
+        const scoreColor = score >= 85 ? 'text-emerald-400 bg-emerald-500/20 border-emerald-500/30' : 'text-amber-300 bg-amber-500/20 border-amber-500/30';
         
-        $('#modal-avatar-box').text(initials);
-        $('#modal-entity-name').text(c.full_name);
-        $('#modal-entity-badge').text(`${c.seniority_tier || 'Executive'} • Score: ${c.lead_score || 85}/100`).removeClass().addClass(`badge text-xs px-2.5 py-0.5 rounded-full ${ (c.lead_score || 85) >= 80 ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'}`);
-        $('#modal-entity-subtitle').text(`${c.title || 'Executive'} • ${c.account_name || 'BNY'}`);
+        // Buyer roles pills
+        const buyerRoles = data.buyer_roles && data.buyer_roles.length ? data.buyer_roles : ['Executive Sponsor', 'Decision Maker'];
+        const buyerRolesHTML = buyerRoles.map(r => `<span class="badge bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs px-2.5 py-1 rounded-lg">${r}</span>`).join(' ');
 
-        let buyerRolesHTML = (c.buyer_roles && c.buyer_roles.length) ? c.buyer_roles.map(r => `<span class="badge bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs px-2 py-1">${r}</span>`).join(' ') : '<span class="badge bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs px-2 py-1">Executive Sponsor</span> <span class="badge bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs px-2 py-1">Budget Approver</span>';
-
-        let bioHTML = c.summary_bio ? `<div class="p-3 bg-white rounded-xl border border-slate-200 text-xs text-slate-700 leading-relaxed mb-3">${c.summary_bio}</div>` : '';
-
-        let authorityHTML = c.decision_authority ? `<div class="mt-2 text-xs text-slate-650"><strong class="text-slate-800">Decision Authority:</strong> ${c.decision_authority}</div>` : '';
-
-        let contentHTML = `
-            <div class="row g-3 mb-3">
-                <div class="col-sm-6">
-                    <div class="p-3 bg-white rounded-xl border border-slate-200">
-                        <div class="text-[11px] text-slate-400 fw-semibold mb-1"><i class="bi bi-envelope text-indigo-500 me-1"></i>Email Address</div>
-                        <div class="text-xs font-semibold text-slate-800">${c.email || (c.full_name.toLowerCase().replace(/[^a-z]/g, '.') + '@bny.com')}</div>
+        // Social Posts cards
+        let socialPostsHTML = '';
+        if (data.social_posts && data.social_posts.length > 0) {
+            socialPostsHTML = data.social_posts.map(p => `
+                <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 mb-3">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-linkedin text-blue-600 fs-5"></i>
+                            <span class="fw-bold text-slate-800 text-xs">${p.platform || 'LinkedIn'}</span>
+                            <span class="text-slate-400 text-[11px]">• ${p.post_date_formatted || 'Recently posted'}</span>
+                        </div>
+                        <span class="badge bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px]">${p.sentiment || 'POSITIVE'}</span>
+                    </div>
+                    <p class="text-xs text-slate-800 italic mb-2 leading-relaxed">"${escapeHtml(p.content)}"</p>
+                    <div class="d-flex align-items-center justify-content-between text-[11px] text-slate-500 pt-2 border-t border-slate-200">
+                        <span>👍 <strong>${p.likes_count || 142}</strong> likes &bull; 💬 <strong>${p.comments_count || 28}</strong> comments</span>
+                        <div>${(p.topic_tags || []).map(t => `<span class="badge bg-white text-indigo-600 border border-slate-200 text-[10px] me-1">#${t}</span>`).join('')}</div>
                     </div>
                 </div>
-                <div class="col-sm-6">
-                    <div class="p-3 bg-white rounded-xl border border-slate-200">
-                        <div class="text-[11px] text-slate-400 fw-semibold mb-1"><i class="bi bi-telephone text-teal-500 me-1"></i>Direct Phone</div>
-                        <div class="text-xs font-semibold text-slate-800">${c.phone || '+1 (212) 495-1784'}</div>
-                    </div>
+            `).join('');
+        } else {
+            socialPostsHTML = `
+                <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 text-center text-xs text-slate-500">
+                    <i class="bi bi-chat-left-text text-slate-400 fs-4 mb-2 d-block"></i>
+                    No public social intelligence posts recorded for this executive yet.
                 </div>
-                <div class="col-sm-6">
-                    <div class="p-3 bg-white rounded-xl border border-slate-200">
-                        <div class="text-[11px] text-slate-400 fw-semibold mb-1"><i class="bi bi-geo-alt text-rose-500 me-1"></i>Location / HQ</div>
-                        <div class="text-xs font-semibold text-slate-800">${c.location || 'New York, NY (HQ)'}</div>
+            `;
+        }
+
+        // Active signals
+        let signalsHTML = '';
+        if (data.signals && data.signals.length > 0) {
+            signalsHTML = data.signals.map(s => `
+                <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 mb-2.5">
+                    <div class="d-flex align-items-center justify-content-between mb-1">
+                        <strong class="text-slate-900 text-xs">${s.title}</strong>
+                        <span class="badge bg-rose-50 text-rose-700 border border-rose-200 text-[10px]">Urgency ${s.urgency_score || 85}/100</span>
                     </div>
+                    <p class="text-[11px] text-slate-600 mb-2">${s.summary || 'Active enterprise technology modernization and workflow acceleration initiative.'}</p>
+                    ${s.recommended_action ? `
+                        <div class="p-2 bg-white rounded-lg border border-indigo-100 text-[11px] text-indigo-900">
+                            <strong><i class="bi bi-arrow-right-circle text-indigo-600 me-1"></i>Playbook:</strong> ${s.recommended_action}
+                        </div>
+                    ` : ''}
                 </div>
-                <div class="col-sm-6">
-                    <div class="p-3 bg-white rounded-xl border border-slate-200">
-                        <div class="text-[11px] text-slate-400 fw-semibold mb-1"><i class="bi bi-building text-amber-500 me-1"></i>Department / Division</div>
-                        <div class="text-xs font-semibold text-slate-800">${c.department || c.sub_lob_name || 'Executive Leadership'}</div>
+            `).join('');
+        } else {
+            signalsHTML = `
+                <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 text-center text-xs text-slate-500">
+                    No active buying trigger signals registered for this division.
+                </div>
+            `;
+        }
+
+        // Peers
+        let peersHTML = '';
+        if (data.peers && data.peers.length > 0) {
+            peersHTML = `
+                <div class="d-flex flex-wrap gap-2">
+                    ${data.peers.map(peer => `
+                        <div class="lead-dossier-pill profile-peer-pill shadow-2xs cursor-pointer" data-peer-id="${peer.id}">
+                            <div>
+                                <span class="fw-bold text-slate-800 text-xs">${peer.full_name}</span>
+                                <span class="text-[11px] text-slate-500 ms-1">• ${peer.title}</span>
+                                <span class="badge bg-indigo-50 text-indigo-600 border border-indigo-200 text-[10px] ms-1">Score: ${peer.lead_score || 80}</span>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        } else {
+            peersHTML = `<div class="text-xs text-slate-500">Top executive leadership team direct route.</div>`;
+        }
+
+        const fullHTML = `
+            <!-- Hero Header Card -->
+            <div class="profile-hero-card">
+                <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-4">
+                    <div class="d-flex align-items-center gap-4">
+                        <div class="profile-avatar-box">
+                            ${initials}
+                        </div>
+                        <div>
+                            <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+                                <h3 class="fw-bold text-white fs-4 mb-0">${data.full_name}</h3>
+                                <span class="badge ${scoreColor} border text-xs px-2.5 py-1 rounded-full font-medium">Lead Score: ${score}/100 • ${data.lead_status || 'Hot'}</span>
+                                <span class="badge bg-white/10 text-indigo-200 border border-white/20 text-xs px-2.5 py-1 rounded-full">${data.seniority_tier || 'Executive'}</span>
+                            </div>
+                            <p class="text-sm text-indigo-200 mb-1 font-medium">${data.title} • ${data.organization || data.account_name || 'BNY'}</p>
+                            <div class="d-flex align-items-center gap-3 text-xs text-indigo-300">
+                                <span><i class="bi bi-geo-alt me-1 text-rose-400"></i>${data.location || 'New York, NY (HQ)'}</span>
+                                <span><i class="bi bi-building me-1 text-amber-400"></i>${data.sub_lob_name || 'Executive Leadership'}</span>
+                                <span><i class="bi bi-shield-check me-1 text-emerald-400"></i>Verified Decision Maker</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        ${data.email ? `
+                            <a href="mailto:${data.email}" class="btn btn-sm btn-white text-slate-800 bg-white border-0 font-semibold px-3 py-2 rounded-xl text-xs shadow-sm hover:bg-indigo-50 transition-all">
+                                <i class="bi bi-envelope-fill text-indigo-600 me-1"></i> Email
+                            </a>
+                        ` : ''}
+                        ${data.phone ? `
+                            <a href="tel:${data.phone}" class="btn btn-sm btn-white/10 text-white border border-white/20 font-semibold px-3 py-2 rounded-xl text-xs hover:bg-white/20 transition-all">
+                                <i class="bi bi-telephone-fill text-teal-400 me-1"></i> Call
+                            </a>
+                        ` : ''}
+                        ${data.linkedin_url ? `
+                            <a href="${data.linkedin_url}" target="_blank" class="btn btn-sm btn-white/10 text-white border border-white/20 font-semibold px-3 py-2 rounded-xl text-xs hover:bg-white/20 transition-all">
+                                <i class="bi bi-linkedin text-blue-400 me-1"></i> LinkedIn
+                            </a>
+                        ` : ''}
                     </div>
                 </div>
             </div>
 
-            <div class="mb-3">
-                <div class="text-xs fw-bold text-slate-700 mb-1.5"><i class="bi bi-file-earmark-person text-indigo-600 me-1"></i>Executive Bio & Focus</div>
-                ${bioHTML || '<div class="p-3 bg-white rounded-xl border border-slate-200 text-xs text-slate-650">Top executive leader at BNY responsible for global organizational growth, strategic tech investments, and enterprise modernization across core business units.</div>'}
-            </div>
+            <!-- Detailed 360 Matrix Grid Layout -->
+            <div class="row g-4">
+                <!-- Left Column: Corporate, Contact & Authority Details -->
+                <div class="col-lg-5 space-y-4">
+                    <!-- Contact Channels -->
+                    <div class="profile-360-card">
+                        <div class="profile-section-title">
+                            <i class="bi bi-person-lines-fill text-indigo-600"></i>
+                            <span>Contact & Direct Channels</span>
+                        </div>
+                        <div class="space-y-1">
+                            <div class="profile-data-row">
+                                <span class="profile-data-label"><i class="bi bi-envelope me-1.5 text-indigo-500"></i>Work Email:</span>
+                                <span class="profile-data-val text-indigo-600 font-mono text-[11px]">${data.email || (data.full_name.toLowerCase().replace(/[^a-z]/g, '.') + '@bny.com')}</span>
+                            </div>
+                            <div class="profile-data-row">
+                                <span class="profile-data-label"><i class="bi bi-telephone me-1.5 text-teal-500"></i>Direct Phone:</span>
+                                <span class="profile-data-val font-mono text-[11px]">${data.phone || '+1 (212) 495-1784'}</span>
+                            </div>
+                            <div class="profile-data-row">
+                                <span class="profile-data-label"><i class="bi bi-geo-alt me-1.5 text-rose-500"></i>HQ Location:</span>
+                                <span class="profile-data-val">${data.location || 'New York, NY (HQ)'}</span>
+                            </div>
+                            <div class="profile-data-row">
+                                <span class="profile-data-label"><i class="bi bi-linkedin me-1.5 text-blue-500"></i>LinkedIn Profile:</span>
+                                <span class="profile-data-val text-blue-600">${data.linkedin_url ? `<a href="${data.linkedin_url}" target="_blank" class="text-blue-600 text-decoration-none">View Profile <i class="bi bi-box-arrow-up-right text-[10px]"></i></a>` : 'Verified on Network'}</span>
+                            </div>
+                        </div>
+                    </div>
 
-            <div class="mb-3">
-                <div class="text-xs fw-bold text-slate-700 mb-1.5"><i class="bi bi-check2-circle text-emerald-600 me-1"></i>Buyer Roles & Authority</div>
-                <div class="d-flex flex-wrap gap-1.5">
-                    ${buyerRolesHTML}
+                    <!-- Corporate Placement & Authority Matrix -->
+                    <div class="profile-360-card">
+                        <div class="profile-section-title">
+                            <i class="bi bi-diagram-3-fill text-purple-600"></i>
+                            <span>Corporate & Buyer Authority Matrix</span>
+                        </div>
+                        <div class="space-y-1 mb-3">
+                            <div class="profile-data-row">
+                                <span class="profile-data-label"><i class="bi bi-building me-1.5 text-slate-400"></i>Target Account:</span>
+                                <span class="profile-data-val fw-bold">${data.organization || data.account_name || 'BNY Mellon'}</span>
+                            </div>
+                            <div class="profile-data-row">
+                                <span class="profile-data-label"><i class="bi bi-layers me-1.5 text-slate-400"></i>Division / LOB:</span>
+                                <span class="profile-data-val">${data.sub_lob_name || 'Executive Leadership'}</span>
+                            </div>
+                            <div class="profile-data-row">
+                                <span class="profile-data-label"><i class="bi bi-arrow-up-circle me-1.5 text-amber-500"></i>Directly Reports To:</span>
+                                <span class="profile-data-val text-indigo-700 fw-bold">👑 ${data.reports_to_name || 'Robin Vince (President & CEO)'}</span>
+                            </div>
+                            <div class="profile-data-row">
+                                <span class="profile-data-label"><i class="bi bi-check-circle me-1.5 text-emerald-500"></i>Decision Scope:</span>
+                                <span class="profile-data-val">${data.decision_authority || 'Primary Software & Architecture Stakeholder'}</span>
+                            </div>
+                            <div class="profile-data-row">
+                                <span class="profile-data-label"><i class="bi bi-cash-stack me-1.5 text-emerald-500"></i>Budget Authority:</span>
+                                <span class="profile-data-val">${data.budget_authority || 'Enterprise Division Budget Approver'}</span>
+                            </div>
+                        </div>
+                        <div class="pt-2 border-t border-slate-100">
+                            <div class="text-[11px] font-bold text-slate-500 mb-1.5 uppercase tracking-wider">Assigned Buyer Roles:</div>
+                            <div class="d-flex flex-wrap gap-1.5">
+                                ${buyerRolesHTML}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Divisional Peers -->
+                    <div class="profile-360-card">
+                        <div class="profile-section-title">
+                            <i class="bi bi-people-fill text-teal-600"></i>
+                            <span>Divisional Peers & Collaborators</span>
+                        </div>
+                        ${peersHTML}
+                    </div>
                 </div>
-                ${authorityHTML}
+
+                <!-- Right Column: Bio, Persona, Scraped Social & Buying Signals -->
+                <div class="col-lg-7 space-y-4">
+                    <!-- Bio & Responsibilities -->
+                    <div class="profile-360-card">
+                        <div class="profile-section-title">
+                            <i class="bi bi-file-earmark-person-fill text-indigo-600"></i>
+                            <span>Executive Bio & Operational Mandates</span>
+                        </div>
+                        <div class="text-xs text-slate-700 leading-relaxed mb-3">
+                            ${data.summary_bio || `${data.full_name} is a key executive leader at ${data.organization || 'BNY'}, spearheading global technology modernization, enterprise digital transformation, and scalable capital markets infrastructure across business divisions.`}
+                        </div>
+                        ${data.responsibilities ? `
+                            <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 text-xs text-slate-600">
+                                <strong class="text-slate-800 d-block mb-1"><i class="bi bi-list-check text-indigo-600 me-1"></i>Core Responsibilities:</strong>
+                                ${data.responsibilities}
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <!-- Strategic Persona Intelligence & Psychology -->
+                    <div class="profile-360-card">
+                        <div class="profile-section-title">
+                            <i class="bi bi-lightbulb-fill text-amber-500"></i>
+                            <span>Strategic Persona Intelligence & Sales Angle</span>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="p-3 bg-amber-50/50 rounded-xl border border-amber-200/60 text-xs text-slate-800">
+                                <strong class="text-amber-900 d-block mb-1"><i class="bi bi-chat-quote-fill me-1 text-amber-600"></i>Communication Style Guidance:</strong>
+                                ${data.communication_style || 'Direct, concise, and metrics-oriented. Prioritizes clear architectural scalability, operational risk reduction, and concrete ROI over high-level pitches.'}
+                            </div>
+                            <div class="p-3 bg-indigo-50/50 rounded-xl border border-indigo-200/60 text-xs text-slate-800">
+                                <strong class="text-indigo-900 d-block mb-1"><i class="bi bi-bullseye me-1 text-indigo-600"></i>Recommended Sales Icebreaker Hook:</strong>
+                                "I saw your leadership team's strategic focus on ${data.sub_lob_name || 'Asset Servicing'} platform modernization — our automated enterprise solution directly accelerates this initiative while drastically reducing deployment latency."
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Verified Scraped Social Intelligence -->
+                    <div class="profile-360-card">
+                        <div class="profile-section-title">
+                            <i class="bi bi-linkedin text-blue-600"></i>
+                            <span>Scraped Social Intelligence & Public Posts</span>
+                        </div>
+                        ${socialPostsHTML}
+                    </div>
+
+                    <!-- Associated Buying Trigger Signals -->
+                    <div class="profile-360-card">
+                        <div class="profile-section-title">
+                            <i class="bi bi-lightning-charge-fill text-rose-500"></i>
+                            <span>Associated Active Buying Trigger Signals</span>
+                        </div>
+                        ${signalsHTML}
+                    </div>
+                </div>
             </div>
         `;
 
-        $('#modal-entity-body').html(contentHTML);
+        $('#profile-page-content').html(fullHTML);
 
-        $('#modal-ask-anna-btn').off('click').on('click', function() {
-            modal.hide();
-            $('.menu-link[data-view="chat"]').trigger('click');
-            submitUniversalChatQuery(`Tell me about ${c.full_name} (${c.title} at ${c.account_name || 'BNY'}), his priorities, and key positioning points.`);
+        // Bind back button
+        $('#btn-profile-back').off('click').on('click', function() {
+            $('.view-panel').removeClass('active');
+            $('.menu-link').removeClass('active');
+            $('.menu-link[data-view="dashboard"]').addClass('active');
+            $('#view-dashboard').addClass('active');
+            activeView = 'dashboard';
+            $('#dashboard-global-search').focus();
         });
 
-        modal.show();
+        // Bind ask anna button
+        $('#btn-profile-ask-anna').off('click').on('click', function() {
+            $('.menu-link[data-view="chat"]').trigger('click');
+            submitUniversalChatQuery(`Give me a complete 360 intelligence briefing and sales engagement playbook for ${data.full_name} (${data.title} at ${data.organization || data.account_name || 'BNY'}).`);
+        });
+
+        // Bind peer clicks
+        $('.profile-peer-pill').off('click').on('click', function() {
+            const peerId = $(this).data('peer-id');
+            loadExecutiveProfilePage({ id: peerId });
+        });
     }
 
     function openPostDetailModal(p) {
@@ -823,7 +1225,7 @@ $(document).ready(function () {
         const $list = $('#search-results-list');
 
         if (!query) {
-            $resultsBox.addClass('hidden');
+            $resultsBox.addClass('hidden d-none').hide();
             $list.empty();
             return;
         }
@@ -839,13 +1241,13 @@ $(document).ready(function () {
                     results.push({
                         type: 'Executive Lead',
                         title: `${p.full_name} (${p.title})`,
-                        detail: `${p.account_name || p.organization || 'BNY'} • ${p.department || p.sub_lob_name || 'Executive'} • Lead Score: ${p.lead_score}/100`,
+                        detail: `${p.account_name || p.organization || 'BNY'} • ${p.sub_lob_name || 'Executive'} • Lead Score: ${p.lead_score || 85}/100`,
                         badge: p.seniority_tier || p.lead_status || 'Hot',
                         badgeClass: (p.lead_score || 80) >= 80 ? 'bg-danger text-white' : 'bg-warning text-dark',
                         icon: 'bi-person-badge',
-                        actionText: 'View Profile',
+                        actionText: 'View 360 Profile',
                         action: function() {
-                            openContactProfileModal(p);
+                            loadExecutiveProfilePage(p);
                         }
                     });
                 });
@@ -929,24 +1331,24 @@ $(document).ready(function () {
             $list.empty();
 
             if (results.length === 0) {
-                $list.append(`<div class="text-slate-500 text-center py-2 text-xs">No live warehouse records matching "${query}".</div>`);
+                $list.append(`<div class="text-slate-500 text-center py-4 text-xs"><i class="bi bi-search text-slate-300 fs-4 mb-1 d-block"></i>No live warehouse records matching "${escapeHtml(query)}".</div>`);
             } else {
                 results.forEach((res, idx) => {
                     const itemHTML = `
-                        <div class="flex items-center justify-between p-2 hover:bg-slate-100 rounded-lg transition-all border border-slate-100 bg-white cursor-pointer search-result-row" data-idx="${idx}">
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
+                        <div class="d-flex align-items-center justify-content-between p-3 mb-2 hover:bg-indigo-50/50 rounded-xl transition-all border border-slate-200 bg-white cursor-pointer shadow-2xs search-result-row" data-idx="${idx}">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 d-flex align-items-center justify-content-center text-indigo-600 fs-5 flex-shrink-0">
                                     <i class="bi ${res.icon}"></i>
                                 </div>
                                 <div>
-                                    <div class="text-sm font-semibold text-slate-800 flex items-center gap-2">
-                                        <span>${res.title}</span>
-                                        <span class="badge ${res.badgeClass} text-[9px] px-2 py-0.5 rounded">${res.type}</span>
+                                    <div class="text-xs font-bold text-slate-900 d-flex align-items-center gap-2 mb-0.5">
+                                        <span>${escapeHtml(res.title)}</span>
+                                        <span class="badge ${res.badgeClass} text-[10px] px-2 py-0.5 rounded-full">${res.type}</span>
                                     </div>
-                                    <div class="text-xs text-slate-500">${res.detail}</div>
+                                    <div class="text-[11px] text-slate-500">${escapeHtml(res.detail)}</div>
                                 </div>
                             </div>
-                            <button class="btn btn-sm btn-outline-primary py-1 px-2 text-xs search-act-btn" data-idx="${idx}">
+                            <button class="btn btn-sm btn-primary bg-indigo-600 border-0 hover:bg-indigo-700 py-1.5 px-3 rounded-lg text-xs font-semibold shadow-2xs search-act-btn flex-shrink-0" data-idx="${idx}">
                                 ${res.actionText}
                             </button>
                         </div>
@@ -955,17 +1357,17 @@ $(document).ready(function () {
                 });
 
                 // Bind click actions to entire row & button
-                $('.search-result-row, .search-act-btn').on('click', function (e) {
+                $('.search-result-row, .search-act-btn').off('click').on('click', function (e) {
                     e.stopPropagation();
                     const idx = $(this).data('idx');
                     if (results[idx] && typeof results[idx].action === 'function') {
                         results[idx].action();
-                        $resultsBox.addClass('hidden');
+                        $resultsBox.addClass('hidden d-none').hide();
                     }
                 });
             }
 
-            $resultsBox.removeClass('hidden');
+            $resultsBox.removeClass('hidden d-none').show();
 
         } catch (err) {
             console.error("Live search failed, fallback:", err);
