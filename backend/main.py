@@ -91,10 +91,13 @@ FRONTEND_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "fronten
 if os.path.exists(FRONTEND_DIR):
     css_dir = os.path.join(FRONTEND_DIR, "css")
     js_dir = os.path.join(FRONTEND_DIR, "js")
+    asstes_dir = os.path.join(FRONTEND_DIR, "asstes")
     if os.path.exists(css_dir):
         app.mount("/css", StaticFiles(directory=css_dir), name="css")
     if os.path.exists(js_dir):
         app.mount("/js", StaticFiles(directory=js_dir), name="js")
+    if os.path.exists(asstes_dir):
+        app.mount("/asstes", StaticFiles(directory=asstes_dir), name="asstes")
 
 @app.get("/")
 def read_root():
