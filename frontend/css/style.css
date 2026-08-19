@@ -1333,3 +1333,31 @@ a {
     font-weight: 600;
     text-align: right;
 }
+
+/* Discovery Page — Match Sidebar Color Scheme */
+.discovery-time-filter.active {
+    background-color: #6366f1 !important;
+    color: #ffffff !important;
+    border-color: #6366f1 !important;
+}
+.discovery-time-filter:hover:not(.active) {
+    border-color: #6366f1 !important;
+    color: #6366f1 !important;
+    background-color: rgba(99, 102, 241, 0.05) !important;
+}
+#discovery-tabs .nav-link {
+    color: #64748b;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s;
+}
+#discovery-tabs .nav-link:hover {
+    color: #6366f1;
+    border-color: #6366f1;
+    background-color: rgba(99, 102, 241, 0.05);
+}
+#discovery-tabs .nav-link.active {
+    background-color: #6366f1 !important;
+    color: #ffffff !important;
+    border-color: #6366f1 !important;
+}

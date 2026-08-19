@@ -32,7 +32,7 @@ $(document).ready(function () {
     $('.menu-link').on('click', function (e) {
         e.preventDefault();
         const targetView = $(this).data('view');
-        if (!targetView || (targetView !== 'dashboard' && targetView !== 'chat')) return;
+        if (!targetView || (targetView !== 'dashboard' && targetView !== 'chat' && targetView !== 'discovery')) return;
 
         // Update menu active class
         $('.menu-item').removeClass('active');
@@ -41,7 +41,8 @@ $(document).ready(function () {
         // Update header page title context
         const viewTitles = {
             'dashboard': 'Executive Overview',
-            'chat': 'Live Agent Playground'
+            'chat': 'Live Agent Playground',
+            'discovery': 'Discovery'
         };
         $('#page-title').text(viewTitles[targetView] || 'Executive Overview');
 
@@ -60,6 +61,8 @@ $(document).ready(function () {
             setTimeout(() => $('#chat-input-field').focus(), 50);
         } else if (targetView === 'leads') {
             renderLeadsTable();
+        } else if (targetView === 'discovery') {
+            if (typeof loadDiscoveryData === 'function') loadDiscoveryData();
         }
 
         // Dynamically load page module if it exists
@@ -543,6 +546,22 @@ $(document).ready(function () {
         }
     });
 
+    // Mute/Unmute button
+    let annaMuted = false;
+    $(document).on('click', '#btn-mute-anna', function () {
+        annaMuted = !annaMuted;
+        if (annaMuted) {
+            speechSynthesis.cancel();
+            const vid = document.getElementById('chat-avatar-video');
+            if (vid) vid.pause();
+            $('#mute-icon').removeClass('bi-volume-up-fill').addClass('bi-volume-mute-fill');
+            $('#mute-label').text('Unmute');
+        } else {
+            $('#mute-icon').removeClass('bi-volume-mute-fill').addClass('bi-volume-up-fill');
+            $('#mute-label').text('Mute');
+        }
+    });
+
     // Clear chat button
     $('#btn-clear-chat').on('click', function () {
         universalChatMessages = [];
@@ -560,6 +579,7 @@ $(document).ready(function () {
     // Anna TTS — Speak any reply
     // ==========================================
     function speakAnnaReply(text) {
+        if (annaMuted) return;
         const vid = document.getElementById('chat-avatar-video');
         // Clean markdown/HTML for speech
         const cleanText = text.replace(/<[^>]*>/g, '').replace(/\*\*/g, '').replace(/\*/g, '').replace(/•/g, '').replace(/`/g, '').replace(/\n/g, '. ').replace(/\s+/g, ' ').trim();
@@ -631,7 +651,14 @@ $(document).ready(function () {
             scrollUniversalChatToBottom();
 
             // Play video while speaking
-            if (vid) vid.play();
+            if (vid && !annaMuted) vid.play();
+
+            // If muted, skip TTS but still show text and move to next
+            if (annaMuted) {
+                idx++;
+                setTimeout(speakNext, 1000);
+                return;
+            }
 
             // Use browser TTS
             const utterance = new SpeechSynthesisUtterance(sentence);

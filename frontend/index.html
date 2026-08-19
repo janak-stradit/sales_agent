@@ -58,6 +58,12 @@
                         <span>Live Playground</span>
                     </a>
                 </li>
+                <li class="menu-item">
+                    <a href="#" class="menu-link" data-view="discovery">
+                        <i class="bi bi-compass"></i>
+                        <span>Discovery</span>
+                    </a>
+                </li>
             </ul>
 
             <div class="sidebar-footer">
@@ -187,6 +193,9 @@
                             </div>
                         </div>
                         <div class="d-flex align-items-center gap-2">
+                            <button id="btn-mute-anna" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs" title="Mute/Unmute Anna">
+                                <i class="bi bi-volume-up-fill" id="mute-icon"></i> <span id="mute-label">Mute</span>
+                            </button>
                             <button id="btn-clear-chat" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs" title="Clear Conversation">
                                 <i class="bi bi-trash3"></i> Clear Chat
                             </button>
@@ -235,6 +244,138 @@
                         <video id="chat-avatar-video" loop muted playsinline style="width: 100%; height: 100%; object-fit: cover;">
                             <source src="asstes/anna_avatar.mp4" type="video/mp4">
                         </video>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Discovery View Panel -->
+            <div id="view-discovery" class="view-panel">
+                <div class="p-4" style="max-width: 1200px; margin: 0 auto;">
+                    <!-- Header with Time Filters -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h4 class="fw-bold text-slate-800 mb-1" style="font-size:1.1rem;">
+                                <i class="bi bi-compass me-2 text-indigo-600"></i>Discovery
+                            </h4>
+                            <p class="text-xs text-slate-500 mb-0">Explore accounts, business lines, and personas with time-based filters.</p>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-sm discovery-time-filter active" data-filter="daily" style="border: 1px solid #6366f1; color: #6366f1; border-radius: 8px; font-size: 0.75rem;">Daily</button>
+                            <button class="btn btn-sm discovery-time-filter" data-filter="weekly" style="border: 1px solid #e2e8f0; color: #64748b; border-radius: 8px; font-size: 0.75rem;">Weekly</button>
+                            <button class="btn btn-sm discovery-time-filter" data-filter="monthly" style="border: 1px solid #e2e8f0; color: #64748b; border-radius: 8px; font-size: 0.75rem;">Monthly</button>
+                            <button class="btn btn-sm discovery-time-filter" data-filter="quarterly" style="border: 1px solid #e2e8f0; color: #64748b; border-radius: 8px; font-size: 0.75rem;">Quarterly</button>
+                        </div>
+                    </div>
+
+                    <!-- Tab Navigation -->
+                    <ul class="nav nav-pills mb-4 gap-2" id="discovery-tabs">
+                        <li class="nav-item">
+                            <button class="nav-link active px-4 py-2 rounded-xl text-xs fw-semibold" data-bs-toggle="pill" data-bs-target="#disc-account">
+                                <i class="bi bi-building me-1"></i> Account
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link px-4 py-2 rounded-xl text-xs fw-semibold" data-bs-toggle="pill" data-bs-target="#disc-lob">
+                                <i class="bi bi-layers me-1"></i> Line of Business
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link px-4 py-2 rounded-xl text-xs fw-semibold" data-bs-toggle="pill" data-bs-target="#disc-sublob">
+                                <i class="bi bi-diagram-3 me-1"></i> Sub Line of Business
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link px-4 py-2 rounded-xl text-xs fw-semibold" data-bs-toggle="pill" data-bs-target="#disc-persona">
+                                <i class="bi bi-person-badge me-1"></i> Persona
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link px-4 py-2 rounded-xl text-xs fw-semibold" data-bs-toggle="pill" data-bs-target="#disc-posts">
+                                <i class="bi bi-linkedin me-1"></i> LinkedIn Posts
+                            </button>
+                        </li>
+                    </ul>
+
+                    <!-- Tab Content -->
+                    <div class="tab-content">
+                        <!-- Account Tab -->
+                        <div class="tab-pane fade show active" id="disc-account">
+                            <div class="glass-card p-4">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="fw-bold text-slate-700 mb-0" style="font-size:0.95rem;">Target Accounts</h5>
+                                    <span class="text-xs text-slate-400" id="disc-account-filter-label">Filter: Daily</span>
+                                </div>
+                                <div id="disc-account-content" class="table-responsive">
+                                    <table class="table custom-table align-middle text-sm">
+                                        <thead><tr><th>Account</th><th>Industry</th><th>Employees</th><th>Revenue</th><th>HQ</th></tr></thead>
+                                        <tbody id="disc-account-body"><!-- Dynamic --></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Line of Business Tab -->
+                        <div class="tab-pane fade" id="disc-lob">
+                            <div class="glass-card p-4">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="fw-bold text-slate-700 mb-0" style="font-size:0.95rem;">Lines of Business</h5>
+                                    <span class="text-xs text-slate-400" id="disc-lob-filter-label">Filter: Daily</span>
+                                </div>
+                                <div id="disc-lob-content" class="table-responsive">
+                                    <table class="table custom-table align-middle text-sm">
+                                        <thead><tr><th>LOB Name</th><th>Account</th><th>Business Head</th><th>Tech Leader</th><th>Platforms</th></tr></thead>
+                                        <tbody id="disc-lob-body"><!-- Dynamic --></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sub Line of Business Tab -->
+                        <div class="tab-pane fade" id="disc-sublob">
+                            <div class="glass-card p-4">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="fw-bold text-slate-700 mb-0" style="font-size:0.95rem;">Sub Lines of Business</h5>
+                                    <span class="text-xs text-slate-400" id="disc-sublob-filter-label">Filter: Daily</span>
+                                </div>
+                                <div id="disc-sublob-content" class="table-responsive">
+                                    <table class="table custom-table align-middle text-sm">
+                                        <thead><tr><th>Sub LOB</th><th>Parent LOB</th><th>Account</th><th>Head</th><th>Notes</th></tr></thead>
+                                        <tbody id="disc-sublob-body"><!-- Dynamic --></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Persona Tab -->
+                        <div class="tab-pane fade" id="disc-persona">
+                            <div class="glass-card p-4">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="fw-bold text-slate-700 mb-0" style="font-size:0.95rem;">Personas</h5>
+                                    <span class="text-xs text-slate-400" id="disc-persona-filter-label">Filter: Daily</span>
+                                </div>
+                                <div id="disc-persona-content" class="table-responsive">
+                                    <table class="table custom-table align-middle text-sm">
+                                        <thead><tr><th>Name</th><th>Title</th><th>Organization</th><th>Seniority</th><th>Lead Score</th><th>Email</th></tr></thead>
+                                        <tbody id="disc-persona-body"><!-- Dynamic --></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- LinkedIn Posts Tab -->
+                        <div class="tab-pane fade" id="disc-posts">
+                            <div class="glass-card p-4">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="fw-bold text-slate-700 mb-0" style="font-size:0.95rem;">
+                                        <i class="bi bi-linkedin text-blue-600 me-2"></i>LinkedIn Posts
+                                    </h5>
+                                    <span class="text-xs text-slate-400" id="disc-posts-filter-label">Filter: Daily</span>
+                                </div>
+                                <div id="disc-posts-content" class="space-y-3">
+                                    <!-- Dynamic LinkedIn post cards -->
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -438,6 +579,7 @@
     <script src="js/pages/signals.js"></script>
     <script src="js/pages/pipeline.js"></script>
     <script src="js/pages/logs.js"></script>
+    <script src="js/pages/discovery.js"></script>
     <script src="js/mockData.js"></script>
     <script src="js/app.js"></script>
 </body>
