@@ -409,21 +409,26 @@ def process_chatbot_query(db: Session, request: ChatbotQueryRequest) -> ChatbotQ
     if not post_results and (extracted["intent"] == "social_intelligence" or extracted["wants_social_posts"]):
         # Topic / keyword search across all posts
         social_filters = []
-        for w in words:
+        generic_words = {"post", "posts", "linkedin", "social", "latest", "recent", "show", "get", "find", "view", "feed", "all", "updates"}
+        topic_words = [w for w in words if w.lower() not in generic_words]
+        for w in topic_words:
             social_filters.append(SocialIntelligence.content.ilike(f"%{w}%"))
             social_filters.append(SocialIntelligence.author_name.ilike(f"%{w}%"))
         if vector_matched_social_ids:
             social_filters.append(SocialIntelligence.id.in_(list(vector_matched_social_ids)))
 
         if social_filters:
-            matched_posts = db.query(SocialIntelligence).filter(or_(*social_filters)).order_by(desc(SocialIntelligence.post_date)).limit(6).all()
+            matched_posts = db.query(SocialIntelligence).filter(or_(*social_filters)).order_by(desc(SocialIntelligence.post_date)).limit(10).all()
         else:
-            matched_posts = db.query(SocialIntelligence).order_by(desc(SocialIntelligence.post_date)).limit(4).all()
+            matched_posts = db.query(SocialIntelligence).order_by(desc(SocialIntelligence.post_date)).limit(10).all()
+
+        if not matched_posts:
+            matched_posts = db.query(SocialIntelligence).order_by(desc(SocialIntelligence.post_date)).limit(10).all()
 
         post_results = [_map_post_to_result(p) for p in matched_posts]
         if post_results:
             target_author = post_results[0].author_name
-            processing_steps.append(f"📊 PostgreSQL: Queried 'social_intelligence' table ({len(post_results)} post(s) matching topic)")
+            processing_steps.append(f"📊 PostgreSQL: Queried 'social_intelligence' table ({len(post_results)} post(s) found)")
 
     # ── 3. Hybrid Contact Scoring (Vector Embeddings + SQL Keywords) ──
     all_contacts = db.query(Contact).all()

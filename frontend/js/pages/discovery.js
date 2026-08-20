@@ -136,8 +136,18 @@ $(document).ready(function () {
         const $container = $('#disc-posts-content');
         $container.html('<div class="text-center text-muted py-4"><div class="spinner-border spinner-border-sm me-2"></div>Loading LinkedIn posts...</div>');
         try {
-            const res = await API.post('/chatbot/query', { message: 'Show latest LinkedIn posts', limit: 20 });
-            const posts = res.posts || [];
+            let posts = [];
+            try {
+                const res = await API.post('/chatbot/query', { message: 'Show latest LinkedIn posts', limit: 20 });
+                posts = res.posts || res.results?.posts || [];
+            } catch (qErr) {
+                const feed = await API.get('/social/feed');
+                posts = Array.isArray(feed) ? feed : (feed.items || feed.posts || []);
+            }
+            if (posts.length === 0) {
+                const feed = await API.get('/social/feed');
+                posts = Array.isArray(feed) ? feed : (feed.items || feed.posts || []);
+            }
             if (posts.length === 0) {
                 $container.html('<div class="text-center text-muted py-4">No LinkedIn posts found</div>');
                 return;
