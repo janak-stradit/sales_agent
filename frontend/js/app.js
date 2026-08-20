@@ -239,10 +239,9 @@ $(document).ready(function () {
         universalChatMessages.forEach(msg => {
             if (msg.sender === 'user') {
                 const userHTML = `
-                    <div class="universal-msg-row universal-msg-user">
-                        <div class="universal-user-bubble">
+                    <div class="universal-msg-row universal-msg-user mb-4">
+                        <div class="universal-user-bubble ms-auto px-4 py-2.5 rounded-2xl bg-accent-primary text-white text-sm" style="max-width: 80%;">
                             <div>${escapeHtml(msg.text)}</div>
-                            <div class="text-[10px] text-indigo-200 text-end mt-1">${msg.time}</div>
                         </div>
                     </div>
                 `;
@@ -251,27 +250,63 @@ $(document).ready(function () {
                 // Parse markdown-like text
                 let formattedText = msg.text || '';
                 formattedText = formattedText
-                    .replace(/### (.*)/g, '<h6 class="fw-bold mt-2 mb-1 text-indigo-600 text-sm">$1</h6>')
-                    .replace(/\*\*(.*?)\*\*/g, '<strong class="text-slate-900">$1</strong>')
-                    .replace(/\*(.*?)\*/g, '<em class="text-slate-700">$1</em>')
-                    .replace(/`(.*?)`/g, '<code class="bg-slate-100 text-indigo-700 px-1.5 py-0.5 rounded text-xs">$1</code>')
-                    .replace(/- (.*)/g, '<div class="ps-3 py-0.5 text-xs text-slate-700">&bull; $1</div>')
+                    .replace(/### (.*)/g, '<h6 class="fw-bold mt-2 mb-1 text-accent-primary text-sm">$1</h6>')
+                    .replace(/\*\*(.*?)\*\*/g, '<strong class="text-primary">$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em class="text-primary">$1</em>')
+                    .replace(/`(.*?)`/g, '<code class="bg-surface-secondary text-accent-primary px-1.5 py-0.5 rounded text-xs">$1</code>')
+                    .replace(/- (.*)/g, '<div class="ps-3 py-0.5 text-xs text-primary">&bull; $1</div>')
                     .replace(/\n/g, '<br>');
 
-                // Build Thought Chain / Processing Steps Badges
+                // Build Dynamic Anna's Research Process
                 let thoughtChainHTML = '';
-                if (msg.processing_steps && msg.processing_steps.length > 0) {
+                if (msg.is_pending && msg.planned_steps) {
+                    // Pending / Active State
                     thoughtChainHTML = `
-                        <div class="thought-chain-box mb-3">
-                            <div class="fw-bold text-slate-700 text-[11px] mb-1.5 d-flex align-items-center justify-content-between">
-                                <span><i class="bi bi-gear-wide-connected text-indigo-600 me-1"></i> Agent Process & Thought Chain:</span>
-                                <span class="badge bg-emerald-50 text-emerald-700 border border-emerald-200 text-[9px] font-normal px-2 py-0.5">Live Executed</span>
+                        <div class="thought-chain-box mb-4 bg-transparent">
+                            <div class="fw-medium text-primary text-sm mb-3 d-flex align-items-center justify-content-between">
+                                <span>Anna Execution Pipeline</span>
+                                <span class="text-accent-primary text-xs d-flex align-items-center gap-2">
+                                    <span class="spinner-border spinner-border-sm" style="width: 12px; height: 12px; border-width: 2px;" role="status"></span> Working
+                                </span>
                             </div>
-                            <div class="space-y-1">
+                            <div class="process-details space-y-2">
+                                ${msg.planned_steps.map((step, idx) => {
+                                    let icon = '<span class="text-slate-300">◌</span>';
+                                    let textClass = 'text-secondary';
+                                    if (idx < msg.current_step_index) {
+                                        icon = '<span class="text-success-dark">✓</span>';
+                                        textClass = 'text-primary fw-medium';
+                                    } else if (idx === msg.current_step_index) {
+                                        icon = '<span class="text-accent-primary-dark animate-pulse">○</span>';
+                                        textClass = 'text-accent-primary fw-medium';
+                                    }
+                                    return `
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div style="width: 16px; text-align: center;">${icon}</div>
+                                            <span class="${textClass} text-xs">${escapeHtml(step)}</span>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    `;
+                } else if (msg.processing_steps && msg.processing_steps.length > 0) {
+                    // Completed State
+                    thoughtChainHTML = `
+                        <div class="thought-chain-box mb-4 pb-3 bg-transparent border-b border-soft">
+                            <div class="fw-medium text-primary text-sm d-flex align-items-center justify-content-between mb-3">
+                                <span>Anna Execution Pipeline</span>
+                                <span class="text-success-dark text-xs d-flex align-items-center gap-1.5">
+                                    ✓ Complete
+                                </span>
+                            </div>
+                            <div class="process-details space-y-2">
                                 ${msg.processing_steps.map(step => `
-                                    <div class="thought-step-item">
-                                        <i class="bi bi-check-circle-fill text-emerald-500 text-[11px]"></i>
-                                        <span class="text-slate-700 text-[11px]">${escapeHtml(step)}</span>
+                                    <div class="d-flex align-items-start gap-3">
+                                        <div style="width: 16px; text-align: center; margin-top: 1px;">
+                                            <span class="text-success-dark">✓</span>
+                                        </div>
+                                        <span class="text-primary text-xs leading-tight">${escapeHtml(step.replace(/^✓\s*|🔍\s*|📊\s*|🧠\s*|⚡\s*|👥\s*/, ''))}</span>
                                     </div>
                                 `).join('')}
                             </div>
@@ -284,10 +319,10 @@ $(document).ready(function () {
                 if (msg.executive_summary) {
                     const lines = msg.executive_summary.split('\n').filter(l => l.trim().length > 0);
                     summaryHTML = `
-                        <div class="executive-summary-banner">
-                            <div class="summary-tab-pill"><i class="bi bi-lightning-charge-fill"></i> Executive Summary (3-4 Lines)</div>
+                        <div class="executive-summary-banner mb-4">
+                            <div class="text-xs fw-semibold text-accent-anna uppercase tracking-wider mb-2">Executive Summary</div>
                             <div class="space-y-1">
-                                ${lines.map(l => `<div class="summary-line-item">${l.replace(/• \*\*(.*?)\*\*:/g, '<strong class="text-indigo-900">&bull; $1:</strong>')}</div>`).join('')}
+                                ${lines.map(l => `<div class="text-primary text-sm">${l.replace(/• \*\*(.*?)\*\*:/g, '<strong class="text-primary">&bull; $1:</strong>')}</div>`).join('')}
                             </div>
                         </div>
                     `;
@@ -297,21 +332,21 @@ $(document).ready(function () {
                 let socialPostsHTML = '';
                 if (msg.posts && msg.posts.length > 0) {
                     socialPostsHTML = `
-                        <div class="mt-3 pt-2 border-t border-slate-100">
-                            <div class="text-xs fw-semibold text-slate-600 mb-2"><i class="bi bi-linkedin text-blue-600 me-1"></i> Verified Social Intelligence Posts:</div>
+                        <div class="mt-3 pt-2 border-t border-soft">
+                            <div class="text-xs fw-semibold text-secondary mb-2"><i class="bi bi-linkedin text-blue-600 me-1"></i> Verified Social Intelligence Posts:</div>
                             <div class="space-y-2">
                                 ${msg.posts.map((p, pIdx) => `
                                     <div class="chat-social-card">
                                         <div class="d-flex align-items-center justify-content-between mb-1.5">
                                             <div class="d-flex align-items-center gap-1.5">
-                                                <i class="bi bi-quote text-indigo-500 fs-5"></i>
-                                                <strong class="text-slate-900 text-xs">${p.author_name}</strong>
-                                                <span class="text-slate-400 text-[11px]">(${p.platform})</span>
+                                                <i class="bi bi-quote text-accent-primary fs-5"></i>
+                                                <strong class="text-primary text-xs">${p.author_name}</strong>
+                                                <span class="text-muted text-[11px]">(${p.platform})</span>
                                             </div>
-                                            <span class="badge bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px]">${p.sentiment}</span>
+                                            <span class="badge bg-success-soft text-emerald-700 border border-soft text-[10px]">${p.sentiment}</span>
                                         </div>
-                                        <p class="text-xs text-slate-800 italic mb-2">"${escapeHtml(p.content)}"</p>
-                                        <div class="d-flex align-items-center justify-content-between text-[11px] text-slate-500 border-t border-slate-100 pt-2">
+                                        <p class="text-xs text-primary italic mb-2">"${escapeHtml(p.content)}"</p>
+                                        <div class="d-flex align-items-center justify-content-between text-[11px] text-secondary border-t border-soft pt-2">
                                             <span>👍 ${p.likes_count} likes &bull; 💬 ${p.comments_count} comments</span>
                                             <button class="btn btn-xs btn-outline-primary py-0.5 px-2 text-[10px] chat-view-post-btn" data-post-idx="${pIdx}">View Full Post</button>
                                         </div>
@@ -325,15 +360,28 @@ $(document).ready(function () {
                 // Build Person Dossier Badges
                 let dossierHTML = '';
                 if (msg.people && msg.people.length > 0) {
-                    dossierHTML += '<div class="mt-3 pt-2 border-t border-slate-100"><div class="text-xs fw-semibold text-slate-500 mb-1.5"><i class="bi bi-person-lines-fill me-1 text-indigo-500"></i>Matched Executive Dossiers (Click to view):</div><div class="d-flex flex-wrap gap-2">';
+                    dossierHTML += '<div class="mt-6"><div class="text-sm fw-medium text-primary mb-3 border-b border-soft pb-2">Matched Executive Profiles</div><div class="space-y-0">';
                     msg.people.slice(0, 4).forEach((p, pIdx) => {
-                        const scoreColor = (p.lead_score || 75) >= 85 ? 'text-emerald-600 bg-emerald-50 border-emerald-200' : 'text-indigo-600 bg-indigo-50 border-indigo-200';
+                        const fitText = p.lead_status === 'Hot' ? 'High Fit' : (p.lead_status || 'Strong Fit');
                         dossierHTML += `
-                            <div class="lead-dossier-pill shadow-2xs chat-person-pill" data-person-idx="${pIdx}">
-                                <div>
-                                    <span class="fw-bold text-slate-800 text-xs">${p.full_name}</span>
-                                    <span class="text-[11px] text-slate-500 ms-1">• ${p.title}</span>
-                                    <span class="badge ${scoreColor} border text-[10px] ms-1.5">Score: ${p.lead_score || 75}</span>
+                            <div class="py-3 chat-person-pill border-b border-soft last:border-0" data-person-idx="${pIdx}">
+                                <div class="d-flex justify-content-between align-items-start mb-1">
+                                    <div>
+                                        <div class="fw-medium text-primary text-sm">${p.full_name}</div>
+                                        <div class="text-xs text-secondary">${p.title || 'Executive'} &middot; ${p.organization || 'BNY'}</div>
+                                    </div>
+                                    <div class="d-flex flex-column align-items-end">
+                                        <span class="text-success-dark text-[11px] fw-medium px-2 py-0.5 bg-success-soft rounded-md">${fitText} &bull; ${p.lead_score || 75}</span>
+                                    </div>
+                                </div>
+                                ${p.decision_authority || p.sub_lob_name ? `
+                                <div class="mt-2 text-xs text-secondary bg-surface-secondary px-3 py-2 rounded-lg border border-soft">
+                                    <span class="text-secondary fw-medium me-1">Relevance:</span> ${p.decision_authority || 'Key Decision Maker'} ${p.sub_lob_name ? `(${p.sub_lob_name})` : ''}
+                                </div>` : ''}
+                                <div class="d-flex flex-wrap gap-x-3 mt-2 text-[11px] text-muted">
+                                    ${p.location ? `<span>${p.location}</span>` : ''}
+                                    ${p.email || p.phone ? `<span>&bull; Contact available</span>` : ''}
+                                    <span class="ms-auto text-accent-primary cursor-pointer hover:underline text-xs">View Profile &rarr;</span>
                                 </div>
                             </div>
                         `;
@@ -344,8 +392,8 @@ $(document).ready(function () {
                 // Build Followup Chips
                 let followupsHTML = '';
                 if (msg.followups && msg.followups.length > 0) {
-                    followupsHTML += '<div class="mt-3 pt-2 border-t border-slate-100 d-flex flex-wrap gap-1.5 align-items-center">';
-                    followupsHTML += '<span class="text-[11px] text-slate-400 fw-semibold"><i class="bi bi-arrow-return-right me-1"></i>Follow-ups:</span>';
+                    followupsHTML += '<div class="mt-3 pt-2 border-t border-soft d-flex flex-wrap gap-1.5 align-items-center">';
+                    followupsHTML += '<span class="text-[11px] text-muted fw-semibold"><i class="bi bi-arrow-return-right me-1"></i>Follow-ups:</span>';
                     msg.followups.forEach(f => {
                         followupsHTML += `<button class="btn btn-xs btn-outline-primary text-[11px] py-1 px-2.5 rounded-full chat-followup-btn" data-query="${escapeHtml(f)}">${escapeHtml(f)}</button>`;
                     });
@@ -359,15 +407,19 @@ $(document).ready(function () {
                         </div>
                         <div class="universal-bot-bubble">
                             ${thoughtChainHTML}
-                            ${summaryHTML}
-                            <div class="text-sm">${formattedText}</div>
-                            ${socialPostsHTML}
-                            ${dossierHTML}
-                            ${followupsHTML}
-                            <div class="text-[10px] text-slate-400 mt-2 d-flex justify-content-between align-items-center">
-                                <span>Anna AI • Real-time DB Search</span>
-                                <span>${msg.time}</span>
-                            </div>
+                            ${!msg.is_pending ? `
+                                ${summaryHTML}
+                                <div class="text-sm streaming-text-container" id="msg-text-${msg.id || 'new'}">${formattedText}${msg.is_streaming ? '<span class="animate-pulse ms-1 text-muted">▌</span>' : ''}</div>
+                                ${!msg.is_streaming ? `
+                                    ${socialPostsHTML}
+                                    ${dossierHTML}
+                                    ${followupsHTML}
+                                    <div class="text-[10px] text-muted mt-2 d-flex justify-content-between align-items-center">
+                                        <span>Anna AI • Real-time DB Search</span>
+                                        <span>${msg.time}</span>
+                                    </div>
+                                ` : ''}
+                            ` : ''}
                         </div>
                     </div>
                 `;
@@ -405,7 +457,7 @@ $(document).ready(function () {
     function scrollUniversalChatToBottom() {
         const $container = $('#chat-messages-container');
         if ($container.length) {
-            $container.animate({ scrollTop: $container[0].scrollHeight }, 150);
+            $container.stop(true, true).animate({ scrollTop: $container[0].scrollHeight }, 150);
         }
     }
 
@@ -423,6 +475,10 @@ $(document).ready(function () {
         const query = (rawQuery || $('#chat-input-field').val() || '').trim();
         if (!query) return;
 
+        // Pause video when user sends message
+        const vid = document.getElementById('chat-avatar-video');
+        if (vid) vid.pause();
+
         $('#chat-input-field').val('');
 
         const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -436,154 +492,200 @@ $(document).ready(function () {
 
         renderUniversalChat();
 
-        // Add dynamic loader row
-        const $list = $('#universal-messages-list');
-        const loaderHTML = `
-            <div id="universal-chat-loader" class="universal-msg-row">
-                <div class="universal-bot-avatar">
-                    <i class="bi bi-robot"></i>
-                </div>
-                <div class="universal-bot-bubble d-flex flex-column gap-1.5 text-slate-500 py-3">
-                    <div class="d-flex align-items-center gap-2">
-                        <div class="spinner-border spinner-border-sm text-indigo-600" style="width: 14px; height: 14px; border-width: 2px;" role="status"></div>
-                        <span class="text-xs font-semibold text-slate-700" id="loader-status-text">🔍 Identifying query intent & entities...</span>
-                    </div>
-                    <div class="text-[11px] text-slate-400 ps-4" id="loader-substatus-text">Querying PostgreSQL database (social_intelligence, contacts, signals)...</div>
-                </div>
-            </div>
-        `;
-        $list.append(loaderHTML);
+        // Generate dynamic steps based on query
+        let plannedSteps = ["Understanding your request", "Identifying target account", "Searching account intelligence", "Preparing response"];
+        const qLower = query.toLowerCase();
+        if (qLower.includes("vp") || qLower.includes("executive") || qLower.includes("who")) {
+            plannedSteps = ["Understanding leadership search", "Identifying target account", "Searching executive records", "Filtering by seniority and role", "Ranking relevant executives", "Preparing executive intelligence"];
+        } else if (qLower.includes("signal") || qLower.includes("trigger") || qLower.includes("buying")) {
+            plannedSteps = ["Identifying target account", "Searching recent account signals", "Analyzing technology initiatives", "Reviewing leadership changes", "Ranking buying signals", "Preparing recommendations"];
+        } else if (qLower.includes("bny") && (qLower.includes("360") || qLower.includes("overview"))) {
+            plannedSteps = ["Understanding BNY account request", "Retrieving company intelligence", "Searching organizational data", "Mapping executive leadership", "Analyzing technology landscape", "Checking recent buying signals", "Evaluating sales opportunities", "Building BNY 360 intelligence"];
+        } else if (qLower.includes("compare")) {
+            plannedSteps = ["Understanding account comparison", "Researching primary account", "Researching secondary account", "Comparing organizational scale", "Comparing technology landscape", "Evaluating buying potential", "Preparing account comparison"];
+        }
+
+        // Add pending agent message
+        const pendingMsg = {
+            id: 'msg-' + Date.now(),
+            sender: 'agent',
+            is_pending: true,
+            planned_steps: plannedSteps,
+            current_step_index: 0
+        };
+        universalChatMessages.push(pendingMsg);
+        renderUniversalChat();
         scrollUniversalChatToBottom();
 
         // Animate loader stages while waiting
-        let loaderStep = 0;
-        const loaderMessages = [
-            { main: "📊 Querying PostgreSQL database (social_intelligence, contacts, signals)...", sub: "Searching author posts, executive personas & buying triggers..." },
-            { main: "🧠 Searching ChromaDB semantic vector embeddings...", sub: "Retrieving semantic similarity context & sentiment metrics..." },
-            { main: "⚡ Synthesizing intelligence briefing & sales playbooks...", sub: "Formulating actionable sales angles and exact quotes..." }
-        ];
         const loaderInterval = setInterval(() => {
-            if ($('#universal-chat-loader').length && loaderStep < loaderMessages.length) {
-                $('#loader-status-text').text(loaderMessages[loaderStep].main);
-                $('#loader-substatus-text').text(loaderMessages[loaderStep].sub);
-                loaderStep++;
+            if (pendingMsg.current_step_index < pendingMsg.planned_steps.length - 1) {
+                pendingMsg.current_step_index++;
+                renderUniversalChat();
             }
-        }, 500);
+        }, 2000);
 
-        // Call Live Backend with Active Session ID
-        API.post('/chatbot/query', { query: query, session_id: 'anna_web_session' }).then(res => {
+        // Call Live Backend
+        API.post('/chatbot/query', { query: query }).then(res => {
             clearInterval(loaderInterval);
-            $('#universal-chat-loader').remove();
             const replyTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             const botReply = res.response || res.reply || "I analyzed your query across target accounts and executive leadership.";
 
-            universalChatMessages.push({
-                sender: 'agent',
-                text: botReply,
-                time: replyTime,
-                executive_summary: res.executive_summary || '',
-                processing_steps: res.processing_steps || [],
-                posts: res.results?.posts || res.posts || [],
-                people: res.results?.people || res.people || [],
-                signals: res.results?.signals || res.signals || [],
-                followups: res.suggested_followups || []
-            });
+            // Update the pending message with actual results
+            pendingMsg.is_pending = false;
+            pendingMsg.is_streaming = true;
+            pendingMsg.text = ""; // Empty initially for streaming
+            pendingMsg.time = replyTime;
+            pendingMsg.executive_summary = res.executive_summary || '';
+            pendingMsg.processing_steps = res.processing_steps || [];
+            pendingMsg.posts = res.results?.posts || res.posts || [];
+            pendingMsg.people = res.results?.people || res.results?.contacts || res.people || [];
+            pendingMsg.signals = res.results?.signals || res.signals || [];
+            pendingMsg.followups = res.suggested_followups || [];
 
             renderUniversalChat();
-            // Speak the reply via natural female TTS voice and animate avatar video
+            
+            // Speak the reply via TTS and play video
             speakAnnaReply(botReply);
+
+            // Stream the text progressively without rebuilding the whole DOM
+            let charIndex = 0;
+            const CHUNK_SIZE = 3; // Increased to 3 chars per tick for a faster reading speed
+            const STREAM_INTERVAL = 30; // 30ms per tick (approx 100 characters per second)
+            
+            // Format function locally so we can update just the text
+            function formatMarkdown(text) {
+                return text
+                    .replace(/### (.*)/g, '<h6 class="fw-bold mt-2 mb-1 text-accent-primary text-sm">$1</h6>')
+                    .replace(/\*\*(.*?)\*\*/g, '<strong class="text-primary">$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em class="text-primary">$1</em>')
+                    .replace(/`(.*?)`/g, '<code class="bg-surface-secondary text-accent-primary px-1.5 py-0.5 rounded text-xs">$1</code>')
+                    .replace(/- (.*)/g, '<div class="ps-3 py-0.5 text-xs text-primary">&bull; $1</div>')
+                    .replace(/\n/g, '<br>');
+            }
+
+            const streamInterval = setInterval(() => {
+                const $container = $('#chat-messages-container');
+                const isAtBottom = $container.length && ($container[0].scrollHeight - $container.scrollTop() - $container.outerHeight() < 50);
+
+                if (charIndex < botReply.length) {
+                    charIndex += CHUNK_SIZE;
+                    pendingMsg.text = botReply.substring(0, charIndex);
+                    
+                    // Directly update the text container if it exists
+                    const $textBlock = $(`#msg-text-${pendingMsg.id}`);
+                    if ($textBlock.length) {
+                        $textBlock.html(formatMarkdown(pendingMsg.text) + '<span class="animate-pulse ms-1 text-muted">▌</span>');
+                    } else {
+                        renderUniversalChat();
+                    }
+                    
+                    // Instant scroll only if user was already at the bottom
+                    if (isAtBottom) {
+                        $container.scrollTop($container[0].scrollHeight);
+                    }
+                } else {
+                    clearInterval(streamInterval);
+                    pendingMsg.text = botReply;
+                    pendingMsg.is_streaming = false;
+                    renderUniversalChat();
+                    if (isAtBottom) {
+                        $container.scrollTop($container[0].scrollHeight);
+                    }
+                }
+            }, STREAM_INTERVAL);
+
         }).catch(err => {
             clearInterval(loaderInterval);
-            $('#universal-chat-loader').remove();
             const replyTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            universalChatMessages.push({
-                sender: 'agent',
-                text: `I received your query regarding "${query}". (Live Backend connection is active at port 8000).`,
-                time: replyTime,
-                executive_summary: `• Query processed: "${query}"\n• Connection active to backend intelligence server.\n• Explore suggested follow-ups below to view executive records.`,
-                processing_steps: [
-                    "🔍 Identified query intent: Executive Search",
-                    "📊 Queried PostgreSQL database records"
-                ],
-                posts: [],
-                people: [],
-                followups: ["Who is Emily Portney?", "Show buying signals for BNY"]
-            });
+            
+            pendingMsg.is_pending = false;
+            pendingMsg.text = `I received your query regarding "${query}". (Live Backend connection is active at port 8000).`;
+            pendingMsg.time = replyTime;
+            pendingMsg.executive_summary = `• Query processed: "${query}"\n• Connection active to backend intelligence server.\n• Explore suggested follow-ups below to view executive records.`;
+            pendingMsg.processing_steps = [
+                "🔍 Identified query intent: Executive Search",
+                "📊 Queried PostgreSQL database records"
+            ];
+            pendingMsg.posts = [];
+            pendingMsg.people = [];
+            pendingMsg.followups = ["Who is Emily Portney?", "Show buying signals for BNY"];
+            
             renderUniversalChat();
+            // Speak the fallback reply via TTS and play video
             speakAnnaReply(`I received your query regarding "${query}".`);
         });
     }
 
-    // ==========================================
-    // Robust Female TTS Voice Selector (Anna)
-    // ==========================================
-    let cachedVoices = [];
-    function loadVoices() {
-        if ('speechSynthesis' in window) {
-            cachedVoices = speechSynthesis.getVoices();
+    // Send button & Enter key
+    $('#send-chat-btn').on('click', function () {
+        submitUniversalChatQuery();
+    });
+
+    $('#chat-input-field').on('keydown', function (e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            submitUniversalChatQuery();
         }
-    }
-    if ('speechSynthesis' in window) {
-        loadVoices();
-        speechSynthesis.onvoiceschanged = loadVoices;
-    }
+    });
 
-    function getFemaleVoice() {
-        const voices = cachedVoices.length ? cachedVoices : (window.speechSynthesis ? window.speechSynthesis.getVoices() : []);
-        if (!voices || voices.length === 0) return null;
-
-        // 1. High-priority dedicated female English voices
-        const femaleVoiceNames = [
-            'aria', 'jenny', 'zira', 'samantha', 'victoria', 'karen', 'moira',
-            'google uk english female', 'google us english', 'microsoft zira',
-            'microsoft jenny', 'microsoft aria', 'female'
-        ];
-
-        for (const name of femaleVoiceNames) {
-            const match = voices.find(v => v.name.toLowerCase().includes(name) && (v.lang.startsWith('en') || !v.lang));
-            if (match) return match;
+    // Mute/Unmute button
+    let annaMuted = false;
+    $(document).on('click', '#btn-mute-anna', function () {
+        annaMuted = !annaMuted;
+        if (annaMuted) {
+            speechSynthesis.cancel();
+            const vid = document.getElementById('chat-avatar-video');
+            if (vid) vid.pause();
+            $('#mute-icon').removeClass('bi-volume-up-fill').addClass('bi-volume-mute-fill');
+            $('#mute-label').text('Unmute');
+        } else {
+            $('#mute-icon').removeClass('bi-volume-mute-fill').addClass('bi-volume-up-fill');
+            $('#mute-label').text('Mute');
         }
+    });
 
-        // 2. Filter out known male voice identifiers
-        const maleNames = ['david', 'mark', 'george', 'guy', 'male', 'richard', 'james', 'stefan', 'paul'];
-        const nonMaleEn = voices.find(v => v.lang.startsWith('en') && !maleNames.some(m => v.name.toLowerCase().includes(m)));
-        if (nonMaleEn) return nonMaleEn;
+    // Clear chat button
+    $('#btn-clear-chat').on('click', function () {
+        universalChatMessages = [];
+        renderUniversalChat();
+        showToast("Chat Cleared", "Universal Assistant conversation reset.", "info");
+    });
 
-        // 3. Fallback to any English voice
-        return voices.find(v => v.lang.startsWith('en')) || voices[0] || null;
-    }
+    // Starter Prompt Pills
+    $('.starter-chip').on('click', function () {
+        const prompt = $(this).data('prompt');
+        submitUniversalChatQuery(prompt);
+    });
 
     // ==========================================
-    // Anna TTS — Speak any reply with Avatar Video
+    // Anna TTS — Speak any reply
     // ==========================================
     function speakAnnaReply(text) {
+        if (annaMuted) return;
         const vid = document.getElementById('chat-avatar-video');
-        if (!('speechSynthesis' in window)) return;
-
-        // Clean markdown/HTML for natural speech
+        // Clean markdown/HTML for speech
         const cleanText = text.replace(/<[^>]*>/g, '').replace(/\*\*/g, '').replace(/\*/g, '').replace(/•/g, '').replace(/`/g, '').replace(/\n/g, '. ').replace(/\s+/g, ' ').trim();
         if (!cleanText) return;
 
-        // Play avatar video while speaking
-        if (vid) {
-            try { vid.play(); } catch (e) { }
-        }
+        // Play video while speaking
+        if (vid) vid.play();
 
         const utterance = new SpeechSynthesisUtterance(cleanText);
         utterance.rate = 0.95;
-        utterance.pitch = 1.15; // Set higher pitch for natural female tone
+        utterance.pitch = 1.1;
         utterance.lang = 'en-US';
 
-        const femaleVoice = getFemaleVoice();
-        if (femaleVoice) {
-            utterance.voice = femaleVoice;
-        }
+        const voices = speechSynthesis.getVoices();
+        const femaleVoice = voices.find(v => v.name.includes('Female') || v.name.includes('Samantha') || v.name.includes('Zira') || v.name.includes('Google UK English Female'));
+        if (femaleVoice) utterance.voice = femaleVoice;
 
         utterance.onend = function () {
+            // Stop video when done speaking
             if (vid) vid.pause();
         };
 
-        speechSynthesis.cancel();
+        speechSynthesis.cancel(); // cancel any ongoing speech
         speechSynthesis.speak(utterance);
     }
 
@@ -599,13 +701,14 @@ $(document).ready(function () {
     ];
 
     $('#btn-start-anna').on('click', function () {
-        $(this).prop('disabled', true).html('<i class="bi bi-mic-fill me-1 text-danger animate-pulse"></i> Speaking...');
+        $(this).prop('disabled', true).html('<i class="bi bi-mic-fill me-2"></i>Speaking...');
         const vid = document.getElementById('chat-avatar-video');
         const $msgList = $('#universal-messages-list');
         let idx = 0;
 
         function speakNext() {
             if (idx >= annaScript.length) {
+                // Done speaking
                 if (vid) vid.pause();
                 $msgList.append(`
                     <div class="universal-msg-row">
@@ -621,6 +724,7 @@ $(document).ready(function () {
             }
 
             const sentence = annaScript[idx];
+            // Show sentence as a bot message in chat
             $msgList.append(`
                 <div class="universal-msg-row">
                     <div class="universal-bot-avatar"><i class="bi bi-robot"></i></div>
@@ -629,66 +733,45 @@ $(document).ready(function () {
             `);
             scrollUniversalChatToBottom();
 
-            if (vid) {
-                try { vid.play(); } catch (e) { }
+            // Play video while speaking
+            if (vid && !annaMuted) vid.play();
+
+            // If muted, skip TTS but still show text and move to next
+            if (annaMuted) {
+                idx++;
+                setTimeout(speakNext, 1000);
+                return;
             }
 
+            // Use browser TTS
             const utterance = new SpeechSynthesisUtterance(sentence);
             utterance.rate = 0.95;
-            utterance.pitch = 1.15; // Set higher pitch for natural female tone
+            utterance.pitch = 1.1;
             utterance.lang = 'en-US';
 
-            const femaleVoice = getFemaleVoice();
-            if (femaleVoice) {
-                utterance.voice = femaleVoice;
-            }
+            // Try to pick a female voice
+            const voices = speechSynthesis.getVoices();
+            const femaleVoice = voices.find(v => v.name.includes('Female') || v.name.includes('Samantha') || v.name.includes('Zira') || v.name.includes('Google UK English Female'));
+            if (femaleVoice) utterance.voice = femaleVoice;
 
             utterance.onend = function () {
+                // Pause video between sentences (idle)
                 if (vid) vid.pause();
                 idx++;
-                setTimeout(speakNext, 500);
+                setTimeout(speakNext, 600);
             };
 
             speechSynthesis.speak(utterance);
         }
 
-        if (cachedVoices.length === 0 && 'speechSynthesis' in window) {
+        // Ensure voices are loaded
+        if (speechSynthesis.getVoices().length === 0) {
             speechSynthesis.onvoiceschanged = function () {
-                loadVoices();
                 speakNext();
             };
-            loadVoices();
-            if (cachedVoices.length > 0) {
-                speakNext();
-            }
         } else {
             speakNext();
         }
-    });
-
-    // Send button & Enter key
-    $('#send-chat-btn').on('click', function () {
-        submitUniversalChatQuery();
-    });
-
-    $('#chat-input-field').on('keydown', function (e) {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            submitUniversalChatQuery();
-        }
-    });
-
-    // Clear chat button
-    $('#btn-clear-chat').on('click', function () {
-        universalChatMessages = [];
-        renderUniversalChat();
-        showToast("Chat Cleared", "Universal Assistant conversation reset.", "info");
-    });
-
-    // Starter Prompt Pills
-    $('.starter-chip').on('click', function () {
-        const prompt = $(this).data('prompt');
-        submitUniversalChatQuery(prompt);
     });
 
     // Quick Trigger test simulation bar on Dashboard
@@ -734,7 +817,7 @@ $(document).ready(function () {
             const trHTML = `
                 <tr>
                     <td>
-                        <div class="fw-bold text-slate-800">${l.name}</div>
+                        <div class="fw-bold text-primary">${l.name}</div>
                         <div class="fs-7 text-muted">${l.id}</div>
                     </td>
                     <td>${l.company}</td>
@@ -842,7 +925,7 @@ $(document).ready(function () {
         $tagsBox.empty();
         recentSearches.forEach(q => {
             $tagsBox.append(`
-                <span class="badge bg-slate-100 text-slate-700 border border-slate-200 px-3 py-1.5 rounded-lg search-history-tag hover:bg-indigo-50 hover:text-indigo-600 transition-all cursor-pointer" data-query="${q}">
+                <span class="badge bg-surface-secondary text-primary border border-soft px-3 py-1.5 rounded-lg search-history-tag hover:bg-accent-primary-soft hover:text-accent-primary transition-all cursor-pointer" data-query="${q}">
                     ${q}
                 </span>
             `);
@@ -936,10 +1019,10 @@ $(document).ready(function () {
 
         // Show loading skeleton
         $('#profile-page-content').html(`
-            <div class="glass-card p-12 text-center bg-white rounded-2xl border border-slate-200 shadow-sm">
-                <div class="spinner-border text-indigo-600 mb-3" style="width: 2.5rem; height: 2.5rem;" role="status"></div>
-                <h5 class="fw-bold text-slate-800 text-sm mb-1">Loading 360 Executive Intelligence Profile...</h5>
-                <p class="text-xs text-slate-400">Querying database for full bio, buyer authority, psychographics, scraped posts, and division signals...</p>
+            <div class="glass-card p-12 text-center bg-surface-primary rounded-2xl border border-soft shadow-sm">
+                <div class="spinner-border text-accent-primary mb-3" style="width: 2.5rem; height: 2.5rem;" role="status"></div>
+                <h5 class="fw-bold text-primary text-sm mb-1">Loading 360 Executive Intelligence Profile...</h5>
+                <p class="text-xs text-muted">Querying database for full bio, buyer authority, psychographics, scraped posts, and division signals...</p>
             </div>
         `);
 
@@ -961,36 +1044,36 @@ $(document).ready(function () {
     function renderExecutiveProfileFullPage(data) {
         const initials = (data.full_name ? data.full_name.split(' ').map(n=>n[0]).join('').substring(0,2) : 'EX').toUpperCase();
         const score = data.lead_score || 85;
-        const scoreColor = score >= 85 ? 'text-emerald-400 bg-emerald-500/20 border-emerald-500/30' : 'text-amber-300 bg-amber-500/20 border-amber-500/30';
+        const scoreColor = score >= 85 ? 'text-emerald-400 bg-success/20 border-emerald-500/30' : 'text-amber-300 bg-amber-500/20 border-amber-500/30';
         
         // Buyer roles pills
         const buyerRoles = data.buyer_roles && data.buyer_roles.length ? data.buyer_roles : ['Executive Sponsor', 'Decision Maker'];
-        const buyerRolesHTML = buyerRoles.map(r => `<span class="badge bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs px-2.5 py-1 rounded-lg">${r}</span>`).join(' ');
+        const buyerRolesHTML = buyerRoles.map(r => `<span class="badge bg-accent-primary-soft text-accent-primary border border-soft text-xs px-2.5 py-1 rounded-lg">${r}</span>`).join(' ');
 
         // Social Posts cards
         let socialPostsHTML = '';
         if (data.social_posts && data.social_posts.length > 0) {
             socialPostsHTML = data.social_posts.map(p => `
-                <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 mb-3">
+                <div class="p-4 bg-surface-secondary rounded-xl border border-soft mb-3">
                     <div class="d-flex align-items-center justify-content-between mb-2">
                         <div class="d-flex align-items-center gap-2">
                             <i class="bi bi-linkedin text-blue-600 fs-5"></i>
-                            <span class="fw-bold text-slate-800 text-xs">${p.platform || 'LinkedIn'}</span>
-                            <span class="text-slate-400 text-[11px]">• ${p.post_date_formatted || 'Recently posted'}</span>
+                            <span class="fw-bold text-primary text-xs">${p.platform || 'LinkedIn'}</span>
+                            <span class="text-muted text-[11px]">• ${p.post_date_formatted || 'Recently posted'}</span>
                         </div>
-                        <span class="badge bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px]">${p.sentiment || 'POSITIVE'}</span>
+                        <span class="badge bg-success-soft text-emerald-700 border border-soft text-[10px]">${p.sentiment || 'POSITIVE'}</span>
                     </div>
-                    <p class="text-xs text-slate-800 italic mb-2 leading-relaxed">"${escapeHtml(p.content)}"</p>
-                    <div class="d-flex align-items-center justify-content-between text-[11px] text-slate-500 pt-2 border-t border-slate-200">
+                    <p class="text-xs text-primary italic mb-2 leading-relaxed">"${escapeHtml(p.content)}"</p>
+                    <div class="d-flex align-items-center justify-content-between text-[11px] text-secondary pt-2 border-t border-soft">
                         <span>👍 <strong>${p.likes_count || 142}</strong> likes &bull; 💬 <strong>${p.comments_count || 28}</strong> comments</span>
-                        <div>${(p.topic_tags || []).map(t => `<span class="badge bg-white text-indigo-600 border border-slate-200 text-[10px] me-1">#${t}</span>`).join('')}</div>
+                        <div>${(p.topic_tags || []).map(t => `<span class="badge bg-surface-primary text-accent-primary border border-soft text-[10px] me-1">#${t}</span>`).join('')}</div>
                     </div>
                 </div>
             `).join('');
         } else {
             socialPostsHTML = `
-                <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 text-center text-xs text-slate-500">
-                    <i class="bi bi-chat-left-text text-slate-400 fs-4 mb-2 d-block"></i>
+                <div class="p-4 bg-surface-secondary rounded-xl border border-soft text-center text-xs text-secondary">
+                    <i class="bi bi-chat-left-text text-muted fs-4 mb-2 d-block"></i>
                     No public social intelligence posts recorded for this executive yet.
                 </div>
             `;
@@ -1000,22 +1083,22 @@ $(document).ready(function () {
         let signalsHTML = '';
         if (data.signals && data.signals.length > 0) {
             signalsHTML = data.signals.map(s => `
-                <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 mb-2.5">
+                <div class="p-3.5 bg-surface-secondary rounded-xl border border-soft mb-2.5">
                     <div class="d-flex align-items-center justify-content-between mb-1">
-                        <strong class="text-slate-900 text-xs">${s.title}</strong>
-                        <span class="badge bg-rose-50 text-rose-700 border border-rose-200 text-[10px]">Urgency ${s.urgency_score || 85}/100</span>
+                        <strong class="text-primary text-xs">${s.title}</strong>
+                        <span class="badge bg-priority-soft text-rose-700 border border-soft text-[10px]">Urgency ${s.urgency_score || 85}/100</span>
                     </div>
-                    <p class="text-[11px] text-slate-600 mb-2">${s.summary || 'Active enterprise technology modernization and workflow acceleration initiative.'}</p>
+                    <p class="text-[11px] text-secondary mb-2">${s.summary || 'Active enterprise technology modernization and workflow acceleration initiative.'}</p>
                     ${s.recommended_action ? `
-                        <div class="p-2 bg-white rounded-lg border border-indigo-100 text-[11px] text-indigo-900">
-                            <strong><i class="bi bi-arrow-right-circle text-indigo-600 me-1"></i>Playbook:</strong> ${s.recommended_action}
+                        <div class="p-2 bg-surface-primary rounded-lg border border-indigo-100 text-[11px] text-indigo-900">
+                            <strong><i class="bi bi-arrow-right-circle text-accent-primary me-1"></i>Playbook:</strong> ${s.recommended_action}
                         </div>
                     ` : ''}
                 </div>
             `).join('');
         } else {
             signalsHTML = `
-                <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 text-center text-xs text-slate-500">
+                <div class="p-4 bg-surface-secondary rounded-xl border border-soft text-center text-xs text-secondary">
                     No active buying trigger signals registered for this division.
                 </div>
             `;
@@ -1029,16 +1112,16 @@ $(document).ready(function () {
                     ${data.peers.map(peer => `
                         <div class="lead-dossier-pill profile-peer-pill shadow-2xs cursor-pointer" data-peer-id="${peer.id}">
                             <div>
-                                <span class="fw-bold text-slate-800 text-xs">${peer.full_name}</span>
-                                <span class="text-[11px] text-slate-500 ms-1">• ${peer.title}</span>
-                                <span class="badge bg-indigo-50 text-indigo-600 border border-indigo-200 text-[10px] ms-1">Score: ${peer.lead_score || 80}</span>
+                                <span class="fw-bold text-primary text-xs">${peer.full_name}</span>
+                                <span class="text-[11px] text-secondary ms-1">• ${peer.title}</span>
+                                <span class="badge bg-accent-primary-soft text-accent-primary border border-soft text-[10px] ms-1">Score: ${peer.lead_score || 80}</span>
                             </div>
                         </div>
                     `).join('')}
                 </div>
             `;
         } else {
-            peersHTML = `<div class="text-xs text-slate-500">Top executive leadership team direct route.</div>`;
+            peersHTML = `<div class="text-xs text-secondary">Top executive leadership team direct route.</div>`;
         }
 
         const fullHTML = `
@@ -1053,11 +1136,11 @@ $(document).ready(function () {
                             <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
                                 <h3 class="fw-bold text-white fs-4 mb-0">${data.full_name}</h3>
                                 <span class="badge ${scoreColor} border text-xs px-2.5 py-1 rounded-full font-medium">Lead Score: ${score}/100 • ${data.lead_status || 'Hot'}</span>
-                                <span class="badge bg-white/10 text-indigo-200 border border-white/20 text-xs px-2.5 py-1 rounded-full">${data.seniority_tier || 'Executive'}</span>
+                                <span class="badge bg-surface-primary/10 text-indigo-200 border border-white/20 text-xs px-2.5 py-1 rounded-full">${data.seniority_tier || 'Executive'}</span>
                             </div>
                             <p class="text-sm text-indigo-200 mb-1 font-medium">${data.title} • ${data.organization || data.account_name || 'BNY'}</p>
                             <div class="d-flex align-items-center gap-3 text-xs text-indigo-300">
-                                <span><i class="bi bi-geo-alt me-1 text-rose-400"></i>${data.location || 'New York, NY (HQ)'}</span>
+                                <span><i class="bi bi-geo-alt me-1 text-priority"></i>${data.location || 'New York, NY (HQ)'}</span>
                                 <span><i class="bi bi-building me-1 text-amber-400"></i>${data.sub_lob_name || 'Executive Leadership'}</span>
                                 <span><i class="bi bi-shield-check me-1 text-emerald-400"></i>Verified Decision Maker</span>
                             </div>
@@ -1065,17 +1148,17 @@ $(document).ready(function () {
                     </div>
                     <div class="d-flex flex-wrap gap-2">
                         ${data.email ? `
-                            <a href="mailto:${data.email}" class="btn btn-sm btn-white text-slate-800 bg-white border-0 font-semibold px-3 py-2 rounded-xl text-xs shadow-sm hover:bg-indigo-50 transition-all">
-                                <i class="bi bi-envelope-fill text-indigo-600 me-1"></i> Email
+                            <a href="mailto:${data.email}" class="btn btn-sm btn-white text-primary bg-surface-primary border-0 font-semibold px-3 py-2 rounded-xl text-xs shadow-sm hover:bg-accent-primary-soft transition-all">
+                                <i class="bi bi-envelope-fill text-accent-primary me-1"></i> Email
                             </a>
                         ` : ''}
                         ${data.phone ? `
-                            <a href="tel:${data.phone}" class="btn btn-sm btn-white/10 text-white border border-white/20 font-semibold px-3 py-2 rounded-xl text-xs hover:bg-white/20 transition-all">
+                            <a href="tel:${data.phone}" class="btn btn-sm btn-white/10 text-white border border-white/20 font-semibold px-3 py-2 rounded-xl text-xs hover:bg-surface-primary/20 transition-all">
                                 <i class="bi bi-telephone-fill text-teal-400 me-1"></i> Call
                             </a>
                         ` : ''}
                         ${data.linkedin_url ? `
-                            <a href="${data.linkedin_url}" target="_blank" class="btn btn-sm btn-white/10 text-white border border-white/20 font-semibold px-3 py-2 rounded-xl text-xs hover:bg-white/20 transition-all">
+                            <a href="${data.linkedin_url}" target="_blank" class="btn btn-sm btn-white/10 text-white border border-white/20 font-semibold px-3 py-2 rounded-xl text-xs hover:bg-surface-primary/20 transition-all">
                                 <i class="bi bi-linkedin text-blue-400 me-1"></i> LinkedIn
                             </a>
                         ` : ''}
@@ -1090,16 +1173,16 @@ $(document).ready(function () {
                     <!-- Contact Channels -->
                     <div class="profile-360-card">
                         <div class="profile-section-title">
-                            <i class="bi bi-person-lines-fill text-indigo-600"></i>
+                            <i class="bi bi-person-lines-fill text-accent-primary"></i>
                             <span>Contact & Direct Channels</span>
                         </div>
                         <div class="space-y-1">
                             <div class="profile-data-row">
-                                <span class="profile-data-label"><i class="bi bi-envelope me-1.5 text-indigo-500"></i>Work Email:</span>
-                                <span class="profile-data-val text-indigo-600 font-mono text-[11px]">${data.email || (data.full_name.toLowerCase().replace(/[^a-z]/g, '.') + '@bny.com')}</span>
+                                <span class="profile-data-label"><i class="bi bi-envelope me-1.5 text-accent-primary"></i>Work Email:</span>
+                                <span class="profile-data-val text-accent-primary font-mono text-[11px]">${data.email || (data.full_name.toLowerCase().replace(/[^a-z]/g, '.') + '@bny.com')}</span>
                             </div>
                             <div class="profile-data-row">
-                                <span class="profile-data-label"><i class="bi bi-telephone me-1.5 text-teal-500"></i>Direct Phone:</span>
+                                <span class="profile-data-label"><i class="bi bi-telephone me-1.5 text-secondary"></i>Direct Phone:</span>
                                 <span class="profile-data-val font-mono text-[11px]">${data.phone || '+1 (212) 495-1784'}</span>
                             </div>
                             <div class="profile-data-row">
@@ -1121,28 +1204,28 @@ $(document).ready(function () {
                         </div>
                         <div class="space-y-1 mb-3">
                             <div class="profile-data-row">
-                                <span class="profile-data-label"><i class="bi bi-building me-1.5 text-slate-400"></i>Target Account:</span>
+                                <span class="profile-data-label"><i class="bi bi-building me-1.5 text-muted"></i>Target Account:</span>
                                 <span class="profile-data-val fw-bold">${data.organization || data.account_name || 'BNY Mellon'}</span>
                             </div>
                             <div class="profile-data-row">
-                                <span class="profile-data-label"><i class="bi bi-layers me-1.5 text-slate-400"></i>Division / LOB:</span>
+                                <span class="profile-data-label"><i class="bi bi-layers me-1.5 text-muted"></i>Division / LOB:</span>
                                 <span class="profile-data-val">${data.sub_lob_name || 'Executive Leadership'}</span>
                             </div>
                             <div class="profile-data-row">
-                                <span class="profile-data-label"><i class="bi bi-arrow-up-circle me-1.5 text-amber-500"></i>Directly Reports To:</span>
-                                <span class="profile-data-val text-indigo-700 fw-bold">👑 ${data.reports_to_name || 'Robin Vince (President & CEO)'}</span>
+                                <span class="profile-data-label"><i class="bi bi-arrow-up-circle me-1.5 text-warning"></i>Directly Reports To:</span>
+                                <span class="profile-data-val text-accent-primary fw-bold">👑 ${data.reports_to_name || 'Robin Vince (President & CEO)'}</span>
                             </div>
                             <div class="profile-data-row">
-                                <span class="profile-data-label"><i class="bi bi-check-circle me-1.5 text-emerald-500"></i>Decision Scope:</span>
+                                <span class="profile-data-label"><i class="bi bi-check-circle me-1.5 text-success"></i>Decision Scope:</span>
                                 <span class="profile-data-val">${data.decision_authority || 'Primary Software & Architecture Stakeholder'}</span>
                             </div>
                             <div class="profile-data-row">
-                                <span class="profile-data-label"><i class="bi bi-cash-stack me-1.5 text-emerald-500"></i>Budget Authority:</span>
+                                <span class="profile-data-label"><i class="bi bi-cash-stack me-1.5 text-success"></i>Budget Authority:</span>
                                 <span class="profile-data-val">${data.budget_authority || 'Enterprise Division Budget Approver'}</span>
                             </div>
                         </div>
-                        <div class="pt-2 border-t border-slate-100">
-                            <div class="text-[11px] font-bold text-slate-500 mb-1.5 uppercase tracking-wider">Assigned Buyer Roles:</div>
+                        <div class="pt-2 border-t border-soft">
+                            <div class="text-[11px] font-bold text-secondary mb-1.5 uppercase tracking-wider">Assigned Buyer Roles:</div>
                             <div class="d-flex flex-wrap gap-1.5">
                                 ${buyerRolesHTML}
                             </div>
@@ -1164,15 +1247,15 @@ $(document).ready(function () {
                     <!-- Bio & Responsibilities -->
                     <div class="profile-360-card">
                         <div class="profile-section-title">
-                            <i class="bi bi-file-earmark-person-fill text-indigo-600"></i>
+                            <i class="bi bi-file-earmark-person-fill text-accent-primary"></i>
                             <span>Executive Bio & Operational Mandates</span>
                         </div>
-                        <div class="text-xs text-slate-700 leading-relaxed mb-3">
+                        <div class="text-xs text-primary leading-relaxed mb-3">
                             ${data.summary_bio || `${data.full_name} is a key executive leader at ${data.organization || 'BNY'}, spearheading global technology modernization, enterprise digital transformation, and scalable capital markets infrastructure across business divisions.`}
                         </div>
                         ${data.responsibilities ? `
-                            <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 text-xs text-slate-600">
-                                <strong class="text-slate-800 d-block mb-1"><i class="bi bi-list-check text-indigo-600 me-1"></i>Core Responsibilities:</strong>
+                            <div class="p-3 bg-surface-secondary rounded-xl border border-soft text-xs text-secondary">
+                                <strong class="text-primary d-block mb-1"><i class="bi bi-list-check text-accent-primary me-1"></i>Core Responsibilities:</strong>
                                 ${data.responsibilities}
                             </div>
                         ` : ''}
@@ -1181,16 +1264,16 @@ $(document).ready(function () {
                     <!-- Strategic Persona Intelligence & Psychology -->
                     <div class="profile-360-card">
                         <div class="profile-section-title">
-                            <i class="bi bi-lightbulb-fill text-amber-500"></i>
+                            <i class="bi bi-lightbulb-fill text-warning"></i>
                             <span>Strategic Persona Intelligence & Sales Angle</span>
                         </div>
                         <div class="space-y-3">
-                            <div class="p-3 bg-amber-50/50 rounded-xl border border-amber-200/60 text-xs text-slate-800">
+                            <div class="p-3 bg-amber-50/50 rounded-xl border border-amber-200/60 text-xs text-primary">
                                 <strong class="text-amber-900 d-block mb-1"><i class="bi bi-chat-quote-fill me-1 text-amber-600"></i>Communication Style Guidance:</strong>
                                 ${data.communication_style || 'Direct, concise, and metrics-oriented. Prioritizes clear architectural scalability, operational risk reduction, and concrete ROI over high-level pitches.'}
                             </div>
-                            <div class="p-3 bg-indigo-50/50 rounded-xl border border-indigo-200/60 text-xs text-slate-800">
-                                <strong class="text-indigo-900 d-block mb-1"><i class="bi bi-bullseye me-1 text-indigo-600"></i>Recommended Sales Icebreaker Hook:</strong>
+                            <div class="p-3 bg-accent-primary-soft/50 rounded-xl border border-soft/60 text-xs text-primary">
+                                <strong class="text-indigo-900 d-block mb-1"><i class="bi bi-bullseye me-1 text-accent-primary"></i>Recommended Sales Icebreaker Hook:</strong>
                                 "I saw your leadership team's strategic focus on ${data.sub_lob_name || 'Asset Servicing'} platform modernization — our automated enterprise solution directly accelerates this initiative while drastically reducing deployment latency."
                             </div>
                         </div>
@@ -1251,29 +1334,29 @@ $(document).ready(function () {
         $('#modal-entity-badge').text(p.platform || 'LINKEDIN').removeClass().addClass('badge bg-blue-500/20 text-blue-300 border border-blue-500/30 text-xs px-2.5 py-0.5 rounded-full');
         $('#modal-entity-subtitle').text(`${p.author_title || 'Executive'} • ${p.account_name || 'BNY'} • ${p.post_date_formatted || 'Recent'}`);
 
-        let tagsHTML = (p.topic_tags && p.topic_tags.length) ? p.topic_tags.map(t => `<span class="badge bg-indigo-50 text-indigo-600 border border-indigo-200 text-xs px-2 py-1">#${t}</span>`).join(' ') : '<span class="badge bg-slate-100 text-slate-600 text-xs">#TechModernization</span> <span class="badge bg-slate-100 text-slate-600 text-xs">#CloudInnovation</span>';
+        let tagsHTML = (p.topic_tags && p.topic_tags.length) ? p.topic_tags.map(t => `<span class="badge bg-accent-primary-soft text-accent-primary border border-soft text-xs px-2 py-1">#${t}</span>`).join(' ') : '<span class="badge bg-surface-secondary text-secondary text-xs">#TechModernization</span> <span class="badge bg-surface-secondary text-secondary text-xs">#CloudInnovation</span>';
 
         let contentHTML = `
-            <div class="p-4 bg-white rounded-xl border border-slate-200 shadow-sm mb-3">
-                <div class="d-flex align-items-center justify-content-between mb-3 border-b border-slate-100 pb-2">
+            <div class="p-4 bg-surface-primary rounded-xl border border-soft shadow-sm mb-3">
+                <div class="d-flex align-items-center justify-content-between mb-3 border-b border-soft pb-2">
                     <div class="d-flex align-items-center gap-2">
                         <i class="bi bi-linkedin text-blue-600 fs-5"></i>
                         <div>
-                            <div class="fw-bold text-slate-800 text-xs">${p.author_name}</div>
-                            <div class="text-[11px] text-slate-500">${p.author_title || 'Executive at BNY'}</div>
+                            <div class="fw-bold text-primary text-xs">${p.author_name}</div>
+                            <div class="text-[11px] text-secondary">${p.author_title || 'Executive at BNY'}</div>
                         </div>
                     </div>
-                    <span class="badge bg-emerald-50 text-emerald-600 border border-emerald-200 text-[11px]">${p.sentiment || 'POSITIVE'} Sentiment</span>
+                    <span class="badge bg-success-soft text-success-dark border border-soft text-[11px]">${p.sentiment || 'POSITIVE'} Sentiment</span>
                 </div>
-                <div class="text-sm text-slate-800 leading-relaxed whitespace-pre-wrap">${p.content}</div>
-                <div class="d-flex align-items-center gap-4 mt-4 pt-3 border-t border-slate-100 text-xs text-slate-500">
+                <div class="text-sm text-primary leading-relaxed whitespace-pre-wrap">${p.content}</div>
+                <div class="d-flex align-items-center gap-4 mt-4 pt-3 border-t border-soft text-xs text-secondary">
                     <span><i class="bi bi-hand-thumbs-up-fill text-blue-600 me-1"></i>${p.likes_count || 142} likes</span>
-                    <span><i class="bi bi-chat-dots-fill text-slate-400 me-1"></i>${p.comments_count || 28} comments</span>
+                    <span><i class="bi bi-chat-dots-fill text-muted me-1"></i>${p.comments_count || 28} comments</span>
                     <span><i class="bi bi-calendar3 me-1"></i>${p.post_date_formatted || 'Recently posted'}</span>
                 </div>
             </div>
             <div>
-                <div class="text-xs fw-bold text-slate-700 mb-1.5">Identified Topic Tags:</div>
+                <div class="text-xs fw-bold text-primary mb-1.5">Identified Topic Tags:</div>
                 <div class="d-flex flex-wrap gap-1.5">
                     ${tagsHTML}
                 </div>
@@ -1301,32 +1384,32 @@ $(document).ready(function () {
         let contentHTML = `
             <div class="row g-3 mb-3">
                 <div class="col-sm-6">
-                    <div class="p-3 bg-white rounded-xl border border-slate-200">
-                        <div class="text-[11px] text-slate-400 fw-semibold mb-1"><i class="bi bi-cash-coin text-emerald-500 me-1"></i>Annual Revenue</div>
-                        <div class="text-xs font-semibold text-slate-800">${a.annual_revenue_formatted || '$20.0B USD'}</div>
+                    <div class="p-3 bg-surface-primary rounded-xl border border-soft">
+                        <div class="text-[11px] text-muted fw-semibold mb-1"><i class="bi bi-cash-coin text-success me-1"></i>Annual Revenue</div>
+                        <div class="text-xs font-semibold text-primary">${a.annual_revenue_formatted || '$20.0B USD'}</div>
                     </div>
                 </div>
                 <div class="col-sm-6">
-                    <div class="p-3 bg-white rounded-xl border border-slate-200">
-                        <div class="text-[11px] text-slate-400 fw-semibold mb-1"><i class="bi bi-people text-indigo-500 me-1"></i>Global Headcount</div>
-                        <div class="text-xs font-semibold text-slate-800">${a.employee_count ? a.employee_count.toLocaleString() + ' employees' : '50,000+ employees'}</div>
+                    <div class="p-3 bg-surface-primary rounded-xl border border-soft">
+                        <div class="text-[11px] text-muted fw-semibold mb-1"><i class="bi bi-people text-accent-primary me-1"></i>Global Headcount</div>
+                        <div class="text-xs font-semibold text-primary">${a.employee_count ? a.employee_count.toLocaleString() + ' employees' : '50,000+ employees'}</div>
                     </div>
                 </div>
                 <div class="col-sm-6">
-                    <div class="p-3 bg-white rounded-xl border border-slate-200">
-                        <div class="text-[11px] text-slate-400 fw-semibold mb-1"><i class="bi bi-globe text-blue-500 me-1"></i>Corporate Domain</div>
-                        <div class="text-xs font-semibold text-slate-800">${a.domain || 'bny.com'}</div>
+                    <div class="p-3 bg-surface-primary rounded-xl border border-soft">
+                        <div class="text-[11px] text-muted fw-semibold mb-1"><i class="bi bi-globe text-blue-500 me-1"></i>Corporate Domain</div>
+                        <div class="text-xs font-semibold text-primary">${a.domain || 'bny.com'}</div>
                     </div>
                 </div>
                 <div class="col-sm-6">
-                    <div class="p-3 bg-white rounded-xl border border-slate-200">
-                        <div class="text-[11px] text-slate-400 fw-semibold mb-1"><i class="bi bi-diagram-3 text-purple-500 me-1"></i>Lines of Business</div>
-                        <div class="text-xs font-semibold text-slate-800">${a.lobs_count || 3} Core Divisions (Asset Servicing, Pershing, Clearance)</div>
+                    <div class="p-3 bg-surface-primary rounded-xl border border-soft">
+                        <div class="text-[11px] text-muted fw-semibold mb-1"><i class="bi bi-diagram-3 text-purple-500 me-1"></i>Lines of Business</div>
+                        <div class="text-xs font-semibold text-primary">${a.lobs_count || 3} Core Divisions (Asset Servicing, Pershing, Clearance)</div>
                     </div>
                 </div>
             </div>
-            <div class="p-3 bg-white rounded-xl border border-slate-200 text-xs text-slate-650 mb-3">
-                <strong class="text-slate-800">Account Overview:</strong> Premier global financial services company helping clients manage and service financial assets throughout the investment lifecycle.
+            <div class="p-3 bg-surface-primary rounded-xl border border-soft text-xs text-slate-650 mb-3">
+                <strong class="text-primary">Account Overview:</strong> Premier global financial services company helping clients manage and service financial assets throughout the investment lifecycle.
             </div>
         `;
 
@@ -1349,15 +1432,15 @@ $(document).ready(function () {
         $('#modal-entity-subtitle').text(`${s.category || 'Technology Modernization'} • ${s.account_name || 'BNY'}`);
 
         let contentHTML = `
-            <div class="p-4 bg-white rounded-xl border border-slate-200 shadow-sm mb-3">
-                <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Signal Classification</div>
-                <div class="text-sm font-semibold text-slate-800 mb-2">${s.title}</div>
+            <div class="p-4 bg-surface-primary rounded-xl border border-soft shadow-sm mb-3">
+                <div class="text-xs font-bold text-muted uppercase tracking-wider mb-2">Signal Classification</div>
+                <div class="text-sm font-semibold text-primary mb-2">${s.title}</div>
                 <div class="d-flex flex-wrap gap-2 mb-3">
-                    <span class="badge bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs px-2 py-1">${s.category || 'Strategic Initiative'}</span>
-                    <span class="badge bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs px-2 py-1">Status: ${s.status || 'OPEN'}</span>
+                    <span class="badge bg-accent-primary-soft text-accent-primary border border-soft text-xs px-2 py-1">${s.category || 'Strategic Initiative'}</span>
+                    <span class="badge bg-success-soft text-emerald-700 border border-soft text-xs px-2 py-1">Status: ${s.status || 'OPEN'}</span>
                 </div>
                 ${s.recommended_action ? `
-                    <div class="p-3 bg-indigo-50/60 rounded-xl border border-indigo-100 text-xs text-indigo-900 mt-2">
+                    <div class="p-3 bg-accent-primary-soft/60 rounded-xl border border-indigo-100 text-xs text-indigo-900 mt-2">
                         <strong class="text-indigo-950"><i class="bi bi-arrow-right-circle me-1"></i>Recommended Sales Playbook:</strong><br>
                         ${s.recommended_action}
                     </div>
@@ -1489,24 +1572,24 @@ $(document).ready(function () {
             $list.empty();
 
             if (results.length === 0) {
-                $list.append(`<div class="text-slate-500 text-center py-4 text-xs"><i class="bi bi-search text-slate-300 fs-4 mb-1 d-block"></i>No live warehouse records matching "${escapeHtml(query)}".</div>`);
+                $list.append(`<div class="text-secondary text-center py-4 text-xs"><i class="bi bi-search text-slate-300 fs-4 mb-1 d-block"></i>No live warehouse records matching "${escapeHtml(query)}".</div>`);
             } else {
                 results.forEach((res, idx) => {
                     const itemHTML = `
-                        <div class="d-flex align-items-center justify-content-between p-3 mb-2 hover:bg-indigo-50/50 rounded-xl transition-all border border-slate-200 bg-white cursor-pointer shadow-2xs search-result-row" data-idx="${idx}">
+                        <div class="d-flex align-items-center justify-content-between p-3 mb-2 hover:bg-accent-primary-soft/50 rounded-xl transition-all border border-soft bg-surface-primary cursor-pointer shadow-2xs search-result-row" data-idx="${idx}">
                             <div class="d-flex align-items-center gap-3">
-                                <div class="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 d-flex align-items-center justify-content-center text-indigo-600 fs-5 flex-shrink-0">
+                                <div class="w-10 h-10 rounded-xl bg-accent-primary-soft border border-indigo-100 d-flex align-items-center justify-content-center text-accent-primary fs-5 flex-shrink-0">
                                     <i class="bi ${res.icon}"></i>
                                 </div>
                                 <div>
-                                    <div class="text-xs font-bold text-slate-900 d-flex align-items-center gap-2 mb-0.5">
+                                    <div class="text-xs font-bold text-primary d-flex align-items-center gap-2 mb-0.5">
                                         <span>${escapeHtml(res.title)}</span>
                                         <span class="badge ${res.badgeClass} text-[10px] px-2 py-0.5 rounded-full">${res.type}</span>
                                     </div>
-                                    <div class="text-[11px] text-slate-500">${escapeHtml(res.detail)}</div>
+                                    <div class="text-[11px] text-secondary">${escapeHtml(res.detail)}</div>
                                 </div>
                             </div>
-                            <button class="btn btn-sm btn-primary bg-indigo-600 border-0 hover:bg-indigo-700 py-1.5 px-3 rounded-lg text-xs font-semibold shadow-2xs search-act-btn flex-shrink-0" data-idx="${idx}">
+                            <button class="btn btn-sm btn-primary bg-accent-primary border-0 hover:bg-accent-primary-hover py-1.5 px-3 rounded-lg text-xs font-semibold shadow-2xs search-act-btn flex-shrink-0" data-idx="${idx}">
                                 ${res.actionText}
                             </button>
                         </div>

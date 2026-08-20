@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,9 +7,7 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <!-- Bootstrap 5 CSS -->
@@ -37,7 +34,6 @@
     <!-- Custom Style Sheet -->
     <link rel="stylesheet" href="css/style.css">
 </head>
-
 <body>
 
     <div class="app-container">
@@ -45,7 +41,7 @@
         <aside class="app-sidebar">
             <div class="sidebar-header">
                 <div class="logo-icon"><i class="bi bi-robot"></i></div>
-                <div class="logo-text">ANNA SALES AGENT</div>
+                <div class="logo-text">SALES AUTOMATION AGENT</div>
             </div>
 
             <!-- Sidebar Menu Strip -->
@@ -96,57 +92,34 @@
                 </div>
 
                 <div class="header-right">
-                    <div class="system-health">
-                        <div class="system-health-dot"></div>
-                        <span>AI Deflection: 99.9% Uptime</span>
-                    </div>
-
-                    <div class="icon-btn" title="System Notifications">
-                        <i class="bi bi-bell"></i>
-                        <span class="badge-dot"></span>
-                    </div>
-
-                    <div class="icon-btn" title="Agent Status">
-                        <i class="bi bi-cpu"></i>
-                    </div>
                 </div>
             </header>
 
             <!-- Dashboard View Panel (Centered Search Hub) -->
             <div id="view-dashboard" class="view-panel active">
-                <div
-                    class="d-flex flex-column align-items-center justify-content-center min-h-[calc(100vh-140px)] py-12 px-4">
+                <div class="d-flex flex-column align-items-center justify-content-center min-h-[calc(100vh-140px)] py-12 px-4">
                     <!-- Centered Branding Header -->
                     <div class="text-center mb-6 max-w-xl">
-                        <div
-                            class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-700 to-violet-600 text-white d-inline-flex align-items-center justify-content-center fs-2 mb-3 shadow-lg shadow-indigo-500/25">
+                        <div class="w-16 h-16 rounded-2xl bg-accent-primary text-white d-inline-flex align-items-center justify-content-center fs-2 mb-3 shadow-sm">
                             <i class="bi bi-search"></i>
                         </div>
-                        <h2 class="fw-bold text-slate-800 fs-3 mb-2 tracking-tight">Enterprise Sales Intelligence</h2>
-                        <p class="text-slate-500 text-sm mb-0">Search target accounts (BNY), executive decision makers
-                            (CEO, Robin Vince, Emily), social posts, and buying signals.</p>
+                        <h2 class="fw-bold text-primary fs-3 mb-2 tracking-tight">Enterprise Sales Intelligence</h2>
+                        <p class="text-secondary text-sm mb-0">Search target accounts (BNY), executive decision makers (CEO, Robin Vince, Emily), social posts, and buying signals.</p>
                     </div>
 
                     <!-- Centered Search Card -->
-                    <div
-                        class="w-full max-w-4xl glass-card p-6 shadow-xl rounded-2xl border border-slate-200/80 bg-white">
+                    <div class="w-full max-w-4xl glass-card p-6 shadow-xl rounded-2xl border border-soft/80 bg-surface-primary">
                         <div class="row align-items-center g-3">
                             <div class="col-lg-7 col-md-6">
                                 <div class="search-input-wrap position-relative">
-                                    <i
-                                        class="bi bi-search text-slate-400 position-absolute left-3.5 top-1/2 -translate-y-1/2 fs-6"></i>
-                                    <input type="text"
-                                        placeholder="Search people (Robin Vince, CEO, Emily), accounts (BNY), posts, signals..."
-                                        id="dashboard-global-search"
-                                        class="w-full pl-11 pr-12 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-indigo-600 focus:bg-white text-sm shadow-inner transition-all">
-                                    <span
-                                        class="position-absolute right-3 top-1/2 -translate-y-1/2 text-xs bg-slate-200 text-slate-500 px-2 py-1 rounded font-mono">⌘K</span>
+                                    <i class="bi bi-search text-muted position-absolute left-3.5 top-1/2 -translate-y-1/2 fs-6"></i>
+                                    <input type="text" placeholder="Search people (Robin Vince, CEO, Emily), accounts (BNY), posts, signals..." id="dashboard-global-search" class="w-full pl-11 pr-12 py-3.5 bg-surface-secondary border border-soft rounded-xl text-primary focus:outline-none focus:border-strong focus:bg-surface-primary text-sm shadow-inner transition-all">
+                                    <span class="position-absolute right-3 top-1/2 -translate-y-1/2 text-xs bg-border-soft text-secondary px-2 py-1 rounded font-mono">⌘K</span>
                                 </div>
                             </div>
                             <div class="col-lg-3 col-md-3">
                                 <div class="flex gap-2">
-                                    <select id="search-filter-category"
-                                        class="form-select custom-form-select py-[13px] mb-0 w-full text-sm rounded-xl">
+                                    <select id="search-filter-category" class="form-select custom-form-select py-[13px] mb-0 w-full text-sm rounded-xl">
                                         <option value="all">All Intelligence</option>
                                         <option value="leads">People & Executives</option>
                                         <option value="posts">Social Posts & Speeches</option>
@@ -156,42 +129,27 @@
                                 </div>
                             </div>
                             <div class="col-lg-2 col-md-3">
-                                <button id="btn-dashboard-search-action"
-                                    class="btn btn-primary w-100 py-3 bg-indigo-600 border-0 rounded-xl text-sm font-semibold d-flex align-items-center justify-content-center gap-2 hover:bg-indigo-700 shadow-md">
+                                <button id="btn-dashboard-search-action" class="btn btn-primary w-100 py-3 bg-accent-primary border-0 rounded-xl text-sm font-semibold d-flex align-items-center justify-content-center gap-2 hover:bg-accent-primary-hover shadow-md">
                                     <i class="bi bi-search"></i> Search
                                 </button>
                             </div>
                         </div>
-
+                        
                         <!-- Search History tag cards -->
-                        <div
-                            class="mt-4 pt-3 border-t border-slate-100 d-flex align-items-center gap-2 flex-wrap text-xs text-slate-500">
-                            <span class="fw-semibold text-slate-600"><i
-                                    class="bi bi-clock-history me-1 text-indigo-500"></i> Quick Searches:</span>
+                        <div class="mt-4 pt-3 border-t border-soft d-flex align-items-center gap-2 flex-wrap text-xs text-secondary">
+                            <span class="fw-semibold text-secondary"><i class="bi bi-clock-history me-1 text-accent-primary"></i> Quick Searches:</span>
                             <div id="search-history-tags" class="d-flex gap-2 flex-wrap">
-                                <span
-                                    class="badge bg-slate-100 text-slate-700 border border-slate-200 px-2.5 py-1.5 rounded-lg cursor-pointer hover:bg-indigo-50 hover:text-indigo-600 search-quick-pill"
-                                    data-query="CEO">👑 CEO</span>
-                                <span
-                                    class="badge bg-slate-100 text-slate-700 border border-slate-200 px-2.5 py-1.5 rounded-lg cursor-pointer hover:bg-indigo-50 hover:text-indigo-600 search-quick-pill"
-                                    data-query="Robin Vince">🏢 Robin Vince</span>
-                                <span
-                                    class="badge bg-slate-100 text-slate-700 border border-slate-200 px-2.5 py-1.5 rounded-lg cursor-pointer hover:bg-indigo-50 hover:text-indigo-600 search-quick-pill"
-                                    data-query="post from robin vince">📄 Post from Robin Vince</span>
-                                <span
-                                    class="badge bg-slate-100 text-slate-700 border border-slate-200 px-2.5 py-1.5 rounded-lg cursor-pointer hover:bg-indigo-50 hover:text-indigo-600 search-quick-pill"
-                                    data-query="Emily Portney">👤 Emily Portney</span>
-                                <span
-                                    class="badge bg-slate-100 text-slate-700 border border-slate-200 px-2.5 py-1.5 rounded-lg cursor-pointer hover:bg-indigo-50 hover:text-indigo-600 search-quick-pill"
-                                    data-query="BNY">🌐 BNY</span>
+                                <span class="badge bg-surface-secondary text-primary border border-soft px-2.5 py-1.5 rounded-lg cursor-pointer hover:bg-accent-primary-soft hover:text-accent-primary search-quick-pill" data-query="CEO">👑 CEO</span>
+                                <span class="badge bg-surface-secondary text-primary border border-soft px-2.5 py-1.5 rounded-lg cursor-pointer hover:bg-accent-primary-soft hover:text-accent-primary search-quick-pill" data-query="Robin Vince">🏢 Robin Vince</span>
+                                <span class="badge bg-surface-secondary text-primary border border-soft px-2.5 py-1.5 rounded-lg cursor-pointer hover:bg-accent-primary-soft hover:text-accent-primary search-quick-pill" data-query="post from robin vince">📄 Post from Robin Vince</span>
+                                <span class="badge bg-surface-secondary text-primary border border-soft px-2.5 py-1.5 rounded-lg cursor-pointer hover:bg-accent-primary-soft hover:text-accent-primary search-quick-pill" data-query="Emily Portney">👤 Emily Portney</span>
+                                <span class="badge bg-surface-secondary text-primary border border-soft px-2.5 py-1.5 rounded-lg cursor-pointer hover:bg-accent-primary-soft hover:text-accent-primary search-quick-pill" data-query="BNY">🌐 BNY</span>
                             </div>
                         </div>
-
+                        
                         <!-- Dynamic Search Results Dropdown -->
-                        <div id="dashboard-search-results"
-                            class="mt-4 p-4 bg-slate-50 border border-slate-200 rounded-xl hidden">
-                            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2"
-                                id="search-results-title">Search Results (0)</div>
+                        <div id="dashboard-search-results" class="mt-4 p-4 bg-surface-secondary border border-soft rounded-xl hidden">
+                            <div class="text-xs font-bold text-muted uppercase tracking-wider mb-2" id="search-results-title">Search Results (0)</div>
                             <div id="search-results-list" class="space-y-2 max-h-80 overflow-y-auto">
                                 <!-- Dynamic Results inject here -->
                             </div>
@@ -202,208 +160,125 @@
 
             <!-- Universal AI Chatbot Assistant View Panel (ChatGPT Style) -->
             <div id="view-chat" class="view-panel">
-                <div class="d-flex gap-4 h-[calc(100vh-100px)]">
+                <div class="d-flex gap-4" style="height: calc(100vh - 120px);">
                     <!-- Left: Chat Area -->
-                    <div class="universal-chat-wrapper glass-card d-flex flex-column flex-grow-1 overflow-hidden rounded-2xl border border-slate-200 bg-white"
-                        style="flex: 1; min-width: 0;">
-                        <!-- Chat Header Bar -->
-                        <div
-                            class="chat-universal-header d-flex justify-content-between align-items-center px-6 py-3.5 border-b border-slate-100 bg-slate-50/80">
-                            <div class="d-flex align-items-center gap-3">
-                                <div
-                                    class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 d-flex align-items-center justify-content-center text-white shadow-sm">
-                                    <i class="bi bi-robot fs-5"></i>
-                                </div>
-                                <div>
-                                    <h5 class="mb-0 fw-bold text-slate-800 text-sm d-flex align-items-center gap-2">
-                                        Anna Intelligence Assistant
-                                        <span
-                                            class="badge bg-emerald-50 text-emerald-600 border border-emerald-200 text-[10px] font-normal px-2 py-0.5 rounded-full d-inline-flex align-items-center gap-1">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                            Live DB Connected
-                                        </span>
-                                    </h5>
-                                    <p class="text-xs text-slate-400 mb-0">Ask questions about target accounts,
-                                        executive personas, buying triggers, or tech initiatives.</p>
-                                </div>
-                            </div>
-                            <div class="d-flex align-items-center gap-2">
-                                <button id="btn-mute-anna"
-                                    class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs"
-                                    title="Mute/Unmute Anna">
-                                    <i class="bi bi-volume-up-fill" id="mute-icon"></i> <span
-                                        id="mute-label">Mute</span>
-                                </button>
-                                <button id="btn-clear-chat"
-                                    class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs"
-                                    title="Clear Conversation">
-                                    <i class="bi bi-trash3"></i> Clear Chat
-                                </button>
+                    <div class="universal-chat-wrapper glass-card d-flex flex-column flex-grow-1 overflow-hidden rounded-2xl border border-soft bg-surface-primary" style="flex: 1; min-width: 0;">
+                    <!-- Chat Header Bar -->
+                    <div class="chat-universal-header d-flex justify-content-between align-items-center px-6 py-3.5 border-b border-soft bg-surface-secondary/80">
+                        <div class="d-flex align-items-center gap-3">
+                            <div>
+                                <h5 class="mb-0 fw-medium text-primary text-lg d-flex align-items-center gap-3">
+                                    Anna Intelligence Assistant
+                                    <span class="badge bg-transparent text-success-dark text-[11px] font-normal px-0 d-inline-flex align-items-center gap-1.5">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-success animate-pulse"></span> Live Intelligence
+                                    </span>
+                                </h5>
+                                <p class="text-sm text-secondary mb-0 mt-1">Sales intelligence for accounts, executives, buying signals and technology initiatives.</p>
                             </div>
                         </div>
-
-                        <!-- Quick Starter Prompt Pills -->
-                        <div
-                            class="starter-pills-bar px-6 py-2 border-b border-slate-100 bg-white d-flex align-items-center gap-2 overflow-x-auto text-xs">
-                            <span class="text-slate-400 fw-semibold text-[11px] flex-shrink-0"><i
-                                    class="bi bi-lightbulb me-1 text-amber-500"></i> Suggestions:</span>
-                            <button class="starter-chip"
-                                data-prompt="Who is Emily Portney and what is her role at BNY?">🏢 Emily Portney
-                                (BNY)</button>
-                            <button class="starter-chip"
-                                data-prompt="Find all VPs and Managing Directors in Asset Servicing at BNY">👥 VPs in
-                                Asset Servicing</button>
-                            <button class="starter-chip"
-                                data-prompt="What are the highest urgency buying signals and tech initiatives for BNY?">⚡
-                                Buying Signals</button>
-                            <button class="starter-chip" data-prompt="Who is the CEO and President of BNY?">👑 CEO &
-                                Leadership</button>
-                            <button class="starter-chip"
-                                data-prompt="Give me a 360 overview of BNY Mellon including revenue, employees, and tech stack">🌐
-                                BNY 360 Overview</button>
-                        </div>
-
-                        <!-- Scrollable Chat Messages Container -->
-                        <div class="universal-messages-box flex-grow-1 p-6 overflow-y-auto" id="chat-messages-container"
-                            style="background: #fafafa;">
-                            <!-- Welcome Hero Message -->
-                            <div class="welcome-chat-hero text-center py-8 mx-auto max-w-lg" id="chat-welcome-hero">
-                                <div
-                                    class="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 d-inline-flex align-items-center justify-content-center fs-3 mb-3 shadow-sm">
-                                    <i class="bi bi-stars"></i>
-                                </div>
-                                <h4 class="fw-bold text-slate-800 text-base mb-1">How can I assist your sales team
-                                    today?</h4>
-                                <p class="text-xs text-slate-500 mb-4">I synthesize real-time data from your target
-                                    enterprise accounts, executive hierarchies, and sales signals into actionable
-                                    intelligence.</p>
-                            </div>
-
-                            <!-- Dynamic Messages Inject here -->
-                            <div id="universal-messages-list" class="space-y-4"></div>
-                        </div>
-
-                        <!-- Bottom Floating ChatGPT-Style Prompt Bar -->
-                        <div class="chat-universal-input-bar p-4 border-t border-slate-100 bg-white">
-                            <div class="max-w-4xl mx-auto">
-                                <div
-                                    class="d-flex align-items-center gap-2 bg-slate-50 border border-slate-200 rounded-2xl px-4 py-2.5 focus-within:border-indigo-600 focus-within:bg-white focus-within:ring-2 focus-within:ring-indigo-100 transition-all shadow-sm">
-                                    <input type="text" id="chat-input-field"
-                                        placeholder="Ask Anna anything about accounts, executives, buying triggers, or tech stacks... (Press Enter to send)"
-                                        class="form-control border-0 bg-transparent p-0 text-sm shadow-none flex-grow-1"
-                                        style="outline: none;">
-                                    <button id="send-chat-btn"
-                                        class="btn btn-primary d-flex align-items-center justify-content-center rounded-xl p-2 px-3.5 bg-indigo-600 border-0 hover:bg-indigo-700 shadow-sm"
-                                        title="Send Message (Enter)">
-                                        <i class="bi bi-send-fill text-white text-sm"></i>
-                                    </button>
-                                </div>
-                                <div class="d-flex align-items-center mt-2 px-1 text-[11px] text-slate-400 gap-3">
-                                    <button id="btn-start-anna"
-                                        class="btn btn-primary btn-sm px-3 py-1 fw-semibold rounded-pill d-flex align-items-center gap-1"
-                                        style="font-size: 0.75rem; white-space: nowrap;">
-                                        <i class="bi bi-play-fill"></i> Start Anna
-                                    </button>
-                                    <span>Powered by Sales AI Intelligence Engine & ChromaDB Vector Embeddings</span>
-                                    <span class="ms-auto">Press <kbd
-                                            class="px-1.5 py-0.5 bg-slate-100 border border-slate-200 rounded text-[10px] text-slate-600 font-mono">Enter
-                                            ↵</kbd> to send</span>
-                                </div>
-                            </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <button id="btn-mute-anna" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs" title="Mute/Unmute Anna">
+                                <i class="bi bi-volume-up-fill" id="mute-icon"></i> <span id="mute-label">Mute</span>
+                            </button>
+                            <button id="btn-clear-chat" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs" title="Clear Conversation">
+                                <i class="bi bi-trash3"></i> Clear Chat
+                            </button>
                         </div>
                     </div>
 
+                    <!-- Quick Starter Prompt Pills Removed -->
+
+                    <!-- Scrollable Chat Messages Container -->
+                    <div class="universal-messages-box flex-grow-1 p-6 overflow-y-auto" id="chat-messages-container" style="background: #fafafa;">
+                        <!-- Welcome Hero Message -->
+                        <!-- Dynamic Messages Inject here -->
+                        <div id="universal-messages-list" class="space-y-4"></div>
+                    </div>
+
+                    <!-- Bottom Floating ChatGPT-Style Prompt Bar -->
+                    <div class="chat-universal-input-bar p-5 border-t border-soft bg-surface-primary">
+                        <div class="max-w-4xl mx-auto">
+                            <div class="d-flex align-items-center gap-2 bg-surface-secondary border border-soft rounded-xl px-4 py-3 focus-within:border-strong focus-within:bg-surface-primary focus-within:ring-2 focus-within:ring-2 focus-within:ring-[rgba(138,98,72,0.12)] transition-all shadow-sm">
+                                <input type="text" id="chat-input-field" placeholder="Ask Anna anything about accounts, executives, buying triggers, or tech stacks..." class="form-control border-0 bg-transparent p-0 text-sm shadow-none flex-grow-1" style="outline: none;">
+                                <button id="send-chat-btn" class="btn btn-primary d-flex align-items-center justify-content-center rounded-lg p-2 px-3.5 bg-accent-primary border-0 hover:bg-[#4f4ccb] shadow-sm" title="Send Message (Enter)">
+                                    <i class="bi bi-send-fill text-white text-sm"></i>
+                                </button>
+                            </div>
+                            <div class="d-flex align-items-center mt-3 px-1 text-[11px] text-muted gap-3">
+                                <span class="ms-auto">Press <kbd class="px-1.5 py-0.5 bg-surface-secondary border border-soft rounded text-[10px] text-secondary font-mono">Enter ↵</kbd> to send</span>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+
                     <!-- Right: AI Avatar Video -->
-                    <div id="chat-video-panel"
-                        class="glass-card d-flex align-items-center justify-content-center rounded-2xl border border-slate-200 overflow-hidden"
-                        style="width: 320px; flex-shrink: 0; background: #0f0f1a; transition: all 0.4s ease;">
-                        <video id="chat-avatar-video" loop muted playsinline
-                            style="width: 100%; height: 100%; object-fit: cover;">
-                            <source src="asstes/Animated_woman_gesturing_and_spe…_202608181555.mp4" type="video/mp4">
-                        </video>
+                    <div id="chat-video-panel" class="d-flex flex-column bg-surface-primary border border-soft overflow-hidden rounded-2xl" style="width: 280px; flex-shrink: 0; transition: all 0.4s ease;">
+                        <div class="flex-grow-1 position-relative" style="background: var(--avatar-panel-bg);">
+                            <video id="chat-avatar-video" loop muted playsinline style="width: 100%; height: 100%; object-fit: cover;">
+                                <source src="asstes/anna_avatar.mp4" type="video/mp4">
+                            </video>
+                        </div>
+                        <div class="p-3 bg-surface-primary border-t border-soft shadow-sm d-flex flex-column gap-2 flex-shrink-0">
+                            <div>
+                                <h6 class="fw-medium text-primary mb-1">Anna</h6>
+                                <p class="text-xs text-secondary mb-0">Enterprise Sales Intelligence</p>
+                            </div>
+                            
+                            <button id="btn-start-anna" class="btn btn-sm btn-primary bg-accent-primary border-0 rounded-lg shadow-sm w-100 d-flex align-items-center justify-content-center gap-2 py-2">
+                                <i class="bi bi-play-circle-fill"></i> Start Anna
+                            </button>
+
+                            <div class="d-flex align-items-center gap-2 text-[11px] text-success-dark font-medium">
+                                <span class="w-1.5 h-1.5 rounded-full bg-success"></span> Ready
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Discovery View Panel -->
             <div id="view-discovery" class="view-panel">
-                <div class="max-w-7xl mx-auto space-y-6 pb-12">
-                    <!-- Discovery Header & Time Filters -->
-                    <div class="glass-card p-6">
-                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-4">
-                            <div>
-                                <div class="d-flex align-items-center gap-2 mb-1">
-                                    <div
-                                        class="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-600 d-flex align-items-center justify-content-center">
-                                        <i class="bi bi-compass fs-6"></i>
-                                    </div>
-                                    <h4 class="fw-bold text-slate-800 mb-0" style="font-size:1.25rem;">Enterprise
-                                        Discovery</h4>
-                                    <span
-                                        class="badge bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] px-2 py-0.5 rounded-full">Live
-                                        Pipeline</span>
-                                </div>
-                                <p class="text-xs text-slate-500 mb-0">Browse intelligence records organized by
-                                    discovery interval: Target Accounts, Lines of Business, Personas, and LinkedIn
-                                    Posts.</p>
-                            </div>
-
-                            <!-- Time Filters Strip -->
-                            <div
-                                class="d-flex align-items-center gap-2 bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
-                                <button
-                                    class="btn btn-sm px-3 py-1.5 rounded-xl text-xs fw-semibold discovery-time-filter active"
-                                    data-filter="daily" id="btn-disc-daily">
-                                    <i class="bi bi-calendar-day me-1"></i> Daily
-                                </button>
-                                <button
-                                    class="btn btn-sm px-3 py-1.5 rounded-xl text-xs fw-semibold discovery-time-filter"
-                                    data-filter="weekly" id="btn-disc-weekly">
-                                    <i class="bi bi-calendar-week me-1"></i> Weekly
-                                </button>
-                                <button
-                                    class="btn btn-sm px-3 py-1.5 rounded-xl text-xs fw-semibold discovery-time-filter"
-                                    data-filter="15days" id="btn-disc-15days">
-                                    <i class="bi bi-calendar2-range me-1"></i> 15 Days
-                                </button>
-                                <button
-                                    class="btn btn-sm px-3 py-1.5 rounded-xl text-xs fw-semibold discovery-time-filter"
-                                    data-filter="monthly" id="btn-disc-monthly">
-                                    <i class="bi bi-calendar-month me-1"></i> Monthly
-                                </button>
-                            </div>
+                <div class="p-4" style="max-width: 1200px; margin: 0 auto;">
+                    <!-- Header with Time Filters -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h4 class="fw-bold text-slate-800 mb-1" style="font-size:1.1rem;">
+                                <i class="bi bi-compass me-2 text-indigo-600"></i>Discovery
+                            </h4>
+                            <p class="text-xs text-slate-500 mb-0">Explore accounts, business lines, and personas with time-based filters.</p>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-sm discovery-time-filter active" data-filter="daily" style="border: 1px solid #6366f1; color: #6366f1; border-radius: 8px; font-size: 0.75rem;">Daily</button>
+                            <button class="btn btn-sm discovery-time-filter" data-filter="weekly" style="border: 1px solid #e2e8f0; color: #64748b; border-radius: 8px; font-size: 0.75rem;">Weekly</button>
+                            <button class="btn btn-sm discovery-time-filter" data-filter="monthly" style="border: 1px solid #e2e8f0; color: #64748b; border-radius: 8px; font-size: 0.75rem;">Monthly</button>
+                            <button class="btn btn-sm discovery-time-filter" data-filter="quarterly" style="border: 1px solid #e2e8f0; color: #64748b; border-radius: 8px; font-size: 0.75rem;">Quarterly</button>
                         </div>
                     </div>
 
                     <!-- Tab Navigation -->
                     <ul class="nav nav-pills mb-4 gap-2" id="discovery-tabs">
                         <li class="nav-item">
-                            <button class="nav-link active px-4 py-2 rounded-xl text-xs fw-semibold"
-                                data-bs-toggle="pill" data-bs-target="#disc-account">
+                            <button class="nav-link active px-4 py-2 rounded-xl text-xs fw-semibold" data-bs-toggle="pill" data-bs-target="#disc-account">
                                 <i class="bi bi-building me-1"></i> Account
                             </button>
                         </li>
                         <li class="nav-item">
-                            <button class="nav-link px-4 py-2 rounded-xl text-xs fw-semibold" data-bs-toggle="pill"
-                                data-bs-target="#disc-lob">
+                            <button class="nav-link px-4 py-2 rounded-xl text-xs fw-semibold" data-bs-toggle="pill" data-bs-target="#disc-lob">
                                 <i class="bi bi-layers me-1"></i> Line of Business
                             </button>
                         </li>
                         <li class="nav-item">
-                            <button class="nav-link px-4 py-2 rounded-xl text-xs fw-semibold" data-bs-toggle="pill"
-                                data-bs-target="#disc-sublob">
+                            <button class="nav-link px-4 py-2 rounded-xl text-xs fw-semibold" data-bs-toggle="pill" data-bs-target="#disc-sublob">
                                 <i class="bi bi-diagram-3 me-1"></i> Sub Line of Business
                             </button>
                         </li>
                         <li class="nav-item">
-                            <button class="nav-link px-4 py-2 rounded-xl text-xs fw-semibold" data-bs-toggle="pill"
-                                data-bs-target="#disc-persona">
+                            <button class="nav-link px-4 py-2 rounded-xl text-xs fw-semibold" data-bs-toggle="pill" data-bs-target="#disc-persona">
                                 <i class="bi bi-person-badge me-1"></i> Persona
                             </button>
                         </li>
                         <li class="nav-item">
-                            <button class="nav-link px-4 py-2 rounded-xl text-xs fw-semibold" data-bs-toggle="pill"
-                                data-bs-target="#disc-posts">
+                            <button class="nav-link px-4 py-2 rounded-xl text-xs fw-semibold" data-bs-toggle="pill" data-bs-target="#disc-posts">
                                 <i class="bi bi-linkedin me-1"></i> LinkedIn Posts
                             </button>
                         </li>
@@ -415,22 +290,12 @@
                         <div class="tab-pane fade show active" id="disc-account">
                             <div class="glass-card p-4">
                                 <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <h5 class="fw-bold text-slate-700 mb-0" style="font-size:0.95rem;">Target Accounts
-                                    </h5>
-                                    <span class="text-xs text-slate-400" id="disc-account-filter-label">Filter:
-                                        Daily</span>
+                                    <h5 class="fw-bold text-slate-700 mb-0" style="font-size:0.95rem;">Target Accounts</h5>
+                                    <span class="text-xs text-slate-400" id="disc-account-filter-label">Filter: Daily</span>
                                 </div>
                                 <div id="disc-account-content" class="table-responsive">
                                     <table class="table custom-table align-middle text-sm">
-                                        <thead>
-                                            <tr>
-                                                <th>Account</th>
-                                                <th>Industry</th>
-                                                <th>Employees</th>
-                                                <th>Revenue</th>
-                                                <th>HQ</th>
-                                            </tr>
-                                        </thead>
+                                        <thead><tr><th>Account</th><th>Industry</th><th>Employees</th><th>Revenue</th><th>HQ</th></tr></thead>
                                         <tbody id="disc-account-body"><!-- Dynamic --></tbody>
                                     </table>
                                 </div>
@@ -441,21 +306,12 @@
                         <div class="tab-pane fade" id="disc-lob">
                             <div class="glass-card p-4">
                                 <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <h5 class="fw-bold text-slate-700 mb-0" style="font-size:0.95rem;">Lines of Business
-                                    </h5>
+                                    <h5 class="fw-bold text-slate-700 mb-0" style="font-size:0.95rem;">Lines of Business</h5>
                                     <span class="text-xs text-slate-400" id="disc-lob-filter-label">Filter: Daily</span>
                                 </div>
                                 <div id="disc-lob-content" class="table-responsive">
                                     <table class="table custom-table align-middle text-sm">
-                                        <thead>
-                                            <tr>
-                                                <th>LOB Name</th>
-                                                <th>Account</th>
-                                                <th>Business Head</th>
-                                                <th>Tech Leader</th>
-                                                <th>Platforms</th>
-                                            </tr>
-                                        </thead>
+                                        <thead><tr><th>LOB Name</th><th>Account</th><th>Business Head</th><th>Tech Leader</th><th>Platforms</th></tr></thead>
                                         <tbody id="disc-lob-body"><!-- Dynamic --></tbody>
                                     </table>
                                 </div>
@@ -466,22 +322,12 @@
                         <div class="tab-pane fade" id="disc-sublob">
                             <div class="glass-card p-4">
                                 <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <h5 class="fw-bold text-slate-700 mb-0" style="font-size:0.95rem;">Sub Lines of
-                                        Business</h5>
-                                    <span class="text-xs text-slate-400" id="disc-sublob-filter-label">Filter:
-                                        Daily</span>
+                                    <h5 class="fw-bold text-slate-700 mb-0" style="font-size:0.95rem;">Sub Lines of Business</h5>
+                                    <span class="text-xs text-slate-400" id="disc-sublob-filter-label">Filter: Daily</span>
                                 </div>
                                 <div id="disc-sublob-content" class="table-responsive">
                                     <table class="table custom-table align-middle text-sm">
-                                        <thead>
-                                            <tr>
-                                                <th>Sub LOB</th>
-                                                <th>Parent LOB</th>
-                                                <th>Account</th>
-                                                <th>Head</th>
-                                                <th>Notes</th>
-                                            </tr>
-                                        </thead>
+                                        <thead><tr><th>Sub LOB</th><th>Parent LOB</th><th>Account</th><th>Head</th><th>Notes</th></tr></thead>
                                         <tbody id="disc-sublob-body"><!-- Dynamic --></tbody>
                                     </table>
                                 </div>
@@ -493,21 +339,11 @@
                             <div class="glass-card p-4">
                                 <div class="d-flex justify-content-between align-items-center mb-3">
                                     <h5 class="fw-bold text-slate-700 mb-0" style="font-size:0.95rem;">Personas</h5>
-                                    <span class="text-xs text-slate-400" id="disc-persona-filter-label">Filter:
-                                        Daily</span>
+                                    <span class="text-xs text-slate-400" id="disc-persona-filter-label">Filter: Daily</span>
                                 </div>
                                 <div id="disc-persona-content" class="table-responsive">
                                     <table class="table custom-table align-middle text-sm">
-                                        <thead>
-                                            <tr>
-                                                <th>Name</th>
-                                                <th>Title</th>
-                                                <th>Organization</th>
-                                                <th>Seniority</th>
-                                                <th>Lead Score</th>
-                                                <th>Email</th>
-                                            </tr>
-                                        </thead>
+                                        <thead><tr><th>Name</th><th>Title</th><th>Organization</th><th>Seniority</th><th>Lead Score</th><th>Email</th></tr></thead>
                                         <tbody id="disc-persona-body"><!-- Dynamic --></tbody>
                                     </table>
                                 </div>
@@ -521,8 +357,7 @@
                                     <h5 class="fw-bold text-slate-700 mb-0" style="font-size:0.95rem;">
                                         <i class="bi bi-linkedin text-blue-600 me-2"></i>LinkedIn Posts
                                     </h5>
-                                    <span class="text-xs text-slate-400" id="disc-posts-filter-label">Filter:
-                                        Daily</span>
+                                    <span class="text-xs text-slate-400" id="disc-posts-filter-label">Filter: Daily</span>
                                 </div>
                                 <div id="disc-posts-content" class="space-y-3">
                                     <!-- Dynamic LinkedIn post cards -->
@@ -539,20 +374,16 @@
                     <!-- Top Breadcrumb & Action Bar -->
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                         <div class="d-flex align-items-center gap-3">
-                            <button id="btn-profile-back"
-                                class="btn btn-sm btn-white border border-slate-200 shadow-2xs d-flex align-items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-indigo-600 transition-all">
+                            <button id="btn-profile-back" class="btn btn-sm btn-white border border-soft shadow-2xs d-flex align-items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold text-primary hover:bg-surface-secondary hover:text-accent-primary transition-all">
                                 <i class="bi bi-arrow-left"></i>
                                 <span>Back to Search Hub</span>
                             </button>
-                            <div class="text-xs text-slate-400 d-none d-sm-block">
-                                <span>Search Intelligence</span> <span class="mx-1">/</span> <span
-                                    class="text-slate-600 font-medium" id="profile-breadcrumb-name">Executive
-                                    Profile</span>
+                            <div class="text-xs text-muted d-none d-sm-block">
+                                <span>Search Intelligence</span> <span class="mx-1">/</span> <span class="text-secondary font-medium" id="profile-breadcrumb-name">Executive Profile</span>
                             </div>
                         </div>
                         <div class="d-flex align-items-center gap-2">
-                            <button id="btn-profile-ask-anna"
-                                class="btn btn-sm btn-primary bg-indigo-600 border-0 hover:bg-indigo-700 shadow-sm d-flex align-items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-white">
+                            <button id="btn-profile-ask-anna" class="btn btn-sm btn-primary bg-accent-primary border-0 hover:bg-accent-primary-hover shadow-sm d-flex align-items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-white">
                                 <i class="bi bi-stars"></i>
                                 <span>Ask Anna About This Lead</span>
                             </button>
@@ -571,10 +402,8 @@
                 <div class="glass-card p-6">
                     <div class="flex justify-between items-center mb-6">
                         <div>
-                            <h4 class="text-slate-800 mb-1"><i class="bi bi-card-list text-purpleNeon me-2"></i>Leads
-                                Qualification Board</h4>
-                            <p class="text-xs text-slate-500 m-0">All corporate inquiries logged and categorized by Anna
-                                in the current sales cycle.</p>
+                            <h4 class="text-primary mb-1"><i class="bi bi-card-list text-purpleNeon me-2"></i>Leads Qualification Board</h4>
+                            <p class="text-xs text-secondary m-0">All corporate inquiries logged and categorized by Anna in the current sales cycle.</p>
                         </div>
 
                         <div class="w-72">
@@ -608,23 +437,20 @@
             <!-- Settings View Panel -->
             <div id="view-settings" class="view-panel">
                 <div class="glass-card p-6">
-                    <h4 class="text-slate-800 mb-6"><i class="bi bi-sliders text-tealNeon me-2"></i>Configure AI Sales
-                        Specialist</h4>
-
+                    <h4 class="text-primary mb-6"><i class="bi bi-sliders text-tealNeon me-2"></i>Configure AI Sales Specialist</h4>
+                    
                     <form id="agent-config-form">
                         <div class="row g-4">
                             <!-- Left Column Inputs -->
                             <div class="col-lg-6">
                                 <div class="mb-4">
                                     <label class="custom-form-label">Agent Representative Name</label>
-                                    <input type="text" id="setting-agent-name" class="form-control custom-form-input"
-                                        required>
+                                    <input type="text" id="setting-agent-name" class="form-control custom-form-input" required>
                                 </div>
 
                                 <div class="mb-4">
                                     <label class="custom-form-label">Specialist Role Title</label>
-                                    <input type="text" id="setting-agent-role" class="form-control custom-form-input"
-                                        required>
+                                    <input type="text" id="setting-agent-role" class="form-control custom-form-input" required>
                                 </div>
 
                                 <div class="mb-4">
@@ -632,9 +458,8 @@
                                         <span>Model Temperature (Creativity)</span>
                                         <span class="text-teal-600 font-semibold" id="setting-temp-val">0.2</span>
                                     </label>
-                                    <input type="range" class="form-range" min="0" max="1" step="0.05"
-                                        id="setting-agent-temp">
-                                    <div class="flex justify-between text-xs text-slate-400 mt-1">
+                                    <input type="range" class="form-range" min="0" max="1" step="0.05" id="setting-agent-temp">
+                                    <div class="flex justify-between text-xs text-muted mt-1">
                                         <span>Strict & Safe (0.0)</span>
                                         <span>Creative (1.0)</span>
                                     </div>
@@ -655,83 +480,67 @@
                             <div class="col-lg-6">
                                 <div class="mb-4 h-full flex flex-col">
                                     <label class="custom-form-label">Core System Instructions & Prompt Guide</label>
-                                    <textarea id="setting-system-prompt"
-                                        class="form-control custom-form-input flex-grow h-72 resize-none"
-                                        style="min-height: 280px;"></textarea>
-                                    <p class="text-xs text-slate-400 mt-2">Adjust core system directives guiding Anna's
-                                        responses, compliance protocols, and competitor positioning parameters.</p>
+                                    <textarea id="setting-system-prompt" class="form-control custom-form-input flex-grow h-72 resize-none" style="min-height: 280px;"></textarea>
+                                    <p class="text-xs text-muted mt-2">Adjust core system directives guiding Anna's responses, compliance protocols, and competitor positioning parameters.</p>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="border-t border-slate-200 pt-4 mt-4 flex justify-end">
-                            <button type="submit" class="btn btn-primary px-4 py-2"
-                                style="background-color: var(--color-primary); border-color: var(--color-primary);">
+                        <div class="border-t border-soft pt-4 mt-4 flex justify-end">
+                            <button type="submit" class="btn btn-primary px-4 py-2" style="background-color: var(--color-primary); border-color: var(--color-primary);">
                                 <i class="bi bi-cloud-arrow-up me-2"></i>Save Configuration
                             </button>
                         </div>
                     </form>
-                    <!-- Accounts View Panel -->
-                    <div id="view-accounts" class="view-panel"></div>
+            <!-- Accounts View Panel -->
+            <div id="view-accounts" class="view-panel"></div>
 
-                    <!-- Hierarchy View Panel -->
-                    <div id="view-hierarchy" class="view-panel"></div>
+            <!-- Hierarchy View Panel -->
+            <div id="view-hierarchy" class="view-panel"></div>
 
-                    <!-- Social View Panel -->
-                    <div id="view-social" class="view-panel"></div>
+            <!-- Social View Panel -->
+            <div id="view-social" class="view-panel"></div>
 
-                    <!-- Signals View Panel -->
-                    <div id="view-signals" class="view-panel"></div>
+            <!-- Signals View Panel -->
+            <div id="view-signals" class="view-panel"></div>
 
-                    <!-- Pipeline View Panel -->
-                    <div id="view-pipeline" class="view-panel"></div>
+            <!-- Pipeline View Panel -->
+            <div id="view-pipeline" class="view-panel"></div>
 
-                    <!-- Logs View Panel -->
-                    <div id="view-logs" class="view-panel"></div>
+            <!-- Logs View Panel -->
+            <div id="view-logs" class="view-panel"></div>
         </main>
     </div>
 
     <!-- Universal Entity Profile & 360 Dossier Modal -->
-    <div class="modal fade" id="entityProfileModal" tabindex="-1" aria-labelledby="entityProfileModalLabel"
-        aria-hidden="true">
+    <div class="modal fade" id="entityProfileModal" tabindex="-1" aria-labelledby="entityProfileModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow-2xl rounded-2xl overflow-hidden">
-                <div
-                    class="modal-header bg-gradient-to-r from-slate-900 via-indigo-950 to-indigo-900 text-white p-5 border-0">
+                <div class="modal-header bg-accent-primary text-white p-5 border-0">
                     <div class="d-flex align-items-center gap-3 w-100">
-                        <div id="modal-avatar-box"
-                            class="w-14 h-14 rounded-2xl bg-white/10 border border-white/20 d-flex align-items-center justify-content-center text-white fw-bold fs-4 flex-shrink-0 shadow-inner">
+                        <div id="modal-avatar-box" class="w-14 h-14 rounded-2xl bg-surface-primary/10 border border-white/20 d-flex align-items-center justify-content-center text-white fw-bold fs-4 flex-shrink-0 shadow-inner">
                             RV
                         </div>
                         <div class="flex-grow-1 min-w-0">
                             <div class="d-flex align-items-center gap-2 mb-1">
-                                <h5 class="modal-title fw-bold text-white fs-5 mb-0 text-truncate"
-                                    id="modal-entity-name">Robin Vince</h5>
-                                <span id="modal-entity-badge"
-                                    class="badge bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs px-2 py-0.5 rounded-full">CXO
-                                    • Hot Lead</span>
+                                <h5 class="modal-title fw-bold text-white fs-5 mb-0 text-truncate" id="modal-entity-name">Robin Vince</h5>
+                                <span id="modal-entity-badge" class="badge bg-success/20 text-emerald-300 border border-emerald-500/30 text-xs px-2 py-0.5 rounded-full">CXO • Hot Lead</span>
                             </div>
-                            <p class="text-xs text-indigo-200 mb-0 text-truncate" id="modal-entity-subtitle">President &
-                                Chief Executive Officer (CEO) • BNY</p>
+                            <p class="text-xs text-indigo-200 mb-0 text-truncate" id="modal-entity-subtitle">President & Chief Executive Officer (CEO) • BNY</p>
                         </div>
-                        <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="modal"
-                            aria-label="Close"></button>
+                        <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                 </div>
-                <div class="modal-body p-5 bg-slate-50 overflow-y-auto" style="max-height: 68vh;"
-                    id="modal-entity-body">
+                <div class="modal-body p-5 bg-surface-secondary overflow-y-auto" style="max-height: 68vh;" id="modal-entity-body">
                     <!-- Dynamic Profile Tabs / Cards Inject Here -->
                 </div>
-                <div class="modal-footer bg-white px-5 py-3 border-t border-slate-100 d-flex justify-content-between">
-                    <div class="text-xs text-slate-400">
-                        <i class="bi bi-shield-check text-emerald-500 me-1"></i>Live Intelligence Warehouse Profile
+                <div class="modal-footer bg-surface-primary px-5 py-3 border-t border-soft d-flex justify-content-between">
+                    <div class="text-xs text-muted">
+                        <i class="bi bi-shield-check text-success me-1"></i>Live Intelligence Warehouse Profile
                     </div>
                     <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-sm btn-outline-secondary px-3 rounded-lg"
-                            data-bs-dismiss="modal">Close</button>
-                        <button type="button"
-                            class="btn btn-sm btn-primary px-4 rounded-lg bg-indigo-600 border-0 hover:bg-indigo-700 shadow-sm d-flex align-items-center gap-1.5"
-                            id="modal-ask-anna-btn">
+                        <button type="button" class="btn btn-sm btn-outline-secondary px-3 rounded-lg" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-sm btn-primary px-4 rounded-lg bg-accent-primary border-0 hover:bg-accent-primary-hover shadow-sm d-flex align-items-center gap-1.5" id="modal-ask-anna-btn">
                             <i class="bi bi-stars"></i>
                             <span>Ask Anna About This</span>
                         </button>
@@ -762,5 +571,4 @@
     <script src="js/mockData.js?v=2.5.0"></script>
     <script src="js/app.js?v=2.5.0"></script>
 </body>
-
 </html>
