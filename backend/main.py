@@ -79,6 +79,18 @@ app.include_router(tasks_router, prefix=f"{settings.API_V1_PREFIX}/tasks", tags=
 
 # AI Sales Chatbot & Semantic Search (ChromaDB)
 app.include_router(chatbot_router, prefix=f"{settings.API_V1_PREFIX}/chatbot", tags=["AI Sales Chatbot"])
+app.include_router(chatbot_router, prefix="/chatbot", tags=["AI Sales Chatbot Root Alias"])
+
+from backend.database import SessionLocal
+from backend.services.vector_store_service import get_vector_collection, register_cdc_event_listeners
+
+@app.on_event("startup")
+def on_startup():
+    """Binds real-time CDC listeners on application boot."""
+    try:
+        register_cdc_event_listeners()
+    except Exception:
+        pass
 
 
 import os
@@ -91,10 +103,16 @@ FRONTEND_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "fronten
 if os.path.exists(FRONTEND_DIR):
     css_dir = os.path.join(FRONTEND_DIR, "css")
     js_dir = os.path.join(FRONTEND_DIR, "js")
+    asstes_dir = os.path.join(FRONTEND_DIR, "asstes")
+    assets_dir = os.path.join(FRONTEND_DIR, "assets")
     if os.path.exists(css_dir):
         app.mount("/css", StaticFiles(directory=css_dir), name="css")
     if os.path.exists(js_dir):
         app.mount("/js", StaticFiles(directory=js_dir), name="js")
+    if os.path.exists(asstes_dir):
+        app.mount("/asstes", StaticFiles(directory=asstes_dir), name="asstes")
+    if os.path.exists(assets_dir):
+        app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
 
 @app.get("/")
 def read_root():

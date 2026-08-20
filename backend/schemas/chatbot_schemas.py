@@ -102,6 +102,7 @@ class ChatbotPostResult(BaseModel):
 class ChatbotQueryRequest(BaseModel):
     message: Optional[str] = Field(None, description="Natural language question or search prompt from sales rep")
     query: Optional[str] = Field(None, description="Alias for message parameter")
+    session_id: Optional[str] = Field("default_session", description="Conversation session ID for multi-turn context and coreference resolution")
     account_id: Optional[UUID] = Field(None, description="Optional account ID to constrain search to a specific organization")
     account_name: Optional[str] = Field(None, description="Optional account name filter (e.g. 'BNY', 'Goldman Sachs')")
     include_dossier: bool = Field(True, description="Include deep persona & executive dossier cards")
@@ -118,6 +119,9 @@ class ChatbotQueryResponse(BaseModel):
     response: Optional[str] = None  # Frontend compatibility alias
     executive_summary: Optional[str] = None  # 3-4 line quick executive briefing
     intent_detected: str  # e.g. "social_intelligence", "person_lookup", "role_search", "org_lookup", "signal_search", "hierarchy_lookup"
+    session_id: Optional[str] = "default_session"
+    cache_hit: bool = False
+    latency_ms: Optional[float] = None
     processing_steps: List[str] = Field(default_factory=list)  # Visual process tags / thoughts
     matched_people_count: int = 0
     matched_organizations_count: int = 0
@@ -130,6 +134,7 @@ class ChatbotQueryResponse(BaseModel):
     signals: List[ChatbotSignalResult] = Field(default_factory=list)
     results: Optional[Dict[str, Any]] = None  # Frontend compatibility container
     suggested_followups: List[str] = Field(default_factory=list)
+
 
 
 # ── Structured People Search Request ───────────────
@@ -163,3 +168,21 @@ class ChatbotStarterSuggestion(BaseModel):
 
 class ChatbotSuggestionsResponse(BaseModel):
     suggestions: List[ChatbotStarterSuggestion]
+
+
+# ── Streaming Real-Time Execution Event Models ─────
+class ProcessStepEvent(BaseModel):
+    step_id: str
+    title: str
+    status: str = "completed"  # in_progress, completed, failed
+    details: Optional[str] = None
+    icon: Optional[str] = None
+
+
+class ChatbotStreamEvent(BaseModel):
+    event: str  # "step_started", "step_completed", "final_response", "error"
+    step: Optional[ProcessStepEvent] = None
+    data: Optional[Dict[str, Any]] = None
+    reply: Optional[str] = None
+    executive_summary: Optional[str] = None
+

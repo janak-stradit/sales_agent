@@ -14,6 +14,7 @@ Allows sales teams to:
 from typing import List, Optional, Dict, Any
 from uuid import UUID
 from fastapi import APIRouter, Depends, Query, HTTPException, status
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
@@ -31,12 +32,14 @@ from backend.schemas.chatbot_schemas import (
 )
 from backend.services.chatbot_service import (
     process_chatbot_query,
+    stream_chatbot_query,
     search_people_structured,
     get_chatbot_starter_prompts,
 )
 from backend.services.vector_store_service import (
     semantic_search,
     index_all_warehouse_data,
+    auto_sync_vector_store,
     get_vector_store_stats,
 )
 
@@ -57,19 +60,15 @@ def handle_chatbot_message(
 ):
     """
     💬 Primary Conversational Sales Chatbot Endpoint (Hybrid Search):
-    
-    Combines ChromaDB vector semantic similarity with structured PostgreSQL database queries.
-    Accepts natural language questions from sales reps, such as:
-      - *"Who is the CEO of BNY?"*
-      - *"Show me all VPs in Asset Servicing"*
-      - *"Find decision makers with lead score > 80 at BNY"*
-      - *"What is Emily Portney's communication style and background?"*
-      - *"What are the buying signals and tech initiatives for BNY?"*
-    
-    Returns a conversational assistant reply plus structured executive dossier cards,
-    organization profiles, lines of business, and suggested follow-ups.
     """
-    return process_chatbot_query(db, payload)
+    try:
+        return process_chatbot_query(db, payload)
+    except Exception as e:
+        logger.error(f"Error in handle_chatbot_message: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Chatbot message processing failed: {str(e)}"
+        )
 
 
 @router.post("/query", response_model=ChatbotQueryResponse, status_code=status.HTTP_200_OK)
@@ -78,7 +77,47 @@ def handle_chatbot_query_alias(
     db: Session = Depends(get_db)
 ):
     """Alias for `/message` endpoint to support `/query` integrations."""
-    return process_chatbot_query(db, payload)
+    try:
+        return process_chatbot_query(db, payload)
+    except Exception as e:
+        logger.error(f"Error in handle_chatbot_query_alias: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Chatbot query processing failed: {str(e)}"
+        )
+
+
+@router.post("/stream", status_code=status.HTTP_200_OK)
+async def handle_chatbot_stream(
+    payload: ChatbotQueryRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    ⚡ Real-Time Streaming Chatbot Thought Chain (Server-Sent Events / SSE):
+    
+    Streams real-time execution steps chunk-by-chunk:
+      - `step_started`: Query & intent parsing
+      - `step_completed`: Vector embeddings search
+      - `step_completed`: PostgreSQL relational verification
+      - `final_response`: 3-line executive summary, full synthesis, and dossier payload
+    """
+    return StreamingResponse(
+        stream_chatbot_query(db, payload),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no"
+        }
+    )
+
+
+@router.post("/sync-vectors", status_code=status.HTTP_200_OK)
+def handle_sync_vectors(
+    db: Session = Depends(get_db)
+):
+    """Auto-populates ChromaDB vector store if uninitialized."""
+    return auto_sync_vector_store(db)
 
 
 @router.post("/semantic-search", status_code=status.HTTP_200_OK)

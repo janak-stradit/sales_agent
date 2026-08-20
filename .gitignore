@@ -43,3 +43,7 @@ migrations/versions/__pycache__/
 .obsidian/
 .DS_Store
 Thumbs.db
+
+# Vector Store & Local Scratch
+chroma_db/
+scratch/

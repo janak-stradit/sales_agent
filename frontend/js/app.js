@@ -32,7 +32,7 @@ $(document).ready(function () {
     $('.menu-link').on('click', function (e) {
         e.preventDefault();
         const targetView = $(this).data('view');
-        if (!targetView || (targetView !== 'dashboard' && targetView !== 'chat')) return;
+        if (!targetView || (targetView !== 'dashboard' && targetView !== 'chat' && targetView !== 'discovery')) return;
 
         // Update menu active class
         $('.menu-item').removeClass('active');
@@ -41,7 +41,8 @@ $(document).ready(function () {
         // Update header page title context
         const viewTitles = {
             'dashboard': 'Executive Overview',
-            'chat': 'Live Agent Playground'
+            'chat': 'Live Agent Playground',
+            'discovery': 'Discovery'
         };
         $('#page-title').text(viewTitles[targetView] || 'Executive Overview');
 
@@ -60,6 +61,8 @@ $(document).ready(function () {
             setTimeout(() => $('#chat-input-field').focus(), 50);
         } else if (targetView === 'leads') {
             renderLeadsTable();
+        } else if (targetView === 'discovery') {
+            if (typeof loadDiscoveryData === 'function') loadDiscoveryData();
         }
 
         // Dynamically load page module if it exists
@@ -467,8 +470,8 @@ $(document).ready(function () {
             }
         }, 500);
 
-        // Call Live Backend
-        API.post('/chatbot/query', { query: query }).then(res => {
+        // Call Live Backend with Active Session ID
+        API.post('/chatbot/query', { query: query, session_id: 'anna_web_session' }).then(res => {
             clearInterval(loaderInterval);
             $('#universal-chat-loader').remove();
             const replyTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -487,6 +490,8 @@ $(document).ready(function () {
             });
 
             renderUniversalChat();
+            // Speak the reply via natural female TTS voice and animate avatar video
+            speakAnnaReply(botReply);
         }).catch(err => {
             clearInterval(loaderInterval);
             $('#universal-chat-loader').remove();
@@ -505,8 +510,161 @@ $(document).ready(function () {
                 followups: ["Who is Emily Portney?", "Show buying signals for BNY"]
             });
             renderUniversalChat();
+            speakAnnaReply(`I received your query regarding "${query}".`);
         });
     }
+
+    // ==========================================
+    // Robust Female TTS Voice Selector (Anna)
+    // ==========================================
+    let cachedVoices = [];
+    function loadVoices() {
+        if ('speechSynthesis' in window) {
+            cachedVoices = speechSynthesis.getVoices();
+        }
+    }
+    if ('speechSynthesis' in window) {
+        loadVoices();
+        speechSynthesis.onvoiceschanged = loadVoices;
+    }
+
+    function getFemaleVoice() {
+        const voices = cachedVoices.length ? cachedVoices : (window.speechSynthesis ? window.speechSynthesis.getVoices() : []);
+        if (!voices || voices.length === 0) return null;
+
+        // 1. High-priority dedicated female English voices
+        const femaleVoiceNames = [
+            'aria', 'jenny', 'zira', 'samantha', 'victoria', 'karen', 'moira',
+            'google uk english female', 'google us english', 'microsoft zira',
+            'microsoft jenny', 'microsoft aria', 'female'
+        ];
+
+        for (const name of femaleVoiceNames) {
+            const match = voices.find(v => v.name.toLowerCase().includes(name) && (v.lang.startsWith('en') || !v.lang));
+            if (match) return match;
+        }
+
+        // 2. Filter out known male voice identifiers
+        const maleNames = ['david', 'mark', 'george', 'guy', 'male', 'richard', 'james', 'stefan', 'paul'];
+        const nonMaleEn = voices.find(v => v.lang.startsWith('en') && !maleNames.some(m => v.name.toLowerCase().includes(m)));
+        if (nonMaleEn) return nonMaleEn;
+
+        // 3. Fallback to any English voice
+        return voices.find(v => v.lang.startsWith('en')) || voices[0] || null;
+    }
+
+    // ==========================================
+    // Anna TTS — Speak any reply with Avatar Video
+    // ==========================================
+    function speakAnnaReply(text) {
+        const vid = document.getElementById('chat-avatar-video');
+        if (!('speechSynthesis' in window)) return;
+
+        // Clean markdown/HTML for natural speech
+        const cleanText = text.replace(/<[^>]*>/g, '').replace(/\*\*/g, '').replace(/\*/g, '').replace(/•/g, '').replace(/`/g, '').replace(/\n/g, '. ').replace(/\s+/g, ' ').trim();
+        if (!cleanText) return;
+
+        // Play avatar video while speaking
+        if (vid) {
+            try { vid.play(); } catch (e) { }
+        }
+
+        const utterance = new SpeechSynthesisUtterance(cleanText);
+        utterance.rate = 0.95;
+        utterance.pitch = 1.15; // Set higher pitch for natural female tone
+        utterance.lang = 'en-US';
+
+        const femaleVoice = getFemaleVoice();
+        if (femaleVoice) {
+            utterance.voice = femaleVoice;
+        }
+
+        utterance.onend = function () {
+            if (vid) vid.pause();
+        };
+
+        speechSynthesis.cancel();
+        speechSynthesis.speak(utterance);
+    }
+
+    // ==========================================
+    // Anna TTS Introduction Script
+    // ==========================================
+    const annaScript = [
+        "Hi! I'm Anna, your AI-powered sales intelligence agent.",
+        "I can search your entire enterprise database in seconds — executives, accounts, buying signals, everything.",
+        "Just ask me about any company, role, or person. For example, try asking who the CEO is or find all VPs.",
+        "I pull real-time data from your CRM, vector embeddings, and social intelligence feeds.",
+        "Let's get started — type your first query below and I'll find exactly what you need."
+    ];
+
+    $('#btn-start-anna').on('click', function () {
+        $(this).prop('disabled', true).html('<i class="bi bi-mic-fill me-1 text-danger animate-pulse"></i> Speaking...');
+        const vid = document.getElementById('chat-avatar-video');
+        const $msgList = $('#universal-messages-list');
+        let idx = 0;
+
+        function speakNext() {
+            if (idx >= annaScript.length) {
+                if (vid) vid.pause();
+                $msgList.append(`
+                    <div class="universal-msg-row">
+                        <div class="universal-bot-avatar"><i class="bi bi-robot"></i></div>
+                        <div class="universal-bot-bubble text-success fw-semibold" style="font-size:0.85rem;">
+                            <i class="bi bi-check-circle me-1"></i>Introduction complete. You can start chatting now!
+                        </div>
+                    </div>
+                `);
+                scrollUniversalChatToBottom();
+                $('#btn-start-anna').text('Done').removeClass('btn-primary').addClass('btn-success').prop('disabled', true);
+                return;
+            }
+
+            const sentence = annaScript[idx];
+            $msgList.append(`
+                <div class="universal-msg-row">
+                    <div class="universal-bot-avatar"><i class="bi bi-robot"></i></div>
+                    <div class="universal-bot-bubble" style="font-size:0.88rem;">${sentence}</div>
+                </div>
+            `);
+            scrollUniversalChatToBottom();
+
+            if (vid) {
+                try { vid.play(); } catch (e) { }
+            }
+
+            const utterance = new SpeechSynthesisUtterance(sentence);
+            utterance.rate = 0.95;
+            utterance.pitch = 1.15; // Set higher pitch for natural female tone
+            utterance.lang = 'en-US';
+
+            const femaleVoice = getFemaleVoice();
+            if (femaleVoice) {
+                utterance.voice = femaleVoice;
+            }
+
+            utterance.onend = function () {
+                if (vid) vid.pause();
+                idx++;
+                setTimeout(speakNext, 500);
+            };
+
+            speechSynthesis.speak(utterance);
+        }
+
+        if (cachedVoices.length === 0 && 'speechSynthesis' in window) {
+            speechSynthesis.onvoiceschanged = function () {
+                loadVoices();
+                speakNext();
+            };
+            loadVoices();
+            if (cachedVoices.length > 0) {
+                speakNext();
+            }
+        } else {
+            speakNext();
+        }
+    });
 
     // Send button & Enter key
     $('#send-chat-btn').on('click', function () {

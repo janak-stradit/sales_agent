@@ -305,6 +305,54 @@ def seed_enterprise_accounts():
                         "buyer_roles": ["Regional Head"],
                         "tech_stack": ["Global Custody", "Cross-Border Payments"],
                         "education_summary": "American University of Beirut (BA)"
+                    },
+                    {
+                        "first_name": "Dermot",
+                        "last_name": "McDonogh",
+                        "title": "Senior Executive Vice President and Chief Financial Officer (CFO)",
+                        "seniority_tier": "CXO",
+                        "decision_authority": "final",
+                        "sub_lob_name": "Finance & Treasury",
+                        "location": "New York, USA",
+                        "email": "dermot.mcdonogh@bny.com",
+                        "phone": "+1 212-495-1784",
+                        "lead_score": 94,
+                        "lead_status": "Hot",
+                        "buyer_roles": ["CFO", "Budget Holder", "Final Authority", "Key Decision Maker"],
+                        "tech_stack": ["Oracle Financial Services", "SAP ERP", "Treasury Workstation", "Snowflake"],
+                        "education_summary": "Pace University (BBA), Harvard Business School (AMP)"
+                    },
+                    {
+                        "first_name": "J. Kevin",
+                        "last_name": "McCarthy",
+                        "title": "Senior Executive Vice President and General Counsel",
+                        "seniority_tier": "CXO",
+                        "decision_authority": "veto",
+                        "sub_lob_name": "Legal & Compliance",
+                        "location": "New York, USA",
+                        "email": "kevin.mccarthy@bny.com",
+                        "phone": "+1 212-495-1784",
+                        "lead_score": 82,
+                        "lead_status": "Warm",
+                        "buyer_roles": ["General Counsel", "Veto Authority"],
+                        "tech_stack": ["Legal Tech", "Compliance Reporting", "Archer"],
+                        "education_summary": "Fordham University (BA), Albany Law School (JD)"
+                    },
+                    {
+                        "first_name": "Cathinka",
+                        "last_name": "Wahlstrom",
+                        "title": "Senior Executive Vice President & Chief Commercial Officer",
+                        "seniority_tier": "CXO",
+                        "decision_authority": "shared",
+                        "sub_lob_name": "Commercial & Client Strategy",
+                        "location": "New York, USA",
+                        "email": "cathinka.wahlstrom@bny.com",
+                        "phone": "+1 212-495-1784",
+                        "lead_score": 88,
+                        "lead_status": "Hot",
+                        "buyer_roles": ["Chief Commercial Officer", "Key Stakeholder"],
+                        "tech_stack": ["Salesforce Financial Cloud", "Institutional CRM", "Tableau"],
+                        "education_summary": "University of California, Davis (BA), Columbia Business School (MBA)"
                     }
                 ]
 
