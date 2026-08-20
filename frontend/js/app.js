@@ -528,27 +528,43 @@ $(document).ready(function () {
         // Call Live Backend
         API.post('/chatbot/query', { query: query }).then(res => {
             clearInterval(loaderInterval);
-            const replyTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            const botReply = res.response || res.reply || "I analyzed your query across target accounts and executive leadership.";
-
-            // Update the pending message with actual results
-            pendingMsg.is_pending = false;
-            pendingMsg.is_streaming = true;
-            pendingMsg.text = ""; // Empty initially for streaming
-            pendingMsg.time = replyTime;
-            pendingMsg.executive_summary = res.executive_summary || '';
-            pendingMsg.processing_steps = res.processing_steps || [];
-            pendingMsg.posts = res.results?.posts || res.posts || [];
-            pendingMsg.people = res.results?.people || res.results?.contacts || res.people || [];
-            pendingMsg.signals = res.results?.signals || res.signals || [];
-            pendingMsg.followups = res.suggested_followups || [];
-
-            renderUniversalChat();
             
-            // Speak the reply via TTS and play video
-            speakAnnaReply(botReply);
+            // Extract clean steps
+            const actualSteps = (res.processing_steps && res.processing_steps.length > 0) 
+                ? res.processing_steps.map(s => s.replace(/^✓\s*|…\s*|✔\s*|•\s*|✅\s*|✓\s*/, '')) 
+                : plannedSteps;
+            pendingMsg.planned_steps = actualSteps;
+            pendingMsg.is_pending = true;
 
-            // Stream the text progressively without rebuilding the whole DOM
+            const calmInterval = setInterval(() => {
+                if (pendingMsg.current_step_index < pendingMsg.planned_steps.length - 1) {
+                    pendingMsg.current_step_index++;
+                    renderUniversalChat();
+                    scrollUniversalChatToBottom();
+                } else {
+                    clearInterval(calmInterval);
+                    setTimeout(() => {
+                        const replyTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        const botReply = res.response || res.reply || "I analyzed your query across target accounts and executive leadership.";
+
+                        // Update the pending message with actual results
+                        pendingMsg.is_pending = false;
+                        pendingMsg.is_streaming = true;
+                        pendingMsg.text = ""; // Empty initially for streaming
+                        pendingMsg.time = replyTime;
+                        pendingMsg.executive_summary = res.executive_summary || '';
+                        pendingMsg.processing_steps = actualSteps;
+                        pendingMsg.posts = res.results?.posts || res.posts || [];
+                        pendingMsg.people = res.results?.people || res.results?.contacts || res.people || [];
+                        pendingMsg.signals = res.results?.signals || res.signals || [];
+                        pendingMsg.followups = res.suggested_followups || [];
+
+                        renderUniversalChat();
+                        
+                        // Speak the reply via TTS and play video
+                        speakAnnaReply(botReply);
+
+                        // Stream the text progressively without rebuilding the whole DOM
             let charIndex = 0;
             const CHUNK_SIZE = 3; // Increased to 3 chars per tick for a faster reading speed
             const STREAM_INTERVAL = 30; // 30ms per tick (approx 100 characters per second)
@@ -594,6 +610,9 @@ $(document).ready(function () {
                     }
                 }
             }, STREAM_INTERVAL);
+                    }, 800);
+                }
+            }, 1200);
 
         }).catch(err => {
             clearInterval(loaderInterval);
