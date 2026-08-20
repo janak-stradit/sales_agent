@@ -528,16 +528,21 @@ $(document).ready(function () {
         // Call Live Backend
         API.post('/chatbot/query', { query: query }).then(res => {
             clearInterval(loaderInterval);
+            // Extract clean steps
+            const actualSteps = (res.processing_steps && res.processing_steps.length > 0) 
+                ? res.processing_steps.map(s => s.replace(/^✓\s*|…\s*|✔\s*|•\s*|✅\s*|✓\s*/, '')) 
+                : plannedSteps;
+            pendingMsg.planned_steps = actualSteps;
+            pendingMsg.is_pending = false;
+            pendingMsg.is_streaming = true;
+
             const replyTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             const botReply = res.response || res.reply || "I analyzed your query across target accounts and executive leadership.";
 
-            // Update the pending message with actual results
-            pendingMsg.is_pending = false;
-            pendingMsg.is_streaming = true;
             pendingMsg.text = ""; // Empty initially for streaming
             pendingMsg.time = replyTime;
             pendingMsg.executive_summary = res.executive_summary || '';
-            pendingMsg.processing_steps = res.processing_steps || [];
+            pendingMsg.processing_steps = actualSteps;
             pendingMsg.posts = res.results?.posts || res.posts || [];
             pendingMsg.people = res.results?.people || res.results?.contacts || res.people || [];
             pendingMsg.signals = res.results?.signals || res.signals || [];
@@ -550,10 +555,9 @@ $(document).ready(function () {
 
             // Stream the text progressively without rebuilding the whole DOM
             let charIndex = 0;
-            const CHUNK_SIZE = 3; // Increased to 3 chars per tick for a faster reading speed
-            const STREAM_INTERVAL = 30; // 30ms per tick (approx 100 characters per second)
+            const CHUNK_SIZE = 3; // 3 chars per tick for fast smooth reading speed
+            const STREAM_INTERVAL = 30; // 30ms per tick
             
-            // Format function locally so we can update just the text
             function formatMarkdown(text) {
                 return text
                     .replace(/### (.*)/g, '<h6 class="fw-bold mt-2 mb-1 text-accent-primary text-sm">$1</h6>')
@@ -572,7 +576,6 @@ $(document).ready(function () {
                     charIndex += CHUNK_SIZE;
                     pendingMsg.text = botReply.substring(0, charIndex);
                     
-                    // Directly update the text container if it exists
                     const $textBlock = $(`#msg-text-${pendingMsg.id}`);
                     if ($textBlock.length) {
                         $textBlock.html(formatMarkdown(pendingMsg.text) + '<span class="animate-pulse ms-1 text-muted">▌</span>');
@@ -580,7 +583,6 @@ $(document).ready(function () {
                         renderUniversalChat();
                     }
                     
-                    // Instant scroll only if user was already at the bottom
                     if (isAtBottom) {
                         $container.scrollTop($container[0].scrollHeight);
                     }
@@ -594,7 +596,6 @@ $(document).ready(function () {
                     }
                 }
             }, STREAM_INTERVAL);
-
         }).catch(err => {
             clearInterval(loaderInterval);
             const replyTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
