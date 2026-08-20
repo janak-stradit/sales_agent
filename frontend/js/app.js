@@ -660,6 +660,43 @@ $(document).ready(function () {
     });
 
     // ==========================================
+    // Robust Female TTS Voice Selector (Anna)
+    // ==========================================
+    let cachedVoices = [];
+    function loadVoices() {
+        if ('speechSynthesis' in window) {
+            cachedVoices = speechSynthesis.getVoices();
+        }
+    }
+    if ('speechSynthesis' in window) {
+        loadVoices();
+        speechSynthesis.onvoiceschanged = loadVoices;
+    }
+
+    function getFemaleVoice() {
+        const voices = (cachedVoices && cachedVoices.length) ? cachedVoices : (window.speechSynthesis ? window.speechSynthesis.getVoices() : []);
+        if (!voices || voices.length === 0) return null;
+
+        // 1. Prioritize natural English female voices
+        const femaleKeywords = [
+            'zira', 'jenny', 'aria', 'samantha', 'victoria', 'karen', 'moira',
+            'female', 'google us english', 'google uk english female', 'natural female'
+        ];
+
+        for (const kw of femaleKeywords) {
+            const found = voices.find(v => v.name.toLowerCase().includes(kw));
+            if (found) return found;
+        }
+
+        // 2. Fallback to English voices excluding male identifiers
+        const maleKeywords = ['david', 'mark', 'george', 'guy', 'male', 'richard', 'james', 'stefan', 'paul', 'ravi'];
+        const nonMale = voices.find(v => (v.lang.startsWith('en') || !v.lang) && !maleKeywords.some(m => v.name.toLowerCase().includes(m)));
+        if (nonMale) return nonMale;
+
+        return voices.find(v => v.lang.startsWith('en')) || voices[0];
+    }
+
+    // ==========================================
     // Anna TTS — Speak any reply
     // ==========================================
     function speakAnnaReply(text) {
@@ -670,19 +707,19 @@ $(document).ready(function () {
         if (!cleanText) return;
 
         // Play video while speaking
-        if (vid) vid.play();
+        if (vid) {
+            try { vid.play(); } catch (e) { }
+        }
 
         const utterance = new SpeechSynthesisUtterance(cleanText);
-        utterance.rate = 0.95;
-        utterance.pitch = 1.1;
+        utterance.rate = 1.0;
+        utterance.pitch = 1.15; // Set natural female pitch
         utterance.lang = 'en-US';
 
-        const voices = speechSynthesis.getVoices();
-        const femaleVoice = voices.find(v => v.name.includes('Female') || v.name.includes('Samantha') || v.name.includes('Zira') || v.name.includes('Google UK English Female'));
+        const femaleVoice = getFemaleVoice();
         if (femaleVoice) utterance.voice = femaleVoice;
 
         utterance.onend = function () {
-            // Stop video when done speaking
             if (vid) vid.pause();
         };
 
@@ -735,7 +772,9 @@ $(document).ready(function () {
             scrollUniversalChatToBottom();
 
             // Play video while speaking
-            if (vid && !annaMuted) vid.play();
+            if (vid && !annaMuted) {
+                try { vid.play(); } catch (e) { }
+            }
 
             // If muted, skip TTS but still show text and move to next
             if (annaMuted) {
@@ -744,35 +783,25 @@ $(document).ready(function () {
                 return;
             }
 
-            // Use browser TTS
+            // Use browser TTS with Female voice
             const utterance = new SpeechSynthesisUtterance(sentence);
-            utterance.rate = 0.95;
-            utterance.pitch = 1.1;
+            utterance.rate = 1.0;
+            utterance.pitch = 1.15;
             utterance.lang = 'en-US';
 
-            // Try to pick a female voice
-            const voices = speechSynthesis.getVoices();
-            const femaleVoice = voices.find(v => v.name.includes('Female') || v.name.includes('Samantha') || v.name.includes('Zira') || v.name.includes('Google UK English Female'));
+            const femaleVoice = getFemaleVoice();
             if (femaleVoice) utterance.voice = femaleVoice;
 
             utterance.onend = function () {
-                // Pause video between sentences (idle)
                 if (vid) vid.pause();
                 idx++;
-                setTimeout(speakNext, 600);
+                setTimeout(speakNext, 500);
             };
 
             speechSynthesis.speak(utterance);
         }
 
-        // Ensure voices are loaded
-        if (speechSynthesis.getVoices().length === 0) {
-            speechSynthesis.onvoiceschanged = function () {
-                speakNext();
-            };
-        } else {
-            speakNext();
-        }
+        speakNext();
     });
 
     // Quick Trigger test simulation bar on Dashboard
