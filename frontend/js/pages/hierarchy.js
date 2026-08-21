@@ -31,7 +31,7 @@ const HierarchyPage = {
                 </div>
                 <div class="col-6 col-md-3">
                     <div class="card border-0 shadow-sm bg-white p-3 text-center mb-0">
-                        <h4 class="fw-bold text-purple mb-1" id="spanDepth" style="color: #6f42c1;">0</h4>
+                        <h4 class="fw-bold text-accent-primary mb-1" id="spanDepth" style="color: var(--accent-primary);">0</h4>
                         <span class="text-muted small" style="font-size: 0.75rem;">Max Depth</span>
                     </div>
                 </div>

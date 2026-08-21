@@ -116,7 +116,7 @@ const LeadsPage = {
                         </td>
                         <td class="text-muted truncate" style="max-width: 250px;">${l.title || '—'}</td>
                         <td class="text-center">
-                            <span class="badge bg-purple-subtle text-purple" style="color: #6f42c1; background-color: rgba(111,66,193,0.12);">${l.seniority_tier || '—'}</span>
+                            <span class="badge bg-accent-primary-soft text-accent-primary" style="color: var(--accent-primary); background-color: rgba(138, 98, 72, 0.12);">${l.seniority_tier || '—'}</span>
                         </td>
                         <td class="text-center fw-bold text-dark">${l.lead_score}</td>
                         <td class="text-center">

@@ -30,7 +30,7 @@ const LogsPage = {
                 </div>
                 <div class="col-6 col-md-3">
                     <div class="card border-0 shadow-sm bg-white p-3 text-center mb-0">
-                        <h4 class="fw-bold text-purple" id="logLatency" style="color: #6f42c1;">0s</h4>
+                        <h4 class="fw-bold text-accent-primary" id="logLatency" style="color: var(--accent-primary);">0s</h4>
                         <span class="text-muted small" style="font-size: 0.75rem;">Avg Latency</span>
                     </div>
                 </div>

@@ -141,7 +141,7 @@ const AccountsPage = {
                                     <span class="text-muted text-uppercase" style="font-size: 0.65rem;">Leads</span>
                                 </div>
                                 <div class="col-4 border-end border-light">
-                                    <h5 class="fw-bold text-purple mb-0" style="color: #6f42c1;">${a.decision_maker_count || 0}</h5>
+                                    <h5 class="fw-bold text-accent-primary mb-0" style="color: var(--accent-primary);">${a.decision_maker_count || 0}</h5>
                                     <span class="text-muted text-uppercase" style="font-size: 0.65rem;">DMs</span>
                                 </div>
                                 <div class="col-4">

@@ -121,7 +121,7 @@ $(document).ready(function () {
                         <td class="fw-semibold">${name}</td>
                         <td>${c.title || '—'}</td>
                         <td>${c.organization || '—'}</td>
-                        <td><span class="badge bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px]">${c.seniority_tier || 'Executive'}</span></td>
+                        <td><span class="badge bg-accent-primary-soft text-accent-primary border border-soft text-[10px]">${c.seniority_tier || 'Executive'}</span></td>
                         <td><span class="fw-bold ${(c.lead_score||0) >= 80 ? 'text-success' : 'text-warning'}">${c.lead_score || '—'}</span></td>
                         <td class="text-xs">${c.email || '—'}</td>
                     </tr>
@@ -149,7 +149,7 @@ $(document).ready(function () {
                     <div class="p-4 bg-white rounded-xl border border-slate-200 shadow-sm">
                         <div class="d-flex align-items-center justify-content-between mb-2">
                             <div class="d-flex align-items-center gap-2">
-                                <i class="bi bi-linkedin text-blue-600 fs-5"></i>
+                                <i class="bi bi-linkedin text-accent-primary fs-5"></i>
                                 <div>
                                     <span class="fw-bold text-slate-800 text-sm">${p.author_name || 'Executive'}</span>
                                     <span class="text-slate-400 text-xs ms-2">${p.author_title || ''}</span>

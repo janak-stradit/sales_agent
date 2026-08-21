@@ -93,18 +93,18 @@ const DashboardPage = {
                     </div>
                 </div>
                 <div class="col">
-                    <div class="card h-100 border-0 shadow-sm bg-white p-3 mb-0 hover-up" style="border-radius: 12px; border-left: 4px solid #6f42c1 !important;">
+                    <div class="card h-100 border-0 shadow-sm bg-white p-3 mb-0 hover-up" style="border-radius: 12px; border-left: 4px solid var(--accent-primary) !important;">
                         <div class="d-flex justify-content-between align-items-start mb-2">
                             <div>
                                 <p class="text-uppercase text-muted small fw-bold mb-1" style="font-size: 0.65rem; letter-spacing: 0.05em;">Decision Makers</p>
                                 <h3 class="fw-extrabold mb-0 text-dark" id="kpiDM">—</h3>
                             </div>
-                            <div class="rounded-3 bg-purple-subtle p-2 text-purple d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; color: #6f42c1; background-color: rgba(111, 66, 193, 0.15) !important;">
+                            <div class="rounded-3 bg-accent-primary-soft p-2 text-accent-primary d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; color: var(--accent-primary); background-color: rgba(138, 98, 72, 0.15) !important;">
                                 <i class="bi bi-shield-check fs-5"></i>
                             </div>
                         </div>
                         <div class="d-flex align-items-center gap-1 mt-2">
-                            <span class="badge bg-purple-subtle text-purple py-1 px-2" style="font-size: 0.65rem; color: #6f42c1; background-color: rgba(111, 66, 193, 0.15) !important;">Coverage</span>
+                            <span class="badge bg-accent-primary-soft text-accent-primary py-1 px-2" style="font-size: 0.65rem; color: var(--accent-primary); background-color: rgba(138, 98, 72, 0.15) !important;">Coverage</span>
                             <span class="text-muted" style="font-size: 0.65rem;">76% of total leads</span>
                         </div>
                     </div>
@@ -329,7 +329,7 @@ const DashboardPage = {
                     iconBg = 'bg-info-subtle text-info';
                 } else if (s.signal_type === 'TECH_STACK_MODERNIZATION') {
                     iconHtml = '<i class="bi bi-cpu fs-5"></i>';
-                    iconBg = 'bg-purple-subtle text-purple';
+                    iconBg = 'bg-accent-primary-soft text-accent-primary';
                 } else if (s.signal_type === 'EXPANSION') {
                     iconHtml = '<i class="bi bi-globe fs-5"></i>';
                     iconBg = 'bg-success-subtle text-success';

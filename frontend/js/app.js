@@ -34,6 +34,9 @@ $(document).ready(function () {
         const targetView = $(this).data('view');
         if (!targetView || (targetView !== 'dashboard' && targetView !== 'chat' && targetView !== 'discovery')) return;
 
+        // Save view state to persist across refreshes
+        localStorage.setItem('activeSalesView', targetView);
+
         // Update menu active class
         $('.menu-item').removeClass('active');
         $(this).parent().addClass('active');
@@ -333,7 +336,7 @@ $(document).ready(function () {
                 if (msg.posts && msg.posts.length > 0) {
                     socialPostsHTML = `
                         <div class="mt-3 pt-2 border-t border-soft">
-                            <div class="text-xs fw-semibold text-secondary mb-2"><i class="bi bi-linkedin text-blue-600 me-1"></i> Verified Social Intelligence Posts:</div>
+                            <div class="text-xs fw-semibold text-secondary mb-2"><i class="bi bi-linkedin text-accent-primary me-1"></i> Verified Social Intelligence Posts:</div>
                             <div class="space-y-2">
                                 ${msg.posts.map((p, pIdx) => `
                                     <div class="chat-social-card">
@@ -402,9 +405,9 @@ $(document).ready(function () {
 
                 const botHTML = `
                     <div class="universal-msg-row">
-                        <div class="universal-bot-avatar">
-                            <i class="bi bi-robot"></i>
-                        </div>
+                          <div class="universal-bot-avatar" style="padding: 0; overflow: hidden; background: none;">
+                              <img src="asstes/anna_chat_icon.png" style="width: 100%; height: 100%; object-fit: cover;" alt="Anna">
+                          </div>
                         <div class="universal-bot-bubble">
                             ${thoughtChainHTML}
                             ${!msg.is_pending ? `
@@ -731,7 +734,7 @@ $(document).ready(function () {
                 if (vid) vid.pause();
                 $msgList.append(`
                     <div class="universal-msg-row">
-                        <div class="universal-bot-avatar"><i class="bi bi-robot"></i></div>
+                        <div class="universal-bot-avatar" style="padding: 0; overflow: hidden; background: none;"><img src="asstes/anna_chat_icon.png" style="width: 100%; height: 100%; object-fit: cover;" alt="Anna"></div>
                         <div class="universal-bot-bubble text-success fw-semibold" style="font-size:0.85rem;">
                             <i class="bi bi-check-circle me-1"></i>Introduction complete. You can start chatting now!
                         </div>
@@ -746,7 +749,7 @@ $(document).ready(function () {
             // Show sentence as a bot message in chat
             $msgList.append(`
                 <div class="universal-msg-row">
-                    <div class="universal-bot-avatar"><i class="bi bi-robot"></i></div>
+                    <div class="universal-bot-avatar" style="padding: 0; overflow: hidden; background: none;"><img src="asstes/anna_chat_icon.png" style="width: 100%; height: 100%; object-fit: cover;" alt="Anna"></div>
                     <div class="universal-bot-bubble" style="font-size:0.88rem;">${sentence}</div>
                 </div>
             `);
@@ -1076,7 +1079,7 @@ $(document).ready(function () {
                 <div class="p-4 bg-surface-secondary rounded-xl border border-soft mb-3">
                     <div class="d-flex align-items-center justify-content-between mb-2">
                         <div class="d-flex align-items-center gap-2">
-                            <i class="bi bi-linkedin text-blue-600 fs-5"></i>
+                            <i class="bi bi-linkedin text-accent-primary fs-5"></i>
                             <span class="fw-bold text-primary text-xs">${p.platform || 'LinkedIn'}</span>
                             <span class="text-muted text-[11px]">• ${p.post_date_formatted || 'Recently posted'}</span>
                         </div>
@@ -1109,7 +1112,7 @@ $(document).ready(function () {
                     </div>
                     <p class="text-[11px] text-secondary mb-2">${s.summary || 'Active enterprise technology modernization and workflow acceleration initiative.'}</p>
                     ${s.recommended_action ? `
-                        <div class="p-2 bg-surface-primary rounded-lg border border-indigo-100 text-[11px] text-indigo-900">
+                        <div class="p-2 bg-surface-primary rounded-lg border border-soft text-[11px] text-primary">
                             <strong><i class="bi bi-arrow-right-circle text-accent-primary me-1"></i>Playbook:</strong> ${s.recommended_action}
                         </div>
                     ` : ''}
@@ -1155,10 +1158,10 @@ $(document).ready(function () {
                             <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
                                 <h3 class="fw-bold text-white fs-4 mb-0">${data.full_name}</h3>
                                 <span class="badge ${scoreColor} border text-xs px-2.5 py-1 rounded-full font-medium">Lead Score: ${score}/100 • ${data.lead_status || 'Hot'}</span>
-                                <span class="badge bg-surface-primary/10 text-indigo-200 border border-white/20 text-xs px-2.5 py-1 rounded-full">${data.seniority_tier || 'Executive'}</span>
+                                <span class="badge bg-surface-primary/10 text-secondary border border-white/20 text-xs px-2.5 py-1 rounded-full">${data.seniority_tier || 'Executive'}</span>
                             </div>
-                            <p class="text-sm text-indigo-200 mb-1 font-medium">${data.title} • ${data.organization || data.account_name || 'BNY'}</p>
-                            <div class="d-flex align-items-center gap-3 text-xs text-indigo-300">
+                            <p class="text-sm text-secondary mb-1 font-medium">${data.title} • ${data.organization || data.account_name || 'BNY'}</p>
+                            <div class="d-flex align-items-center gap-3 text-xs text-secondary">
                                 <span><i class="bi bi-geo-alt me-1 text-priority"></i>${data.location || 'New York, NY (HQ)'}</span>
                                 <span><i class="bi bi-building me-1 text-amber-400"></i>${data.sub_lob_name || 'Executive Leadership'}</span>
                                 <span><i class="bi bi-shield-check me-1 text-emerald-400"></i>Verified Decision Maker</span>
@@ -1178,7 +1181,7 @@ $(document).ready(function () {
                         ` : ''}
                         ${data.linkedin_url ? `
                             <a href="${data.linkedin_url}" target="_blank" class="btn btn-sm btn-white/10 text-white border border-white/20 font-semibold px-3 py-2 rounded-xl text-xs hover:bg-surface-primary/20 transition-all">
-                                <i class="bi bi-linkedin text-blue-400 me-1"></i> LinkedIn
+                                <i class="bi bi-linkedin text-accent-primary me-1"></i> LinkedIn
                             </a>
                         ` : ''}
                     </div>
@@ -1209,8 +1212,8 @@ $(document).ready(function () {
                                 <span class="profile-data-val">${data.location || 'New York, NY (HQ)'}</span>
                             </div>
                             <div class="profile-data-row">
-                                <span class="profile-data-label"><i class="bi bi-linkedin me-1.5 text-blue-500"></i>LinkedIn Profile:</span>
-                                <span class="profile-data-val text-blue-600">${data.linkedin_url ? `<a href="${data.linkedin_url}" target="_blank" class="text-blue-600 text-decoration-none">View Profile <i class="bi bi-box-arrow-up-right text-[10px]"></i></a>` : 'Verified on Network'}</span>
+                                <span class="profile-data-label"><i class="bi bi-linkedin me-1.5 text-accent-primary"></i>LinkedIn Profile:</span>
+                                <span class="profile-data-val text-accent-primary">${data.linkedin_url ? `<a href="${data.linkedin_url}" target="_blank" class="text-accent-primary text-decoration-none">View Profile <i class="bi bi-box-arrow-up-right text-[10px]"></i></a>` : 'Verified on Network'}</span>
                             </div>
                         </div>
                     </div>
@@ -1218,7 +1221,7 @@ $(document).ready(function () {
                     <!-- Corporate Placement & Authority Matrix -->
                     <div class="profile-360-card">
                         <div class="profile-section-title">
-                            <i class="bi bi-diagram-3-fill text-purple-600"></i>
+                            <i class="bi bi-diagram-3-fill text-accent-primary"></i>
                             <span>Corporate & Buyer Authority Matrix</span>
                         </div>
                         <div class="space-y-1 mb-3">
@@ -1292,7 +1295,7 @@ $(document).ready(function () {
                                 ${data.communication_style || 'Direct, concise, and metrics-oriented. Prioritizes clear architectural scalability, operational risk reduction, and concrete ROI over high-level pitches.'}
                             </div>
                             <div class="p-3 bg-accent-primary-soft/50 rounded-xl border border-soft/60 text-xs text-primary">
-                                <strong class="text-indigo-900 d-block mb-1"><i class="bi bi-bullseye me-1 text-accent-primary"></i>Recommended Sales Icebreaker Hook:</strong>
+                                <strong class="text-primary d-block mb-1"><i class="bi bi-bullseye me-1 text-accent-primary"></i>Recommended Sales Icebreaker Hook:</strong>
                                 "I saw your leadership team's strategic focus on ${data.sub_lob_name || 'Asset Servicing'} platform modernization — our automated enterprise solution directly accelerates this initiative while drastically reducing deployment latency."
                             </div>
                         </div>
@@ -1301,7 +1304,7 @@ $(document).ready(function () {
                     <!-- Verified Scraped Social Intelligence -->
                     <div class="profile-360-card">
                         <div class="profile-section-title">
-                            <i class="bi bi-linkedin text-blue-600"></i>
+                            <i class="bi bi-linkedin text-accent-primary"></i>
                             <span>Scraped Social Intelligence & Public Posts</span>
                         </div>
                         ${socialPostsHTML}
@@ -1350,7 +1353,7 @@ $(document).ready(function () {
 
         $('#modal-avatar-box').text(initials);
         $('#modal-entity-name').text(`Post from ${p.author_name}`);
-        $('#modal-entity-badge').text(p.platform || 'LINKEDIN').removeClass().addClass('badge bg-blue-500/20 text-blue-300 border border-blue-500/30 text-xs px-2.5 py-0.5 rounded-full');
+        $('#modal-entity-badge').text(p.platform || 'LINKEDIN').removeClass().addClass('badge bg-accent-primary/20 text-accent-primary border border-accent-primary/30 text-xs px-2.5 py-0.5 rounded-full');
         $('#modal-entity-subtitle').text(`${p.author_title || 'Executive'} • ${p.account_name || 'BNY'} • ${p.post_date_formatted || 'Recent'}`);
 
         let tagsHTML = (p.topic_tags && p.topic_tags.length) ? p.topic_tags.map(t => `<span class="badge bg-accent-primary-soft text-accent-primary border border-soft text-xs px-2 py-1">#${t}</span>`).join(' ') : '<span class="badge bg-surface-secondary text-secondary text-xs">#TechModernization</span> <span class="badge bg-surface-secondary text-secondary text-xs">#CloudInnovation</span>';
@@ -1359,7 +1362,7 @@ $(document).ready(function () {
             <div class="p-4 bg-surface-primary rounded-xl border border-soft shadow-sm mb-3">
                 <div class="d-flex align-items-center justify-content-between mb-3 border-b border-soft pb-2">
                     <div class="d-flex align-items-center gap-2">
-                        <i class="bi bi-linkedin text-blue-600 fs-5"></i>
+                        <i class="bi bi-linkedin text-accent-primary fs-5"></i>
                         <div>
                             <div class="fw-bold text-primary text-xs">${p.author_name}</div>
                             <div class="text-[11px] text-secondary">${p.author_title || 'Executive at BNY'}</div>
@@ -1369,7 +1372,7 @@ $(document).ready(function () {
                 </div>
                 <div class="text-sm text-primary leading-relaxed whitespace-pre-wrap">${p.content}</div>
                 <div class="d-flex align-items-center gap-4 mt-4 pt-3 border-t border-soft text-xs text-secondary">
-                    <span><i class="bi bi-hand-thumbs-up-fill text-blue-600 me-1"></i>${p.likes_count || 142} likes</span>
+                    <span><i class="bi bi-hand-thumbs-up-fill text-accent-primary me-1"></i>${p.likes_count || 142} likes</span>
                     <span><i class="bi bi-chat-dots-fill text-muted me-1"></i>${p.comments_count || 28} comments</span>
                     <span><i class="bi bi-calendar3 me-1"></i>${p.post_date_formatted || 'Recently posted'}</span>
                 </div>
@@ -1416,13 +1419,13 @@ $(document).ready(function () {
                 </div>
                 <div class="col-sm-6">
                     <div class="p-3 bg-surface-primary rounded-xl border border-soft">
-                        <div class="text-[11px] text-muted fw-semibold mb-1"><i class="bi bi-globe text-blue-500 me-1"></i>Corporate Domain</div>
+                        <div class="text-[11px] text-muted fw-semibold mb-1"><i class="bi bi-globe text-accent-primary me-1"></i>Corporate Domain</div>
                         <div class="text-xs font-semibold text-primary">${a.domain || 'bny.com'}</div>
                     </div>
                 </div>
                 <div class="col-sm-6">
                     <div class="p-3 bg-surface-primary rounded-xl border border-soft">
-                        <div class="text-[11px] text-muted fw-semibold mb-1"><i class="bi bi-diagram-3 text-purple-500 me-1"></i>Lines of Business</div>
+                        <div class="text-[11px] text-muted fw-semibold mb-1"><i class="bi bi-diagram-3 text-accent-primary me-1"></i>Lines of Business</div>
                         <div class="text-xs font-semibold text-primary">${a.lobs_count || 3} Core Divisions (Asset Servicing, Pershing, Clearance)</div>
                     </div>
                 </div>
@@ -1459,8 +1462,8 @@ $(document).ready(function () {
                     <span class="badge bg-success-soft text-emerald-700 border border-soft text-xs px-2 py-1">Status: ${s.status || 'OPEN'}</span>
                 </div>
                 ${s.recommended_action ? `
-                    <div class="p-3 bg-accent-primary-soft/60 rounded-xl border border-indigo-100 text-xs text-indigo-900 mt-2">
-                        <strong class="text-indigo-950"><i class="bi bi-arrow-right-circle me-1"></i>Recommended Sales Playbook:</strong><br>
+                    <div class="p-3 bg-accent-primary-soft/60 rounded-xl border border-soft text-xs text-primary mt-2">
+                        <strong class="text-primary"><i class="bi bi-arrow-right-circle me-1"></i>Recommended Sales Playbook:</strong><br>
                         ${s.recommended_action}
                     </div>
                 ` : ''}
@@ -1646,4 +1649,8 @@ $(document).ready(function () {
     loadSettingsForm();
     renderLeadsTable();
     renderSearchHistoryTags();
+
+    // Restore last active view from localStorage or default to dashboard
+    const savedView = localStorage.getItem('activeSalesView') || 'dashboard';
+    $(`.menu-link[data-view="${savedView}"]`).trigger('click');
 });
